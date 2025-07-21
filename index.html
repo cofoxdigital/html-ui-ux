@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Phoenix Enterprise Coach Dashboard</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="./styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -25,12 +25,12 @@
                 <i class="fas fa-search"></i>
                 <input type="text" placeholder="Search clients, coaches, content...">
             </div>
-            <div class="notifications">
+            <div class="notifications" id="notifications-trigger">
                 <i class="fas fa-bell"></i>
                 <span class="notification-badge">3</span>
             </div>
             <div class="user-profile">
-                <img src="https://via.placeholder.com/40x40/4F46E5/FFFFFF?text=JD" alt="Profile">
+                <img src="./man_professional.webp" alt="Profile">
                 <span>John Doe</span>
                 <i class="fas fa-chevron-down"></i>
             </div>
@@ -252,7 +252,7 @@
                         <tr>
                             <td>
                                 <div class="client-info">
-                                    <img src="https://via.placeholder.com/32x32/10B981/FFFFFF?text=SJ" alt="Client">
+                                    <img src="./woman_professional.jpg" alt="Client">
                                     <div>
                                         <strong>Sarah Johnson</strong>
                                         <span>sarah@email.com</span>
@@ -278,7 +278,7 @@
                         <tr>
                             <td>
                                 <div class="client-info">
-                                    <img src="https://via.placeholder.com/32x32/3B82F6/FFFFFF?text=DW" alt="Client">
+                                    <img src="./man_professional.webp" alt="Client">
                                     <div>
                                         <strong>David Wilson</strong>
                                         <span>david@email.com</span>
@@ -304,7 +304,7 @@
                         <tr>
                             <td>
                                 <div class="client-info">
-                                    <img src="https://via.placeholder.com/32x32/F59E0B/FFFFFF?text=EM" alt="Client">
+                                    <img src="./woman_professional.jpg" alt="Client">
                                     <div>
                                         <strong>Emma Martinez</strong>
                                         <span>emma@email.com</span>
@@ -330,7 +330,7 @@
                         <tr>
                             <td>
                                 <div class="client-info">
-                                    <img src="https://via.placeholder.com/32x32/EF4444/FFFFFF?text=JB" alt="Client">
+                                    <img src="./man_professional.webp" alt="Client">
                                     <div>
                                         <strong>James Brown</strong>
                                         <span>james@email.com</span>
@@ -356,7 +356,7 @@
                         <tr>
                             <td>
                                 <div class="client-info">
-                                    <img src="https://via.placeholder.com/32x32/8B5CF6/FFFFFF?text=MG" alt="Client">
+                                    <img src="./woman_professional.jpg" alt="Client">
                                     <div>
                                         <strong>Maria Garcia</strong>
                                         <span>maria@email.com</span>
@@ -403,7 +403,7 @@
             <div class="team-grid">
                 <div class="team-card">
                     <div class="team-member">
-                        <img src="https://via.placeholder.com/60x60/10B981/FFFFFF?text=MC" alt="Coach">
+                        <img src="./man_professional.webp" alt="Coach">
                         <div class="member-info">
                             <h3>Mike Chen</h3>
                             <p>Senior Coach</p>
@@ -422,7 +422,7 @@
 
                 <div class="team-card">
                     <div class="team-member">
-                        <img src="https://via.placeholder.com/60x60/3B82F6/FFFFFF?text=LR" alt="Coach">
+                        <img src="./woman_professional.jpg" alt="Coach">
                         <div class="member-info">
                             <h3>Lisa Rodriguez</h3>
                             <p>Fitness Coach</p>
@@ -441,7 +441,7 @@
 
                 <div class="team-card">
                     <div class="team-member">
-                        <img src="https://via.placeholder.com/60x60/F59E0B/FFFFFF?text=AT" alt="Coach">
+                        <img src="./man_professional.webp" alt="Coach">
                         <div class="member-info">
                             <h3>Alex Thompson</h3>
                             <p>Nutrition Specialist</p>
@@ -460,7 +460,7 @@
 
                 <div class="team-card">
                     <div class="team-member">
-                        <img src="https://via.placeholder.com/60x60/EF4444/FFFFFF?text=SK" alt="Coach">
+                        <img src="./woman_professional.jpg" alt="Coach">
                         <div class="member-info">
                             <h3>Sarah Kim</h3>
                             <p>Wellness Coach</p>
@@ -962,6 +962,52 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- Notifications Popup -->
+    <div id="notifications-popup" class="notifications-popup" style="display: none;">
+        <div class="notifications-header">
+            <h3>Notifications</h3>
+            <button class="btn-icon" id="close-notifications">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="notifications-list">
+            <div class="notification-item unread">
+                <div class="notification-icon warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="notification-content">
+                    <h4>Client Engagement Alert</h4>
+                    <p>3 clients haven't logged in this week</p>
+                    <span class="notification-time">2 hours ago</span>
+                </div>
+            </div>
+            <div class="notification-item unread">
+                <div class="notification-icon success">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="notification-content">
+                    <h4>New Review Received</h4>
+                    <p>Sarah Johnson left a 5-star review</p>
+                    <span class="notification-time">4 hours ago</span>
+                </div>
+            </div>
+            <div class="notification-item">
+                <div class="notification-icon info">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <div class="notification-content">
+                    <h4>App Update Available</h4>
+                    <p>FitLife Mobile App v2.1.4 is ready</p>
+                    <span class="notification-time">1 day ago</span>
+                </div>
+            </div>
+        </div>
+        <div class="notifications-footer">
+            <button class="btn btn-outline">Mark All as Read</button>
+            <button class="btn btn-primary">View All Notifications</button>
+        </div>
+    </div>
+
+    <script src="./script.js"></script>
 </body>
 </html>

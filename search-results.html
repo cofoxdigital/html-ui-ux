@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results - Phoenix Enterprise Coach Dashboard</title>
+    <link rel="stylesheet" href="./styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <div class="logo">
+                <i class="fas fa-fire"></i>
+                <span>Phoenix</span>
+            </div>
+            <div class="breadcrumb">
+                <span>Search Results</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="global-search" placeholder="Search clients, coaches, content...">
+            </div>
+            <div class="notifications" id="notifications-trigger">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge">3</span>
+            </div>
+            <div class="user-profile">
+                <img src="./man_professional.webp" alt="Profile">
+                <span>John Doe</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <nav class="nav-menu">
+            <div class="nav-item" data-section="dashboard" onclick="navigateTo('index.html')">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+            </div>
+            <div class="nav-item" data-section="clients" onclick="navigateTo('index.html#clients')">
+                <i class="fas fa-users"></i>
+                <span>Clients</span>
+                <span class="count">247</span>
+            </div>
+            <div class="nav-item" data-section="team" onclick="navigateTo('index.html#team')">
+                <i class="fas fa-user-friends"></i>
+                <span>Team</span>
+                <span class="count">12</span>
+            </div>
+            <div class="nav-item" data-section="apps" onclick="navigateTo('index.html#apps')">
+                <i class="fas fa-mobile-alt"></i>
+                <span>My Apps</span>
+            </div>
+            <div class="nav-item" data-section="builders" onclick="navigateTo('index.html#builders')">
+                <i class="fas fa-tools"></i>
+                <span>Builders</span>
+            </div>
+            <div class="nav-item" data-section="analytics" onclick="navigateTo('index.html#analytics')">
+                <i class="fas fa-chart-bar"></i>
+                <span>Analytics</span>
+            </div>
+            <div class="nav-item" data-section="settings" onclick="navigateTo('index.html#settings')">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </div>
+            <div class="nav-item" data-section="audit" onclick="navigateTo('index.html#audit')">
+                <i class="fas fa-shield-alt"></i>
+                <span>Audit</span>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="search-results-container">
+            <div class="search-header">
+                <h1>Search Results</h1>
+                <div class="search-info">
+                    <span id="search-query"></span>
+                    <span id="results-count"></span>
+                </div>
+            </div>
+
+            <!-- Search Filters -->
+            <div class="search-filters">
+                <button class="filter-btn active" data-filter="all">All Results</button>
+                <button class="filter-btn" data-filter="clients">Clients</button>
+                <button class="filter-btn" data-filter="coaches">Coaches</button>
+                <button class="filter-btn" data-filter="pages">Pages</button>
+                <button class="filter-btn" data-filter="apps">Apps</button>
+                <button class="filter-btn" data-filter="websites">Websites</button>
+                <button class="filter-btn" data-filter="workflows">Workflows</button>
+                <button class="filter-btn" data-filter="other">Other</button>
+            </div>
+
+            <!-- Search Results Sections -->
+            <div class="search-results">
+                <!-- Clients Section -->
+                <div class="search-section" id="clients-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-users"></i> Clients</h2>
+                        <span class="section-count" id="clients-count">0 results</span>
+                    </div>
+                    <div class="results-grid" id="clients-results">
+                        <!-- Client results will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Coaches Section -->
+                <div class="search-section" id="coaches-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-user-tie"></i> Coaches</h2>
+                        <span class="section-count" id="coaches-count">0 results</span>
+                    </div>
+                    <div class="results-grid" id="coaches-results">
+                        <!-- Coach results will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Pages Section -->
+                <div class="search-section" id="pages-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-file-alt"></i> Pages</h2>
+                        <span class="section-count" id="pages-count">0 results</span>
+                    </div>
+                    <div class="results-grid" id="pages-results">
+                        <!-- Page results will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Apps Section -->
+                <div class="search-section" id="apps-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-mobile-alt"></i> Apps</h2>
+                        <span class="section-count" id="apps-count">0 results</span>
+                    </div>
+                    <div class="results-grid" id="apps-results">
+                        <!-- App results will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Websites Section -->
+                <div class="search-section" id="websites-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-globe"></i> Websites</h2>
+                        <span class="section-count" id="websites-count">0 results</span>
+                    </div>
+                    <div class="results-grid" id="websites-results">
+                        <!-- Website results will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Workflows Section -->
+                <div class="search-section" id="workflows-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-project-diagram"></i> Workflows</h2>
+                        <span class="section-count" id="workflows-count">0 results</span>
+                    </div>
+                    <div class="results-grid" id="workflows-results">
+                        <!-- Workflow results will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Other Section -->
+                <div class="search-section" id="other-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-ellipsis-h"></i> Other</h2>
+                        <span class="section-count" id="other-count">0 results</span>
+                    </div>
+                    <div class="results-grid" id="other-results">
+                        <!-- Other results will be populated here -->
+                    </div>
+                </div>
+
+                <!-- No Results -->
+                <div class="no-results" id="no-results" style="display: none;">
+                    <div class="no-results-content">
+                        <i class="fas fa-search"></i>
+                        <h3>No results found</h3>
+                        <p>Try adjusting your search terms or browse our categories.</p>
+                        <button class="btn btn-primary" onclick="navigateTo('index.html')">
+                            <i class="fas fa-home"></i> Back to Dashboard
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Notifications Popup -->
+    <div id="notifications-popup" class="notifications-popup" style="display: none;">
+        <div class="notifications-header">
+            <h3>Notifications</h3>
+            <button class="btn-icon" id="close-notifications">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="notifications-list">
+            <div class="notification-item unread">
+                <div class="notification-icon warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="notification-content">
+                    <h4>Client Engagement Alert</h4>
+                    <p>3 clients haven't logged in this week</p>
+                    <span class="notification-time">2 hours ago</span>
+                </div>
+            </div>
+            <div class="notification-item unread">
+                <div class="notification-icon success">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="notification-content">
+                    <h4>New Review Received</h4>
+                    <p>Sarah Johnson left a 5-star review</p>
+                    <span class="notification-time">4 hours ago</span>
+                </div>
+            </div>
+            <div class="notification-item">
+                <div class="notification-icon info">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <div class="notification-content">
+                    <h4>App Update Available</h4>
+                    <p>FitLife Mobile App v2.1.4 is ready</p>
+                    <span class="notification-time">1 day ago</span>
+                </div>
+            </div>
+        </div>
+        <div class="notifications-footer">
+            <button class="btn btn-outline">Mark All as Read</button>
+            <button class="btn btn-primary">View All Notifications</button>
+        </div>
+    </div>
+
+    <script src="./search-results.js"></script>
+</body>
+</html>
