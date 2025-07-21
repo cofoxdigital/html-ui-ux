@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Editor - Phoenix Enterprise</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f8f9fa;
+        }
+
+        .editor-container {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .editor-sidebar {
+            width: 300px;
+            background: white;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editor-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            background: white;
+        }
+
+        .editor-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0 0 5px 0;
+            color: #333;
+        }
+
+        .editor-subtitle {
+            font-size: 14px;
+            color: #666;
+            margin: 0;
+        }
+
+        .editor-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .editor-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editor-toolbar {
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .toolbar-right {
+            display: flex;
+            gap: 10px;
+        }
+
+        .editor-canvas {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .canvas-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            min-height: 800px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .canvas-content {
+            padding: 40px;
+        }
+
+        .sidebar-tabs {
+            display: flex;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .sidebar-tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .sidebar-tab.active {
+            color: #6c5ce7;
+            border-bottom: 2px solid #6c5ce7;
+        }
+
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .tab-panel {
+            display: none;
+            padding: 20px;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        .section-library {
+            display: grid;
+            gap: 15px;
+        }
+
+        .section-item {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: grab;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .section-item:hover {
+            border-color: #6c5ce7;
+            box-shadow: 0 2px 8px rgba(108, 92, 231, 0.1);
+        }
+
+        .section-item:active {
+            cursor: grabbing;
+        }
+
+        .section-item h4 {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .section-item p {
+            margin: 0;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .section-item i {
+            font-size: 24px;
+            color: #6c5ce7;
+            margin-bottom: 10px;
+        }
+
+        .page-section {
+            margin-bottom: 20px;
+            border: 2px dashed transparent;
+            border-radius: 8px;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .page-section:hover {
+            border-color: #6c5ce7;
+        }
+
+        .page-section.drag-over {
+            border-color: #6c5ce7;
+            background: rgba(108, 92, 231, 0.05);
+        }
+
+        .section-content {
+            padding: 20px;
+            background: white;
+            border-radius: 6px;
+            position: relative;
+        }
+
+        .section-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 5px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .page-section:hover .section-controls {
+            opacity: 1;
+        }
+
+        .control-btn {
+            width: 30px;
+            height: 30px;
+            border: none;
+            border-radius: 4px;
+            background: #6c5ce7;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .control-btn:hover {
+            background: #5a4fcf;
+        }
+
+        .control-btn.delete {
+            background: #e74c3c;
+        }
+
+        .control-btn.delete:hover {
+            background: #c0392b;
+        }
+
+        .editable-text {
+            outline: none;
+            transition: all 0.2s;
+            cursor: text;
+        }
+
+        .editable-text:focus {
+            background: rgba(108, 92, 231, 0.05);
+            border-radius: 4px;
+            padding: 5px;
+        }
+
+        .text-editor-panel {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .text-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .text-control-group {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .text-control-group label {
+            font-size: 12px;
+            color: #666;
+            min-width: 60px;
+        }
+
+        .text-control-group select,
+        .text-control-group input {
+            padding: 5px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .color-picker {
+            width: 40px;
+            height: 30px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .format-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .format-btn {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .format-btn:hover,
+        .format-btn.active {
+            background: #6c5ce7;
+            color: white;
+            border-color: #6c5ce7;
+        }
+
+        .drop-zone {
+            min-height: 100px;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 14px;
+            margin: 20px 0;
+            transition: all 0.2s;
+        }
+
+        .drop-zone.drag-over {
+            border-color: #6c5ce7;
+            background: rgba(108, 92, 231, 0.05);
+            color: #6c5ce7;
+        }
+
+        .template-preview {
+            width: 100%;
+            height: 120px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            background-size: cover;
+            background-position: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .template-preview:hover {
+            border-color: #6c5ce7;
+            box-shadow: 0 2px 8px rgba(108, 92, 231, 0.1);
+        }
+
+        .template-preview.landing {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .template-preview.business {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .template-preview.portfolio {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .device-preview {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .device-btn {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .device-btn.active {
+            background: #6c5ce7;
+            color: white;
+            border-color: #6c5ce7;
+        }
+
+        .canvas-container.mobile {
+            max-width: 375px;
+        }
+
+        .canvas-container.tablet {
+            max-width: 768px;
+        }
+    </style>
+</head>
+<body>
+    <div class="editor-container">
+        <!-- Sidebar -->
+        <div class="editor-sidebar">
+            <div class="editor-header">
+                <h2 class="editor-title" id="page-title">New Page</h2>
+                <p class="editor-subtitle">Drag sections to build your page</p>
+                <div class="editor-actions">
+                    <a href="pages.html" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </a>
+                    <button class="btn btn-primary btn-sm" onclick="savePage()">
+                        <i class="fas fa-save"></i> Save
+                    </button>
+                </div>
+            </div>
+
+            <div class="sidebar-tabs">
+                <button class="sidebar-tab active" onclick="switchTab('sections')">Sections</button>
+                <button class="sidebar-tab" onclick="switchTab('templates')">Templates</button>
+                <button class="sidebar-tab" onclick="switchTab('settings')">Settings</button>
+            </div>
+
+            <div class="sidebar-content">
+                <!-- Sections Tab -->
+                <div class="tab-panel active" id="sections-panel">
+                    <div class="section-library">
+                        <div class="section-item" draggable="true" data-section="hero">
+                            <i class="fas fa-star"></i>
+                            <h4>Hero Section</h4>
+                            <p>Large banner with title, subtitle and call-to-action</p>
+                        </div>
+                        <div class="section-item" draggable="true" data-section="text">
+                            <i class="fas fa-align-left"></i>
+                            <h4>Text Block</h4>
+                            <p>Simple text content with formatting options</p>
+                        </div>
+                        <div class="section-item" draggable="true" data-section="features">
+                            <i class="fas fa-th-large"></i>
+                            <h4>Features Grid</h4>
+                            <p>Showcase features in a grid layout</p>
+                        </div>
+                        <div class="section-item" draggable="true" data-section="testimonial">
+                            <i class="fas fa-quote-left"></i>
+                            <h4>Testimonial</h4>
+                            <p>Customer testimonial with photo and quote</p>
+                        </div>
+                        <div class="section-item" draggable="true" data-section="cta">
+                            <i class="fas fa-bullhorn"></i>
+                            <h4>Call to Action</h4>
+                            <p>Prominent button to drive conversions</p>
+                        </div>
+                        <div class="section-item" draggable="true" data-section="contact">
+                            <i class="fas fa-envelope"></i>
+                            <h4>Contact Form</h4>
+                            <p>Contact form with fields and submit button</p>
+                        </div>
+                        <div class="section-item" draggable="true" data-section="gallery">
+                            <i class="fas fa-images"></i>
+                            <h4>Image Gallery</h4>
+                            <p>Grid of images with lightbox functionality</p>
+                        </div>
+                        <div class="section-item" draggable="true" data-section="pricing">
+                            <i class="fas fa-dollar-sign"></i>
+                            <h4>Pricing Table</h4>
+                            <p>Compare pricing plans and features</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Templates Tab -->
+                <div class="tab-panel" id="templates-panel">
+                    <div class="template-item" onclick="loadTemplate('landing')">
+                        <div class="template-preview landing"></div>
+                        <h4>Landing Page</h4>
+                        <p>Hero, features, testimonials, and CTA</p>
+                    </div>
+                    <div class="template-item" onclick="loadTemplate('business')">
+                        <div class="template-preview business"></div>
+                        <h4>Business Page</h4>
+                        <p>Professional layout for companies</p>
+                    </div>
+                    <div class="template-item" onclick="loadTemplate('portfolio')">
+                        <div class="template-preview portfolio"></div>
+                        <h4>Portfolio</h4>
+                        <p>Showcase your work and projects</p>
+                    </div>
+                </div>
+
+                <!-- Settings Tab -->
+                <div class="tab-panel" id="settings-panel">
+                    <div class="text-editor-panel">
+                        <h4>Page Settings</h4>
+                        <div class="form-group">
+                            <label>Page Title</label>
+                            <input type="text" id="settings-title" placeholder="Enter page title">
+                        </div>
+                        <div class="form-group">
+                            <label>Meta Description</label>
+                            <textarea id="settings-description" placeholder="Enter meta description" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Page Status</label>
+                            <select id="settings-status">
+                                <option value="draft">Draft</option>
+                                <option value="published">Published</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="text-editor-panel" id="text-editor" style="display: none;">
+                        <h4>Text Editor</h4>
+                        <div class="text-controls">
+                            <div class="text-control-group">
+                                <label>Tag:</label>
+                                <select id="text-tag">
+                                    <option value="p">Paragraph</option>
+                                    <option value="h1">Heading 1</option>
+                                    <option value="h2">Heading 2</option>
+                                    <option value="h3">Heading 3</option>
+                                    <option value="h4">Heading 4</option>
+                                    <option value="h5">Heading 5</option>
+                                    <option value="h6">Heading 6</option>
+                                </select>
+                            </div>
+                            <div class="text-control-group">
+                                <label>Font:</label>
+                                <select id="text-font">
+                                    <option value="Inter">Inter</option>
+                                    <option value="Arial">Arial</option>
+                                    <option value="Helvetica">Helvetica</option>
+                                    <option value="Georgia">Georgia</option>
+                                    <option value="Times">Times</option>
+                                </select>
+                            </div>
+                            <div class="text-control-group">
+                                <label>Size:</label>
+                                <input type="number" id="text-size" min="8" max="72" value="16">
+                            </div>
+                            <div class="text-control-group">
+                                <label>Color:</label>
+                                <input type="color" id="text-color" class="color-picker" value="#333333">
+                            </div>
+                        </div>
+                        <div class="format-buttons">
+                            <button class="format-btn" onclick="toggleFormat('bold')" title="Bold">
+                                <i class="fas fa-bold"></i>
+                            </button>
+                            <button class="format-btn" onclick="toggleFormat('italic')" title="Italic">
+                                <i class="fas fa-italic"></i>
+                            </button>
+                            <button class="format-btn" onclick="toggleFormat('underline')" title="Underline">
+                                <i class="fas fa-underline"></i>
+                            </button>
+                            <button class="format-btn" onclick="toggleAlign('left')" title="Align Left">
+                                <i class="fas fa-align-left"></i>
+                            </button>
+                            <button class="format-btn" onclick="toggleAlign('center')" title="Align Center">
+                                <i class="fas fa-align-center"></i>
+                            </button>
+                            <button class="format-btn" onclick="toggleAlign('right')" title="Align Right">
+                                <i class="fas fa-align-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Editor -->
+        <div class="editor-main">
+            <div class="editor-toolbar">
+                <div class="toolbar-left">
+                    <div class="device-preview">
+                        <button class="device-btn active" onclick="setDevice('desktop')">
+                            <i class="fas fa-desktop"></i> Desktop
+                        </button>
+                        <button class="device-btn" onclick="setDevice('tablet')">
+                            <i class="fas fa-tablet-alt"></i> Tablet
+                        </button>
+                        <button class="device-btn" onclick="setDevice('mobile')">
+                            <i class="fas fa-mobile-alt"></i> Mobile
+                        </button>
+                    </div>
+                </div>
+                <div class="toolbar-right">
+                    <button class="btn btn-outline btn-sm" onclick="previewPage()">
+                        <i class="fas fa-eye"></i> Preview
+                    </button>
+                    <button class="btn btn-primary btn-sm" onclick="publishPage()">
+                        <i class="fas fa-globe"></i> Publish
+                    </button>
+                </div>
+            </div>
+
+            <div class="editor-canvas">
+                <div class="canvas-container" id="canvas">
+                    <div class="canvas-content" id="canvas-content">
+                        <div class="drop-zone" id="main-drop-zone">
+                            <i class="fas fa-plus"></i>
+                            Drag sections here to start building your page
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = null;
+        let selectedElement = null;
+        let sectionCounter = 0;
+
+        // Initialize editor
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPageData();
+            setupDragAndDrop();
+            setupTextEditor();
+        });
+
+        function loadPageData() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const pageId = urlParams.get('id');
+            const template = urlParams.get('template');
+
+            if (pageId) {
+                // Load existing page or create new one
+                currentPage = {
+                    id: pageId,
+                    title: 'New Page',
+                    content: [],
+                    template: template || 'blank'
+                };
+
+                document.getElementById('page-title').textContent = currentPage.title;
+                document.getElementById('settings-title').value = currentPage.title;
+
+                // Load template if specified
+                if (template && template !== 'blank') {
+                    loadTemplate(template);
+                }
+            }
+        }
+
+        function setupDragAndDrop() {
+            const sectionItems = document.querySelectorAll('.section-item');
+            const canvas = document.getElementById('canvas-content');
+
+            sectionItems.forEach(item => {
+                item.addEventListener('dragstart', function(e) {
+                    e.dataTransfer.setData('text/plain', this.dataset.section);
+                });
+            });
+
+            canvas.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('drag-over');
+            });
+
+            canvas.addEventListener('dragleave', function(e) {
+                if (!this.contains(e.relatedTarget)) {
+                    this.classList.remove('drag-over');
+                }
+            });
+
+            canvas.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('drag-over');
+                
+                const sectionType = e.dataTransfer.getData('text/plain');
+                if (sectionType) {
+                    addSection(sectionType);
+                }
+            });
+        }
+
+        function addSection(type) {
+            const canvas = document.getElementById('canvas-content');
+            const dropZone = document.getElementById('main-drop-zone');
+            
+            if (dropZone) {
+                dropZone.remove();
+            }
+
+            const sectionId = `section-${++sectionCounter}`;
+            const section = document.createElement('div');
+            section.className = 'page-section';
+            section.id = sectionId;
+            section.innerHTML = getSectionHTML(type, sectionId);
+
+            canvas.appendChild(section);
+            makeTextEditable(section);
+        }
+
+        function getSectionHTML(type, sectionId) {
+            const templates = {
+                hero: `
+                    <div class="section-content">
+                        <div class="section-controls">
+                            <button class="control-btn" onclick="editSection('${sectionId}')" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="control-btn delete" onclick="deleteSection('${sectionId}')" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        <div style="text-align: center; padding: 60px 20px;">
+                            <h1 class="editable-text" style="font-size: 48px; margin-bottom: 20px; color: #333;">Welcome to Our Platform</h1>
+                            <p class="editable-text" style="font-size: 20px; margin-bottom: 30px; color: #666;">Transform your business with our powerful tools and features</p>
+                            <button style="background: #6c5ce7; color: white; padding: 15px 30px; border: none; border-radius: 6px; font-size: 16px; cursor: pointer;">Get Started</button>
+                        </div>
+                    </div>
+                `,
+                text: `
+                    <div class="section-content">
+                        <div class="section-controls">
+                            <button class="control-btn" onclick="editSection('${sectionId}')" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="control-btn delete" onclick="deleteSection('${sectionId}')" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        <div style="padding: 40px 20px;">
+                            <h2 class="editable-text" style="margin-bottom: 20px; color: #333;">Your Heading Here</h2>
+                            <p class="editable-text" style="line-height: 1.6; color: #666;">This is your text content. Click to edit and customize the text, font, size, and color. You can write about your business, services, or any other content you want to share with your visitors.</p>
+                        </div>
+                    </div>
+                `,
+                features: `
+                    <div class="section-content">
+                        <div class="section-controls">
+                            <button class="control-btn" onclick="editSection('${sectionId}')" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="control-btn delete" onclick="deleteSection('${sectionId}')" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        <div style="padding: 40px 20px; text-align: center;">
+                            <h2 class="editable-text" style="margin-bottom: 40px; color: #333;">Our Features</h2>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px;">
+                                <div style="padding: 20px;">
+                                    <i class="fas fa-rocket" style="font-size: 48px; color: #6c5ce7; margin-bottom: 20px;"></i>
+                                    <h3 class="editable-text" style="margin-bottom: 15px; color: #333;">Fast Performance</h3>
+                                    <p class="editable-text" style="color: #666;">Lightning-fast loading times and optimized performance for the best user experience.</p>
+                                </div>
+                                <div style="padding: 20px;">
+                                    <i class="fas fa-shield-alt" style="font-size: 48px; color: #6c5ce7; margin-bottom: 20px;"></i>
+                                    <h3 class="editable-text" style="margin-bottom: 15px; color: #333;">Secure & Reliable</h3>
+                                    <p class="editable-text" style="color: #666;">Enterprise-grade security and 99.9% uptime guarantee for your peace of mind.</p>
+                                </div>
+                                <div style="padding: 20px;">
+                                    <i class="fas fa-users" style="font-size: 48px; color: #6c5ce7; margin-bottom: 20px;"></i>
+                                    <h3 class="editable-text" style="margin-bottom: 15px; color: #333;">24/7 Support</h3>
+                                    <p class="editable-text" style="color: #666;">Round-the-clock customer support to help you whenever you need assistance.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                testimonial: `
+                    <div class="section-content">
+                        <div class="section-controls">
+                            <button class="control-btn" onclick="editSection('${sectionId}')" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="control-btn delete" onclick="deleteSection('${sectionId}')" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        <div style="padding: 40px 20px; text-align: center; background: #f8f9fa;">
+                            <div style="max-width: 600px; margin: 0 auto;">
+                                <i class="fas fa-quote-left" style="font-size: 48px; color: #6c5ce7; margin-bottom: 20px;"></i>
+                                <p class="editable-text" style="font-size: 20px; font-style: italic; margin-bottom: 30px; color: #333;">"This platform has completely transformed how we do business. The results have been incredible!"</p>
+                                <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+                                    <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=60&h=60&fit=crop&crop=face" style="width: 60px; height: 60px; border-radius: 50%;">
+                                    <div style="text-align: left;">
+                                        <h4 class="editable-text" style="margin: 0; color: #333;">Sarah Johnson</h4>
+                                        <p class="editable-text" style="margin: 0; color: #666; font-size: 14px;">CEO, TechCorp</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                cta: `
+                    <div class="section-content">
+                        <div class="section-controls">
+                            <button class="control-btn" onclick="editSection('${sectionId}')" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="control-btn delete" onclick="deleteSection('${sectionId}')" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        <div style="padding: 60px 20px; text-align: center; background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%); color: white;">
+                            <h2 class="editable-text" style="margin-bottom: 20px; color: white;">Ready to Get Started?</h2>
+                            <p class="editable-text" style="margin-bottom: 30px; font-size: 18px; opacity: 0.9;">Join thousands of satisfied customers and transform your business today.</p>
+                            <button style="background: white; color: #6c5ce7; padding: 15px 30px; border: none; border-radius: 6px; font-size: 16px; cursor: pointer;">Start Now</button>
+                        </div>
+                    </div>
+                `,
+                contact: `
+                    <div class="section-content">
+                        <div class="section-controls">
+                            <button class="control-btn" onclick="editSection('${sectionId}')" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="control-btn delete" onclick="deleteSection('${sectionId}')" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        <div style="padding: 40px 20px; max-width: 600px; margin: 0 auto;">
+                            <h2 class="editable-text" style="text-align: center; margin-bottom: 30px; color: #333;">Contact Us</h2>
+                            <form style="display: grid; gap: 20px;">
+                                <input type="text" placeholder="Your Name" style="padding: 12px; border: 1px solid #ddd; border-radius: 6px;">
+                                <input type="email" placeholder="Your Email" style="padding: 12px; border: 1px solid #ddd; border-radius: 6px;">
+                                <textarea placeholder="Your Message" rows="5" style="padding: 12px; border: 1px solid #ddd; border-radius: 6px; resize: vertical;"></textarea>
+                                <button type="submit" style="background: #6c5ce7; color: white; padding: 12px; border: none; border-radius: 6px; cursor: pointer;">Send Message</button>
+                            </form>
+                        </div>
+                    </div>
+                `,
+                gallery: `
+                    <div class="section-content">
+                        <div class="section-controls">
+                            <button class="control-btn" onclick="editSection('${sectionId}')" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="control-btn delete" onclick="deleteSection('${sectionId}')" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        <div style="padding: 40px 20px;">
+                            <h2 class="editable-text" style="text-align: center; margin-bottom: 40px; color: #333;">Gallery</h2>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                                <img src="https://images.unsplash.com/photo-1557804506-669a67965ba0?w=400&h=300&fit=crop" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;">
+                                <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&h=300&fit=crop" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;">
+                                <img src="https://images.unsplash.com/photo-1556761175-b413da4baf72?w=400&h=300&fit=crop" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;">
+                                <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=400&h=300&fit=crop" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;">
+                            </div>
+                        </div>
+                    </div>
+                `,
+                pricing: `
+                    <div class="section-content">
+                        <div class="section-controls">
+                            <button class="control-btn" onclick="editSection('${sectionId}')" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="control-btn delete" onclick="deleteSection('${sectionId}')" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        <div style="padding: 40px 20px;">
+                            <h2 class="editable-text" style="text-align: center; margin-bottom: 40px; color: #333;">Pricing Plans</h2>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; max-width: 1000px; margin: 0 auto;">
+                                <div style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 30px; text-align: center;">
+                                    <h3 class="editable-text" style="margin-bottom: 10px; color: #333;">Basic</h3>
+                                    <div style="font-size: 36px; font-weight: bold; margin-bottom: 20px; color: #6c5ce7;">$29<span style="font-size: 16px; color: #666;">/month</span></div>
+                                    <ul style="list-style: none; padding: 0; margin-bottom: 30px;">
+                                        <li style="padding: 8px 0; color: #666;">✓ 5 Projects</li>
+                                        <li style="padding: 8px 0; color: #666;">✓ 10GB Storage</li>
+                                        <li style="padding: 8px 0; color: #666;">✓ Email Support</li>
+                                    </ul>
+                                    <button style="background: #6c5ce7; color: white; padding: 12px 30px; border: none; border-radius: 6px; cursor: pointer; width: 100%;">Choose Plan</button>
+                                </div>
+                                <div style="border: 2px solid #6c5ce7; border-radius: 8px; padding: 30px; text-align: center; position: relative;">
+                                    <div style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #6c5ce7; color: white; padding: 5px 20px; border-radius: 20px; font-size: 12px;">Popular</div>
+                                    <h3 class="editable-text" style="margin-bottom: 10px; color: #333;">Pro</h3>
+                                    <div style="font-size: 36px; font-weight: bold; margin-bottom: 20px; color: #6c5ce7;">$59<span style="font-size: 16px; color: #666;">/month</span></div>
+                                    <ul style="list-style: none; padding: 0; margin-bottom: 30px;">
+                                        <li style="padding: 8px 0; color: #666;">✓ 25 Projects</li>
+                                        <li style="padding: 8px 0; color: #666;">✓ 100GB Storage</li>
+                                        <li style="padding: 8px 0; color: #666;">✓ Priority Support</li>
+                                        <li style="padding: 8px 0; color: #666;">✓ Advanced Features</li>
+                                    </ul>
+                                    <button style="background: #6c5ce7; color: white; padding: 12px 30px; border: none; border-radius: 6px; cursor: pointer; width: 100%;">Choose Plan</button>
+                                </div>
+                                <div style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 30px; text-align: center;">
+                                    <h3 class="editable-text" style="margin-bottom: 10px; color: #333;">Enterprise</h3>
+                                    <div style="font-size: 36px; font-weight: bold; margin-bottom: 20px; color: #6c5ce7;">$99<span style="font-size: 16px; color: #666;">/month</span></div>
+                                    <ul style="list-style: none; padding: 0; margin-bottom: 30px;">
+                                        <li style="padding: 8px 0; color: #666;">✓ Unlimited Projects</li>
+                                        <li style="padding: 8px 0; color: #666;">✓ 1TB Storage</li>
+                                        <li style="padding: 8px 0; color: #666;">✓ 24/7 Support</li>
+                                        <li style="padding: 8px 0; color: #666;">✓ Custom Integrations</li>
+                                    </ul>
+                                    <button style="background: #6c5ce7; color: white; padding: 12px 30px; border: none; border-radius: 6px; cursor: pointer; width: 100%;">Choose Plan</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            };
+
+            return templates[type] || templates.text;
+        }
+
+        function makeTextEditable(section) {
+            const editableElements = section.querySelectorAll('.editable-text');
+            editableElements.forEach(element => {
+                element.addEventListener('click', function() {
+                    selectElement(this);
+                });
+                element.addEventListener('blur', function() {
+                    deselectElement();
+                });
+                element.addEventListener('input', function() {
+                    // Auto-save functionality could be added here
+                });
+            });
+        }
+
+        function selectElement(element) {
+            // Remove previous selection
+            if (selectedElement) {
+                selectedElement.classList.remove('selected');
+            }
+            
+            selectedElement = element;
+            element.classList.add('selected');
+            
+            // Show text editor panel
+            showTextEditor(element);
+        }
+
+        function deselectElement() {
+            if (selectedElement) {
+                selectedElement.classList.remove('selected');
+            }
+            selectedElement = null;
+            hideTextEditor();
+        }
+
+        function showTextEditor(element) {
+            const textEditor = document.getElementById('text-editor');
+            textEditor.style.display = 'block';
+            
+            // Populate current values
+            const computedStyle = window.getComputedStyle(element);
+            document.getElementById('text-tag').value = element.tagName.toLowerCase();
+            document.getElementById('text-font').value = computedStyle.fontFamily.split(',')[0].replace(/['"]/g, '');
+            document.getElementById('text-size').value = parseInt(computedStyle.fontSize);
+            document.getElementById('text-color').value = rgbToHex(computedStyle.color);
+            
+            // Switch to settings tab
+            switchTab('settings');
+        }
+
+        function hideTextEditor() {
+            const textEditor = document.getElementById('text-editor');
+            textEditor.style.display = 'none';
+        }
+
+        function setupTextEditor() {
+            // Text controls event listeners
+            document.getElementById('text-tag').addEventListener('change', function() {
+                if (selectedElement) {
+                    changeElementTag(selectedElement, this.value);
+                }
+            });
+
+            document.getElementById('text-font').addEventListener('change', function() {
+                if (selectedElement) {
+                    selectedElement.style.fontFamily = this.value;
+                }
+            });
+
+            document.getElementById('text-size').addEventListener('input', function() {
+                if (selectedElement) {
+                    selectedElement.style.fontSize = this.value + 'px';
+                }
+            });
+
+            document.getElementById('text-color').addEventListener('change', function() {
+                if (selectedElement) {
+                    selectedElement.style.color = this.value;
+                }
+            });
+        }
+
+        function changeElementTag(element, newTag) {
+            const newElement = document.createElement(newTag);
+            newElement.innerHTML = element.innerHTML;
+            newElement.className = element.className;
+            newElement.style.cssText = element.style.cssText;
+            
+            element.parentNode.replaceChild(newElement, element);
+            selectedElement = newElement;
+            makeTextEditable(newElement.parentNode);
+        }
+
+        function toggleFormat(format) {
+            if (selectedElement) {
+                const button = event.target.closest('.format-btn');
+                
+                switch(format) {
+                    case 'bold':
+                        selectedElement.style.fontWeight = selectedElement.style.fontWeight === 'bold' ? 'normal' : 'bold';
+                        button.classList.toggle('active');
+                        break;
+                    case 'italic':
+                        selectedElement.style.fontStyle = selectedElement.style.fontStyle === 'italic' ? 'normal' : 'italic';
+                        button.classList.toggle('active');
+                        break;
+                    case 'underline':
+                        selectedElement.style.textDecoration = selectedElement.style.textDecoration === 'underline' ? 'none' : 'underline';
+                        button.classList.toggle('active');
+                        break;
+                }
+            }
+        }
+
+        function toggleAlign(alignment) {
+            if (selectedElement) {
+                selectedElement.style.textAlign = alignment;
+                
+                // Update button states
+                document.querySelectorAll('.format-btn').forEach(btn => {
+                    if (btn.title.includes('Align')) {
+                        btn.classList.remove('active');
+                    }
+                });
+                event.target.closest('.format-btn').classList.add('active');
+            }
+        }
+
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.sidebar-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`[onclick="switchTab('${tabName}')"]`).classList.add('active');
+            
+            // Update tab panels
+            document.querySelectorAll('.tab-panel').forEach(panel => {
+                panel.classList.remove('active');
+            });
+            document.getElementById(`${tabName}-panel`).classList.add('active');
+        }
+
+        function loadTemplate(templateName) {
+            const canvas = document.getElementById('canvas-content');
+            canvas.innerHTML = ''; // Clear existing content
+            
+            const templates = {
+                landing: () => {
+                    addSection('hero');
+                    addSection('features');
+                    addSection('testimonial');
+                    addSection('cta');
+                },
+                business: () => {
+                    addSection('hero');
+                    addSection('text');
+                    addSection('features');
+                    addSection('contact');
+                },
+                portfolio: () => {
+                    addSection('hero');
+                    addSection('gallery');
+                    addSection('text');
+                    addSection('contact');
+                }
+            };
+            
+            if (templates[templateName]) {
+                templates[templateName]();
+                showNotification(`${templateName} template loaded!`, 'success');
+            }
+        }
+
+        function deleteSection(sectionId) {
+            if (confirm('Are you sure you want to delete this section?')) {
+                const section = document.getElementById(sectionId);
+                section.remove();
+                
+                // Show drop zone if no sections left
+                const canvas = document.getElementById('canvas-content');
+                if (canvas.children.length === 0) {
+                    canvas.innerHTML = `
+                        <div class="drop-zone" id="main-drop-zone">
+                            <i class="fas fa-plus"></i>
+                            Drag sections here to start building your page
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        function editSection(sectionId) {
+            // Focus on the first editable element in the section
+            const section = document.getElementById(sectionId);
+            const firstEditable = section.querySelector('.editable-text');
+            if (firstEditable) {
+                firstEditable.focus();
+                selectElement(firstEditable);
+            }
+        }
+
+        function setDevice(device) {
+            const canvas = document.getElementById('canvas');
+            const buttons = document.querySelectorAll('.device-btn');
+            
+            // Update button states
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update canvas size
+            canvas.className = 'canvas-container';
+            if (device !== 'desktop') {
+                canvas.classList.add(device);
+            }
+        }
+
+        function savePage() {
+            if (currentPage) {
+                currentPage.title = document.getElementById('settings-title').value || 'Untitled Page';
+                currentPage.content = document.getElementById('canvas-content').innerHTML;
+                
+                // In a real app, this would save to a database
+                localStorage.setItem(`page-${currentPage.id}`, JSON.stringify(currentPage));
+                
+                showNotification('Page saved successfully!', 'success');
+                document.getElementById('page-title').textContent = currentPage.title;
+            }
+        }
+
+        function previewPage() {
+            // In a real app, this would open a preview window
+            showNotification('Preview functionality coming soon!', 'info');
+        }
+
+        function publishPage() {
+            if (currentPage) {
+                currentPage.status = 'published';
+                savePage();
+                showNotification('Page published successfully!', 'success');
+            }
+        }
+
+        // Utility functions
+        function rgbToHex(rgb) {
+            const result = rgb.match(/\d+/g);
+            if (result) {
+                return "#" + ((1 << 24) + (parseInt(result[0]) << 16) + (parseInt(result[1]) << 8) + parseInt(result[2])).toString(16).slice(1);
+            }
+            return '#000000';
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
