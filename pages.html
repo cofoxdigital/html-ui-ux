@@ -567,6 +567,29 @@
             }, 3000);
         }
 
+        // Global Search Functionality (if search box exists)
+        const globalSearchInput = document.querySelector('.search-box input');
+        if (globalSearchInput) {
+            globalSearchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    const query = this.value.trim();
+                    if (query) {
+                        window.location.href = `search-results.html?q=${encodeURIComponent(query)}`;
+                    }
+                }
+            });
+
+            const searchIcon = document.querySelector('.search-box i');
+            if (searchIcon) {
+                searchIcon.addEventListener('click', function() {
+                    const query = globalSearchInput.value.trim();
+                    if (query) {
+                        window.location.href = `search-results.html?q=${encodeURIComponent(query)}`;
+                    }
+                });
+            }
+        }
+
         // Close modal when clicking outside
         document.addEventListener('click', function(e) {
             if (e.target.classList.contains('modal-overlay')) {

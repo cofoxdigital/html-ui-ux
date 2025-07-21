@@ -1144,6 +1144,58 @@ document.addEventListener('DOMContentLoaded', function() {
     window.exportAuditLogs = () => showNotification('Audit logs exported successfully!', 'success');
     window.createCustomRole = () => showNotification('Custom role creation feature coming soon!', 'info');
 
+    // Global Search Functionality
+    const globalSearchInput = document.querySelector('.search-box input');
+    if (globalSearchInput) {
+        globalSearchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const query = this.value.trim();
+                if (query) {
+                    // Redirect to search results page with query
+                    window.location.href = `search-results.html?q=${encodeURIComponent(query)}`;
+                }
+            }
+        });
+
+        // Add search icon click functionality
+        const searchIcon = document.querySelector('.search-box i');
+        if (searchIcon) {
+            searchIcon.addEventListener('click', function() {
+                const query = globalSearchInput.value.trim();
+                if (query) {
+                    window.location.href = `search-results.html?q=${encodeURIComponent(query)}`;
+                }
+            });
+        }
+    }
+
+    // Notifications functionality
+    const notificationsTrigger = document.getElementById('notifications-trigger');
+    const notificationsPopup = document.getElementById('notifications-popup');
+    const closeNotifications = document.getElementById('close-notifications');
+
+    if (notificationsTrigger && notificationsPopup) {
+        notificationsTrigger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            notificationsPopup.style.display = notificationsPopup.style.display === 'none' ? 'block' : 'none';
+        });
+    }
+
+    if (closeNotifications) {
+        closeNotifications.addEventListener('click', function() {
+            notificationsPopup.style.display = 'none';
+        });
+    }
+
+    // Close notifications when clicking outside
+    document.addEventListener('click', function(e) {
+        if (notificationsPopup && notificationsTrigger && 
+            !notificationsPopup.contains(e.target) && 
+            !notificationsTrigger.contains(e.target)) {
+            notificationsPopup.style.display = 'none';
+        }
+    });
+
     // Initialize dashboard
     renderDashboard();
 
