@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 program: "Weight Loss Pro",
                 status: "Active",
                 coach: "Mike Chen",
-                avatar: "https://via.placeholder.com/60x60/10B981/FFFFFF?text=SJ",
+                avatar: "https://placehold.co/60x60/10B981/FFFFFF?text=SJ",
                 type: "client"
             },
             {
@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 program: "Muscle Building",
                 status: "Active",
                 coach: "Lisa Rodriguez",
-                avatar: "https://via.placeholder.com/60x60/3B82F6/FFFFFF?text=DW",
+                avatar: "https://placehold.co/60x60/3B82F6/FFFFFF?text=DW",
                 type: "client"
             },
             {
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 program: "Nutrition Plan",
                 status: "Active",
                 coach: "Alex Thompson",
-                avatar: "https://via.placeholder.com/60x60/F59E0B/FFFFFF?text=EM",
+                avatar: "https://placehold.co/60x60/F59E0B/FFFFFF?text=EM",
                 type: "client"
             },
             {
@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 program: "Strength Training",
                 status: "Active",
                 coach: "Mike Chen",
-                avatar: "https://via.placeholder.com/60x60/EF4444/FFFFFF?text=JB",
+                avatar: "https://placehold.co/60x60/EF4444/FFFFFF?text=JB",
                 type: "client"
             },
             {
@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 program: "Yoga & Wellness",
                 status: "Active",
                 coach: "Lisa Rodriguez",
-                avatar: "https://via.placeholder.com/60x60/8B5CF6/FFFFFF?text=MG",
+                avatar: "https://placehold.co/60x60/8B5CF6/FFFFFF?text=MG",
                 type: "client"
             }
         ],
@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 clients: 45,
                 rating: 4.9,
                 status: "Active",
-                avatar: "https://via.placeholder.com/60x60/10B981/FFFFFF?text=MC",
+                avatar: "https://placehold.co/60x60/10B981/FFFFFF?text=MC",
                 type: "coach"
             },
             {
@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 clients: 38,
                 rating: 4.8,
                 status: "Active",
-                avatar: "https://via.placeholder.com/60x60/3B82F6/FFFFFF?text=LR",
+                avatar: "https://placehold.co/60x60/3B82F6/FFFFFF?text=LR",
                 type: "coach"
             },
             {
@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 clients: 32,
                 rating: 4.9,
                 status: "Active",
-                avatar: "https://via.placeholder.com/60x60/F59E0B/FFFFFF?text=AT",
+                avatar: "https://placehold.co/60x60/F59E0B/FFFFFF?text=AT",
                 type: "coach"
             },
             {
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 clients: 28,
                 rating: 4.7,
                 status: "Active",
-                avatar: "https://via.placeholder.com/60x60/EF4444/FFFFFF?text=SK",
+                avatar: "https://placehold.co/60x60/EF4444/FFFFFF?text=SK",
                 type: "coach"
             }
         ],

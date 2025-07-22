@@ -1134,6 +1134,8 @@ document.addEventListener('DOMContentLoaded', function() {
     window.launchBuilder = (name) => {
         if (name === 'Page Builder') {
             window.location.href = 'pages.html';
+        } else if (name === 'Form Builder') {
+            window.location.href = 'form-list.html';
         } else {
             showNotification(`${name} launched successfully!`, 'success');
         }

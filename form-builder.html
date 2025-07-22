@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Builder - Phoenix Enterprise Coach Dashboard</title>
+    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="./form-builder-styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.css" rel="stylesheet">
+</head>
+<body class="form-builder-body">
+    <!-- Header -->
+    <header class="form-builder-header">
+        <div class="header-left">
+            <div class="logo">
+                <i class="fas fa-fire"></i>
+                <span>Phoenix</span>
+            </div>
+            <div class="breadcrumb">
+                <span><a href="index.html">Dashboard</a></span>
+                <i class="fas fa-chevron-right"></i>
+                <span><a href="form-list.html">Form Builder</a></span>
+                <i class="fas fa-chevron-right"></i>
+                <span id="form-name-breadcrumb">New Form</span>
+            </div>
+        </div>
+        <div class="header-center">
+            <div class="form-title-editor">
+                <input type="text" id="form-title" placeholder="Untitled Form" class="form-title-input">
+                <button class="btn-icon" id="edit-title" title="Edit form title">
+                    <i class="fas fa-edit"></i>
+                </button>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="form-actions">
+                <button class="btn btn-outline" id="preview-form">
+                    <i class="fas fa-eye"></i>
+                    Preview
+                </button>
+                <button class="btn btn-secondary" id="save-form">
+                    <i class="fas fa-save"></i>
+                    Save
+                </button>
+                <button class="btn btn-primary" id="publish-form">
+                    <i class="fas fa-rocket"></i>
+                    Publish
+                </button>
+            </div>
+            <div class="user-profile">
+                <img src="./man_professional.webp" alt="Profile">
+                <span>John Doe</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Builder Interface -->
+    <div class="form-builder-container">
+        <!-- Left Sidebar - Form Elements -->
+        <aside class="form-elements-sidebar">
+            <div class="sidebar-header">
+                <h3>Form Elements</h3>
+                <div class="search-elements">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search elements..." id="element-search">
+                </div>
+            </div>
+
+            <div class="elements-categories">
+                <!-- Basic Elements -->
+                <div class="element-category active" data-category="basic">
+                    <div class="category-header">
+                        <i class="fas fa-cube"></i>
+                        <span>Basic Elements</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="category-elements">
+                        <div class="form-element" draggable="true" data-type="text">
+                            <i class="fas fa-font"></i>
+                            <span>Text Input</span>
+                        </div>
+                        <div class="form-element" draggable="true" data-type="textarea">
+                            <i class="fas fa-align-left"></i>
+                            <span>Textarea</span>
+                        </div>
+                        <div class="form-element" draggable="true" data-type="email">
+                            <i class="fas fa-envelope"></i>
+                            <span>Email</span>
+                        </div>
+                        <div class="form-element" draggable="true" data-type="phone">
+                            <i class="fas fa-phone"></i>
+                            <span>Phone</span>
+                        </div>
+                        <div class="form-element" draggable="true" data-type="number">
+                            <i class="fas fa-hashtag"></i>
+                            <span>Number</span>
+                        </div>
+                        <div class="form-element" draggable="true" data-type="password">
+                            <i class="fas fa-lock"></i>
+                            <span>Password</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Selection Elements -->
+                <div class="element-category" data-category="selection">
+                    <div class="category-header">
+                        <i class="fas fa-list"></i>
+                        <span>Selection</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="category-elements">
+                        <div class="form-element" draggable="true" data-type="select">
+                            <i class="fas fa-caret-down"></i>
+                            <span>Dropdown</span>
+                        </div>
+                        <div class="form-element" draggable="true" data-type="radio">
+                            <i class="fas fa-dot-circle"></i>
+                            <span>Radio Buttons</span>
+                        </div>
+                        <div class="form-element" draggable="true" data-type="checkbox">
+                            <i class="fas fa-check-square"></i>
+                            <span>Checkboxes</span>
+                        </div>
+                        <div class="form-element" draggable="true" data-type="toggle">
+                            <i class="fas fa-toggle-on"></i>
+                            <span>Toggle Switch</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Date & Time -->
+                <div class="element-category" data-category="datetime">
+                    <div class="category-header">
+                        <i class="fas fa-calendar"></i>
+                        <span>Date & Time</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="category-elements">
+                        <div class="form-element" draggable="true" data-type="date">
+                            <i class="fas fa-calendar-day"></i>
+                            <span>Date Picker</span>
+                        </div>
+                        <div class="form-element" draggable="true" data-type="time">
+                            <i class="fas fa-clock"></i>
+                            <span>Time Picker</span>
+                        </div>
+                        <div class="form-element" draggable="true" data-type="datetime">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Date & Time</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Advanced Elements -->
+                <div class="element-category" data-category="advanced">
+                    <div class="category-header">
+                        <i class="fas fa-cogs"></i>
+                        <span>Advanced</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="category-elements">
+                        <div class="form-element" draggable="true" data-type="file">
+                            <i class="fas fa-upload"></i>
+                            <span>File Upload</span>
+                        </div>
+                        <div class="form-element" draggable="true" data-type="rating">
+                            <i class="fas fa-star"></i>
+                            <span>Rating</span>
+                        </div>
+                        <div class="form-element" draggable="true" data-type="slider">
+                            <i class="fas fa-sliders-h"></i>
+                            <span>Slider</span>
+                        </div>
+                        <div class="form-element" draggable="true" data-type="signature">
+                            <i class="fas fa-signature"></i>
+                            <span>Signature</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Layout Elements -->
+                <div class="element-category" data-category="layout">
+                    <div class="category-header">
+                        <i class="fas fa-th-large"></i>
+                        <span>Layout</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="category-elements">
+                        <div class="form-element" draggable="true" data-type="heading">
+                            <i class="fas fa-heading"></i>
+                            <span>Heading</span>
+                        </div>
+                        <div class="form-element" draggable="true" data-type="paragraph">
+                            <i class="fas fa-paragraph"></i>
+                            <span>Paragraph</span>
+                        </div>
+                        <div class="form-element" draggable="true" data-type="divider">
+                            <i class="fas fa-minus"></i>
+                            <span>Divider</span>
+                        </div>
+                        <div class="form-element" draggable="true" data-type="spacer">
+                            <i class="fas fa-arrows-alt-v"></i>
+                            <span>Spacer</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Center - Form Canvas -->
+        <main class="form-canvas-container">
+            <div class="canvas-toolbar">
+                <div class="toolbar-left">
+                    <button class="btn-icon" id="undo-action" title="Undo">
+                        <i class="fas fa-undo"></i>
+                    </button>
+                    <button class="btn-icon" id="redo-action" title="Redo">
+                        <i class="fas fa-redo"></i>
+                    </button>
+                    <div class="toolbar-divider"></div>
+                    <button class="btn-icon" id="clear-form" title="Clear Form">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+                <div class="toolbar-center">
+                    <div class="device-preview">
+                        <button class="device-btn active" data-device="desktop" title="Desktop View">
+                            <i class="fas fa-desktop"></i>
+                        </button>
+                        <button class="device-btn" data-device="tablet" title="Tablet View">
+                            <i class="fas fa-tablet-alt"></i>
+                        </button>
+                        <button class="device-btn" data-device="mobile" title="Mobile View">
+                            <i class="fas fa-mobile-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="toolbar-right">
+                    <div class="zoom-controls">
+                        <button class="btn-icon" id="zoom-out" title="Zoom Out">
+                            <i class="fas fa-search-minus"></i>
+                        </button>
+                        <span class="zoom-level">100%</span>
+                        <button class="btn-icon" id="zoom-in" title="Zoom In">
+                            <i class="fas fa-search-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-canvas" id="form-canvas">
+                <div class="canvas-content">
+                    <div class="form-preview" id="form-preview">
+                        <div class="form-header">
+                            <h2 class="form-preview-title">Untitled Form</h2>
+                            <p class="form-preview-description">Add a description for your form</p>
+                        </div>
+                        <div class="form-fields" id="form-fields">
+                            <div class="empty-form-message">
+                                <i class="fas fa-mouse-pointer"></i>
+                                <h3>Start Building Your Form</h3>
+                                <p>Drag and drop elements from the left sidebar to create your form</p>
+                            </div>
+                        </div>
+                        <div class="form-footer">
+                            <button type="submit" class="btn btn-primary form-submit-btn">
+                                Submit Form
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Right Sidebar - Properties Panel -->
+        <aside class="properties-sidebar">
+            <div class="sidebar-header">
+                <h3>Properties</h3>
+            </div>
+
+            <div class="properties-content" id="properties-content">
+                <div class="no-selection">
+                    <i class="fas fa-mouse-pointer"></i>
+                    <p>Select an element to edit its properties</p>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Form Settings Modal -->
+    <div id="form-settings-modal" class="modal" style="display: none;">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h2>Form Settings</h2>
+                <button class="modal-close" id="close-settings-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-tabs">
+                    <button class="tab-btn active" data-tab="general">General</button>
+                    <button class="tab-btn" data-tab="styling">Styling</button>
+                    <button class="tab-btn" data-tab="notifications">Notifications</button>
+                    <button class="tab-btn" data-tab="integrations">Integrations</button>
+                </div>
+                
+                <div class="tab-content active" id="general-tab">
+                    <div class="form-group">
+                        <label>Form Title</label>
+                        <input type="text" id="settings-form-title" placeholder="Enter form title">
+                    </div>
+                    <div class="form-group">
+                        <label>Form Description</label>
+                        <textarea id="settings-form-description" placeholder="Enter form description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Success Message</label>
+                        <textarea id="settings-success-message" placeholder="Thank you for your submission!"></textarea>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="styling-tab">
+                    <div class="form-group">
+                        <label>Theme</label>
+                        <select id="form-theme">
+                            <option value="default">Default</option>
+                            <option value="modern">Modern</option>
+                            <option value="minimal">Minimal</option>
+                            <option value="professional">Professional</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Primary Color</label>
+                        <input type="color" id="primary-color" value="#4F46E5">
+                    </div>
+                </div>
+
+                <div class="tab-content" id="notifications-tab">
+                    <div class="form-group">
+                        <label>Email Notifications</label>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="email-notifications">
+                            <label for="email-notifications"></label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Notification Email</label>
+                        <input type="email" id="notification-email" placeholder="admin@example.com">
+                    </div>
+                </div>
+
+                <div class="tab-content" id="integrations-tab">
+                    <div class="form-group">
+                        <label>Webhook URL</label>
+                        <input type="url" id="webhook-url" placeholder="https://example.com/webhook">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="cancel-settings">Cancel</button>
+                <button type="button" class="btn btn-primary" id="save-settings">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview Modal -->
+    <div id="preview-modal" class="modal" style="display: none;">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h2>Form Preview</h2>
+                <button class="modal-close" id="close-preview-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="preview-container" id="preview-container">
+                    <!-- Form preview will be rendered here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="close-preview">Close</button>
+                <button type="button" class="btn btn-primary" id="test-form">Test Form</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script src="./form-builder.js"></script>
+</body>
+</html>
