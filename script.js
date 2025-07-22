@@ -961,16 +961,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const section = document.getElementById('builders');
         const builders = [
             {
-                name: 'Website Builder',
-                icon: 'fas fa-globe',
-                description: 'Create responsive websites with drag-and-drop interface'
-            },
-            {
-                name: 'App Builder',
-                icon: 'fas fa-mobile-alt',
-                description: 'Build native iOS & Android apps without coding'
-            },
-            {
                 name: 'Form Builder',
                 icon: 'fas fa-wpforms',
                 description: 'Design custom forms and surveys for data collection'
@@ -994,18 +984,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 name: 'Table Builder',
                 icon: 'fas fa-table',
                 description: 'Create dynamic tables and data displays'
-            },
-            {
-                name: 'Theme Builder',
-                icon: 'fas fa-palette',
-                description: 'Design custom themes and styling templates'
             }
         ];
 
         section.innerHTML = `
             <div class="section-header">
-                <h1>Builder Tools</h1>
-                <p>Create and customize your apps, websites, and content with our powerful drag-and-drop builders.</p>
+                <h1>Component Builder Tools</h1>
+                <p>Build and customize individual components, forms, pages, and widgets with our intuitive drag-and-drop tools.</p>
             </div>
             <div class="builders-grid">
                 ${builders.map(builder => `

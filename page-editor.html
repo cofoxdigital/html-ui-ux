@@ -214,6 +214,36 @@
             opacity: 1;
         }
 
+        .drag-handle {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 30px;
+            height: 30px;
+            background: #6c5ce7;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: grab;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .page-section:hover .drag-handle {
+            opacity: 1;
+        }
+
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .page-section.dragging {
+            opacity: 0.5;
+        }
+
         .control-btn {
             width: 30px;
             height: 30px;
@@ -245,12 +275,19 @@
             outline: none;
             transition: all 0.2s;
             cursor: text;
+            min-height: 20px;
         }
 
         .editable-text:focus {
             background: rgba(108, 92, 231, 0.05);
             border-radius: 4px;
             padding: 5px;
+            border: 2px dashed #6c5ce7;
+        }
+
+        .editable-text:hover {
+            background: rgba(108, 92, 231, 0.02);
+            border-radius: 4px;
         }
 
         .text-editor-panel {
@@ -626,21 +663,65 @@
             const template = urlParams.get('template');
 
             if (pageId) {
-                // Load existing page or create new one
-                currentPage = {
-                    id: pageId,
-                    title: 'New Page',
-                    content: [],
-                    template: template || 'blank'
-                };
+                // Try to load existing page from localStorage
+                const savedPage = localStorage.getItem(`page_${pageId}`);
+                
+                if (savedPage) {
+                    try {
+                        const pageData = JSON.parse(savedPage);
+                        currentPage = {
+                            id: pageData.id,
+                            title: pageData.title || 'New Page',
+                            content: pageData.content || '',
+                            template: pageData.template || 'blank',
+                            status: pageData.status || 'draft',
+                            published: pageData.published || false
+                        };
 
-                document.getElementById('page-title').textContent = currentPage.title;
-                document.getElementById('settings-title').value = currentPage.title;
+                        // Update UI with loaded data
+                        document.getElementById('page-title').textContent = currentPage.title;
+                        document.getElementById('settings-title').value = currentPage.title;
+                        document.getElementById('settings-status').value = currentPage.status;
 
-                // Load template if specified
-                if (template && template !== 'blank') {
-                    loadTemplate(template);
+                        // Load saved content if it exists
+                        if (currentPage.content && currentPage.content.trim() !== '') {
+                            document.getElementById('canvas-content').innerHTML = currentPage.content;
+                            // Make loaded content editable
+                            const sections = document.querySelectorAll('.page-section');
+                            sections.forEach(section => makeTextEditable(section));
+                        } else if (template && template !== 'blank') {
+                            // Load template only if no saved content exists
+                            loadTemplate(template);
+                        }
+                    } catch (error) {
+                        console.error('Error loading page data:', error);
+                        // Create new page if loading fails
+                        createNewPage(pageId, template);
+                    }
+                } else {
+                    // Create new page
+                    createNewPage(pageId, template);
                 }
+            }
+        }
+
+        function createNewPage(pageId, template) {
+            currentPage = {
+                id: pageId,
+                title: 'New Page',
+                content: '',
+                template: template || 'blank',
+                status: 'draft',
+                published: false
+            };
+
+            document.getElementById('page-title').textContent = currentPage.title;
+            document.getElementById('settings-title').value = currentPage.title;
+            document.getElementById('settings-status').value = currentPage.status;
+
+            // Load template if specified
+            if (template && template !== 'blank') {
+                loadTemplate(template);
             }
         }
 
@@ -648,32 +729,48 @@
             const sectionItems = document.querySelectorAll('.section-item');
             const canvas = document.getElementById('canvas-content');
 
+            // Remove draggable attribute and add click handlers
             sectionItems.forEach(item => {
-                item.addEventListener('dragstart', function(e) {
-                    e.dataTransfer.setData('text/plain', this.dataset.section);
+                item.removeAttribute('draggable');
+                item.addEventListener('click', function() {
+                    const sectionType = this.dataset.section;
+                    addSection(sectionType);
                 });
             });
 
+            // Setup sortable functionality for sections
+            setupSortableSections();
+        }
+
+        function setupSortableSections() {
+            const canvas = document.getElementById('canvas-content');
+            
             canvas.addEventListener('dragover', function(e) {
                 e.preventDefault();
-                this.classList.add('drag-over');
-            });
-
-            canvas.addEventListener('dragleave', function(e) {
-                if (!this.contains(e.relatedTarget)) {
-                    this.classList.remove('drag-over');
-                }
-            });
-
-            canvas.addEventListener('drop', function(e) {
-                e.preventDefault();
-                this.classList.remove('drag-over');
+                const afterElement = getDragAfterElement(canvas, e.clientY);
+                const dragging = document.querySelector('.dragging');
                 
-                const sectionType = e.dataTransfer.getData('text/plain');
-                if (sectionType) {
-                    addSection(sectionType);
+                if (afterElement == null) {
+                    canvas.appendChild(dragging);
+                } else {
+                    canvas.insertBefore(dragging, afterElement);
                 }
             });
+        }
+
+        function getDragAfterElement(container, y) {
+            const draggableElements = [...container.querySelectorAll('.page-section:not(.dragging)')];
+            
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
         }
 
         function addSection(type) {
@@ -698,6 +795,9 @@
             const templates = {
                 hero: `
                     <div class="section-content">
+                        <button class="drag-handle" draggable="true" title="Drag to reorder">
+                            <i class="fas fa-grip-vertical"></i>
+                        </button>
                         <div class="section-controls">
                             <button class="control-btn" onclick="editSection('${sectionId}')" title="Edit">
                                 <i class="fas fa-edit"></i>
@@ -715,6 +815,9 @@
                 `,
                 text: `
                     <div class="section-content">
+                        <button class="drag-handle" draggable="true" title="Drag to reorder">
+                            <i class="fas fa-grip-vertical"></i>
+                        </button>
                         <div class="section-controls">
                             <button class="control-btn" onclick="editSection('${sectionId}')" title="Edit">
                                 <i class="fas fa-edit"></i>
@@ -731,6 +834,9 @@
                 `,
                 features: `
                     <div class="section-content">
+                        <button class="drag-handle" draggable="true" title="Drag to reorder">
+                            <i class="fas fa-grip-vertical"></i>
+                        </button>
                         <div class="section-controls">
                             <button class="control-btn" onclick="editSection('${sectionId}')" title="Edit">
                                 <i class="fas fa-edit"></i>
@@ -903,16 +1009,31 @@
         function makeTextEditable(section) {
             const editableElements = section.querySelectorAll('.editable-text');
             editableElements.forEach(element => {
+                // Make element editable
+                element.contentEditable = true;
                 element.addEventListener('click', function() {
                     selectElement(this);
                 });
                 element.addEventListener('blur', function() {
                     deselectElement();
                 });
-                element.addEventListener('input', function() {
-                    // Auto-save functionality could be added here
+                element.addEventListener('focus', function() {
+                    selectElement(this);
                 });
             });
+
+            // Setup drag functionality for the section
+            const dragHandle = section.querySelector('.drag-handle');
+            if (dragHandle) {
+                dragHandle.addEventListener('dragstart', function(e) {
+                    section.classList.add('dragging');
+                });
+
+                dragHandle.addEventListener('dragend', function(e) {
+                    section.classList.remove('dragging');
+                    // No auto-save on reorder - only save when user clicks Save/Publish
+                });
+            }
         }
 
         function selectElement(element) {
@@ -1119,14 +1240,37 @@
 
         function savePage() {
             if (currentPage) {
+                // Update page data
                 currentPage.title = document.getElementById('settings-title').value || 'Untitled Page';
                 currentPage.content = document.getElementById('canvas-content').innerHTML;
+                currentPage.status = document.getElementById('settings-status').value;
                 
-                // In a real app, this would save to a database
-                localStorage.setItem(`page-${currentPage.id}`, JSON.stringify(currentPage));
+                // Create save data with proper structure
+                const saveData = {
+                    id: currentPage.id,
+                    title: currentPage.title,
+                    slug: currentPage.title.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-'),
+                    content: currentPage.content,
+                    template: currentPage.template || 'blank',
+                    status: currentPage.status,
+                    views: 0,
+                    published: currentPage.status === 'published',
+                    createdAt: currentPage.createdAt || new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
                 
-                showNotification('Page saved successfully!', 'success');
-                document.getElementById('page-title').textContent = currentPage.title;
+                // Save to localStorage with correct key format
+                try {
+                    localStorage.setItem(`page_${currentPage.id}`, JSON.stringify(saveData));
+                    showNotification('Page saved successfully!', 'success');
+                    document.getElementById('page-title').textContent = currentPage.title;
+                    
+                    // Update current page object
+                    currentPage.published = saveData.published;
+                } catch (error) {
+                    console.error('Error saving page:', error);
+                    showNotification('Error saving page. Please try again.', 'error');
+                }
             }
         }
 
@@ -1137,7 +1281,14 @@
 
         function publishPage() {
             if (currentPage) {
+                // Update status to published
                 currentPage.status = 'published';
+                currentPage.published = true;
+                
+                // Update UI
+                document.getElementById('settings-status').value = 'published';
+                
+                // Save the page with published status
                 savePage();
                 showNotification('Page published successfully!', 'success');
             }

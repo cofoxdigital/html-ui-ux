@@ -20,9 +20,12 @@ class FormListManager {
     }
 
     setupEventListeners() {
-        // Create new form button
-        document.getElementById('create-new-form').addEventListener('click', () => {
-            this.showCreateModal();
+        // Create new form buttons (there are multiple)
+        document.querySelectorAll('[onclick="createNewForm()"]').forEach(btn => {
+            btn.removeAttribute('onclick');
+            btn.addEventListener('click', () => {
+                this.showCreateModal();
+            });
         });
 
         // Modal close buttons
@@ -43,8 +46,9 @@ class FormListManager {
             this.hideDeleteModal();
         });
 
-        // Create form button
-        document.getElementById('create-form-btn').addEventListener('click', () => {
+        // Create form submission
+        document.getElementById('create-form-form').addEventListener('submit', (e) => {
+            e.preventDefault();
             this.createForm();
         });
 
@@ -94,68 +98,70 @@ class FormListManager {
             });
         });
 
+        // Initialize chatbot functionality (ensure it doesn't conflict with main script)
+        this.initializeChatbot();
+
         // Close modals when clicking outside
         window.addEventListener('click', (e) => {
-            if (e.target.classList.contains('modal')) {
+            if (e.target.classList.contains('modal-overlay')) {
                 e.target.style.display = 'none';
             }
         });
     }
 
     loadForms() {
-        // Sample form data - in a real app, this would come from an API
-        this.forms = [
-            {
-                id: 1,
-                name: 'Contact Us Form',
-                description: 'General contact form for client inquiries and support requests',
-                category: 'contact',
-                status: 'published',
-                created: '2025-01-15',
-                updated: '2025-01-20',
-                views: 247,
-                submissions: 89,
-                conversion: 36
-            },
-            {
-                id: 2,
-                name: 'Client Registration',
-                description: 'New client onboarding form with health assessment and goals',
-                category: 'registration',
-                status: 'published',
-                created: '2025-01-10',
-                updated: '2025-01-18',
-                views: 432,
-                submissions: 156,
-                conversion: 36
-            },
-            {
-                id: 3,
-                name: 'Client Satisfaction Survey',
-                description: 'Post-session feedback form to measure client satisfaction and improvement areas',
-                category: 'survey',
-                status: 'draft',
-                created: '2025-01-19',
-                updated: '2025-01-20',
-                views: 0,
-                submissions: 0,
-                conversion: 0
-            },
-            {
-                id: 4,
-                name: 'Health Assessment Form',
-                description: 'Comprehensive health and fitness assessment for new clients',
-                category: 'survey',
-                status: 'published',
-                created: '2025-01-08',
-                updated: '2025-01-16',
-                views: 568,
-                submissions: 347,
-                conversion: 61
+        // Load saved forms from localStorage
+        this.forms = [];
+        
+        // Get all localStorage keys that start with 'form_'
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith('form_') && !key.includes('_autosave')) {
+                try {
+                    const formData = JSON.parse(localStorage.getItem(key));
+                    if (formData && formData.id && formData.name) {
+                        // Convert form data to list format
+                        const listForm = {
+                            id: formData.id,
+                            name: formData.name,
+                            description: `Form with ${formData.elements ? formData.elements.length : 0} elements`,
+                            category: this.getCategoryFromElements(formData.elements || []),
+                            status: 'draft', // All saved forms are drafts since we removed auto-save
+                            created: formData.createdAt || formData.updatedAt || new Date().toISOString().split('T')[0],
+                            updated: formData.updatedAt ? formData.updatedAt.split('T')[0] : new Date().toISOString().split('T')[0],
+                            views: 0,
+                            submissions: 0,
+                            conversion: 0,
+                            elements: formData.elements || []
+                        };
+                        this.forms.push(listForm);
+                    }
+                } catch (error) {
+                    console.error('Error parsing form data:', error);
+                }
             }
-        ];
+        }
+
+        // Sort forms by updated date (newest first)
+        this.forms.sort((a, b) => new Date(b.updated) - new Date(a.updated));
 
         this.filteredForms = [...this.forms];
+    }
+
+    getCategoryFromElements(elements) {
+        // Determine category based on form elements
+        if (!elements || elements.length === 0) return 'other';
+        
+        const hasEmail = elements.some(el => el.type === 'email');
+        const hasPhone = elements.some(el => el.type === 'phone');
+        const hasRating = elements.some(el => el.type === 'rating');
+        const hasFile = elements.some(el => el.type === 'file');
+        
+        if (hasEmail && hasPhone) return 'contact';
+        if (hasRating) return 'survey';
+        if (hasFile) return 'registration';
+        
+        return 'other';
     }
 
     applyFilters() {
@@ -192,18 +198,29 @@ class FormListManager {
     renderForms() {
         const formsGrid = document.getElementById('forms-grid');
         
+        // Update statistics
+        this.updateStatistics();
+        
         if (this.filteredForms.length === 0) {
             formsGrid.innerHTML = `
                 <div class="no-forms">
                     <i class="fas fa-file-alt"></i>
                     <h3>No forms found</h3>
                     <p>Try adjusting your filters or create a new form to get started.</p>
-                    <button class="btn btn-primary" onclick="document.getElementById('create-new-form').click()">
+                    <button class="btn btn-primary create-new-form-btn">
                         <i class="fas fa-plus"></i>
                         Create New Form
                     </button>
                 </div>
             `;
+            
+            // Add event listener to the dynamically created button
+            const createBtn = formsGrid.querySelector('.create-new-form-btn');
+            if (createBtn) {
+                createBtn.addEventListener('click', () => {
+                    this.showCreateModal();
+                });
+            }
             return;
         }
 
@@ -211,6 +228,32 @@ class FormListManager {
         
         // Add event listeners to form cards
         this.attachFormCardListeners();
+    }
+
+    updateStatistics() {
+        // Calculate statistics from actual forms data
+        const totalForms = this.forms.length;
+        const totalViews = this.forms.reduce((sum, form) => sum + (form.views || 0), 0);
+        const totalSubmissions = this.forms.reduce((sum, form) => sum + (form.submissions || 0), 0);
+        const avgConversion = totalViews > 0 ? ((totalSubmissions / totalViews) * 100).toFixed(1) : 0;
+
+        // Update the stat cards
+        const statCards = document.querySelectorAll('.stat-card');
+        if (statCards.length >= 4) {
+            statCards[0].querySelector('h3').textContent = totalForms;
+            statCards[1].querySelector('h3').textContent = this.formatNumber(totalViews);
+            statCards[2].querySelector('h3').textContent = this.formatNumber(totalSubmissions);
+            statCards[3].querySelector('h3').textContent = `${avgConversion}%`;
+        }
+    }
+
+    formatNumber(num) {
+        if (num >= 1000000) {
+            return (num / 1000000).toFixed(1) + 'M';
+        } else if (num >= 1000) {
+            return (num / 1000).toFixed(1) + 'K';
+        }
+        return num.toString();
     }
 
     renderFormCard(form) {
@@ -445,9 +488,10 @@ class FormListManager {
     duplicateForm(formId) {
         const form = this.forms.find(f => f.id == formId);
         if (form) {
+            const newId = Date.now();
             const duplicatedForm = {
                 ...form,
-                id: Date.now(),
+                id: newId,
                 name: `${form.name} (Copy)`,
                 status: 'draft',
                 created: new Date().toISOString().split('T')[0],
@@ -457,6 +501,19 @@ class FormListManager {
                 conversion: 0
             };
 
+            // Save duplicated form to localStorage
+            const formData = {
+                id: newId,
+                name: duplicatedForm.name,
+                elements: form.elements || [],
+                settings: {
+                    theme: 'default',
+                    primaryColor: '#4F46E5'
+                },
+                updatedAt: new Date().toISOString()
+            };
+            localStorage.setItem(`form_${newId}`, JSON.stringify(formData));
+
             this.forms.unshift(duplicatedForm);
             this.applyFilters();
         }
@@ -464,6 +521,11 @@ class FormListManager {
 
     deleteForm() {
         const formId = document.getElementById('confirm-delete').dataset.formId;
+        
+        // Remove from localStorage
+        localStorage.removeItem(`form_${formId}`);
+        
+        // Remove from forms array
         this.forms = this.forms.filter(f => f.id != formId);
         this.hideDeleteModal();
         this.applyFilters();
@@ -472,6 +534,115 @@ class FormListManager {
     previewForm(formId) {
         // In a real app, this would open a preview modal or new window
         alert(`Preview form ${formId} - This would open a preview of the form`);
+    }
+
+    initializeChatbot() {
+        const chatbot = document.getElementById('chatbot');
+        const chatbotToggle = document.getElementById('chatbot-toggle');
+        const chatbotBody = document.getElementById('chatbot-body');
+        const chatbotMessages = document.getElementById('chatbot-messages');
+        const chatbotInput = document.getElementById('chatbot-input');
+        const chatbotSend = document.getElementById('chatbot-send');
+        
+        if (!chatbot || !chatbotToggle || !chatbotBody || !chatbotMessages || !chatbotInput || !chatbotSend) {
+            return; // Elements not found, skip initialization
+        }
+        
+        let isCollapsed = false;
+        
+        // Toggle chatbot
+        chatbotToggle.addEventListener('click', function() {
+            isCollapsed = !isCollapsed;
+            if (isCollapsed) {
+                chatbotBody.classList.add('collapsed');
+                this.innerHTML = '<i class="fas fa-plus"></i>';
+            } else {
+                chatbotBody.classList.remove('collapsed');
+                this.innerHTML = '<i class="fas fa-minus"></i>';
+            }
+        });
+        
+        // Send message function
+        const sendMessage = () => {
+            const message = chatbotInput.value.trim();
+            if (!message) return;
+            
+            // Add user message
+            this.addChatMessage(message, 'user');
+            chatbotInput.value = '';
+            
+            // Simulate AI response
+            setTimeout(() => {
+                const response = this.generateFormAIResponse(message);
+                this.addChatMessage(response, 'bot');
+            }, 1000);
+        };
+        
+        // Event listeners
+        chatbotSend.addEventListener('click', sendMessage);
+        chatbotInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    }
+    
+    // Add message to chat
+    addChatMessage(text, sender) {
+        const chatbotMessages = document.getElementById('chatbot-messages');
+        if (!chatbotMessages) return;
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${sender}-message`;
+        
+        const avatar = document.createElement('div');
+        avatar.className = 'message-avatar';
+        avatar.innerHTML = sender === 'bot' ? '<i class="fas fa-robot"></i>' : '<i class="fas fa-user"></i>';
+        
+        const content = document.createElement('div');
+        content.className = 'message-content';
+        content.innerHTML = `<p>${text}</p>`;
+        
+        messageDiv.appendChild(avatar);
+        messageDiv.appendChild(content);
+        
+        chatbotMessages.appendChild(messageDiv);
+        chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+    }
+    
+    // AI Response Generator for Form Builder
+    generateFormAIResponse(userMessage) {
+        const message = userMessage.toLowerCase();
+        
+        if (message.includes('create') || message.includes('new form')) {
+            return "To create a new form, click the 'Create New Form' button. You can choose from templates like Contact Form, Registration Form, or Survey Form, or start with a blank form for complete customization.";
+        }
+        
+        if (message.includes('template')) {
+            return "We offer several form templates: Contact Form (name, email, message), Registration Form (personal details), Survey Form (multiple question types), and Blank Form for custom designs. Each template provides a great starting point!";
+        }
+        
+        if (message.includes('edit') || message.includes('modify')) {
+            return "To edit a form, click the 'Edit' button on any form card. This will open the Form Builder where you can add fields, customize styling, set validation rules, and configure form settings.";
+        }
+        
+        if (message.includes('duplicate') || message.includes('copy')) {
+            return "You can duplicate any form by clicking the 'Duplicate' button. This creates an exact copy that you can then modify without affecting the original form.";
+        }
+        
+        if (message.includes('analytics') || message.includes('stats')) {
+            return "Form analytics show views, submissions, and conversion rates. Click the analytics icon on any form card to see detailed performance metrics and submission data.";
+        }
+        
+        if (message.includes('publish') || message.includes('share')) {
+            return "Once your form is ready, you can publish it to get a shareable link. Published forms can be embedded on websites or shared directly with your audience.";
+        }
+        
+        if (message.includes('field') || message.includes('element')) {
+            return "The Form Builder supports various field types: text inputs, dropdowns, checkboxes, radio buttons, file uploads, date pickers, and more. You can drag and drop elements to build your form.";
+        }
+        
+        return "I can help you with form creation, editing, templates, analytics, and publishing. What specific aspect of form building would you like assistance with?";
     }
 }
 

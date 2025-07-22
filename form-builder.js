@@ -130,14 +130,12 @@ class FormBuilder {
     }
 
     initializeDragAndDrop() {
-        // Setup drag from sidebar
+        // Setup click to add functionality for sidebar elements
         document.querySelectorAll('.form-element').forEach(element => {
-            element.addEventListener('dragstart', (e) => {
-                e.dataTransfer.setData('text/plain', element.dataset.type);
-                e.dataTransfer.setData('source', 'sidebar');
-            });
-
-            // Add click to add functionality for easier use
+            // Remove draggable attribute to disable dragging
+            element.draggable = false;
+            
+            // Add click to add functionality
             element.addEventListener('click', (e) => {
                 e.preventDefault();
                 const elementType = element.dataset.type;
@@ -147,30 +145,7 @@ class FormBuilder {
             });
         });
 
-        // Setup drop zone for new elements
-        const formFields = document.getElementById('form-fields');
-        formFields.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            formFields.classList.add('drag-over');
-        });
-
-        formFields.addEventListener('dragleave', (e) => {
-            if (!formFields.contains(e.relatedTarget)) {
-                formFields.classList.remove('drag-over');
-            }
-        });
-
-        formFields.addEventListener('drop', (e) => {
-            e.preventDefault();
-            formFields.classList.remove('drag-over');
-            
-            const elementType = e.dataTransfer.getData('text/plain');
-            if (elementType) {
-                this.addFormElement(elementType);
-            }
-        });
-
-        // Initialize sortable after form is rendered
+        // Initialize sortable for reordering existing elements
         this.initializeSortable();
     }
 
@@ -189,7 +164,7 @@ class FormBuilder {
                 ghostClass: 'sortable-ghost',
                 chosenClass: 'sortable-chosen',
                 dragClass: 'sortable-drag',
-                handle: '.form-field-wrapper', // Allow dragging by the wrapper
+                handle: '.drag-handle', // Use specific drag handle
                 onUpdate: (evt) => {
                     this.reorderElements(evt.oldIndex, evt.newIndex);
                 }
@@ -415,7 +390,7 @@ class FormBuilder {
                 <div class="empty-form-message">
                     <i class="fas fa-mouse-pointer"></i>
                     <h3>Start Building Your Form</h3>
-                    <p>Drag and drop elements from the left sidebar to create your form</p>
+                    <p>Click on elements from the left sidebar to add them to your form</p>
                 </div>
             `;
             // Destroy sortable when no elements
@@ -566,6 +541,9 @@ class FormBuilder {
             case 'heading':
                 return `
                     <div class="form-field-wrapper heading-wrapper" data-element-id="${element.id}">
+                        <div class="drag-handle" title="Drag to reorder">
+                            <i class="fas fa-grip-vertical"></i>
+                        </div>
                         <${element.level} class="form-heading ${element.cssClass}" 
                                           style="text-align: ${element.alignment}">
                             ${element.text}
@@ -581,6 +559,9 @@ class FormBuilder {
             case 'paragraph':
                 return `
                     <div class="form-field-wrapper paragraph-wrapper" data-element-id="${element.id}">
+                        <div class="drag-handle" title="Drag to reorder">
+                            <i class="fas fa-grip-vertical"></i>
+                        </div>
                         <p class="form-paragraph ${element.cssClass}" 
                            style="text-align: ${element.alignment}">
                             ${element.text}
@@ -596,6 +577,9 @@ class FormBuilder {
             case 'divider':
                 return `
                     <div class="form-field-wrapper divider-wrapper" data-element-id="${element.id}">
+                        <div class="drag-handle" title="Drag to reorder">
+                            <i class="fas fa-grip-vertical"></i>
+                        </div>
                         <hr class="form-divider ${element.cssClass}" 
                             style="border-style: ${element.style}; 
                                    border-width: ${element.thickness}; 
@@ -612,6 +596,9 @@ class FormBuilder {
             case 'spacer':
                 return `
                     <div class="form-field-wrapper spacer-wrapper" data-element-id="${element.id}">
+                        <div class="drag-handle" title="Drag to reorder">
+                            <i class="fas fa-grip-vertical"></i>
+                        </div>
                         <div class="form-spacer ${element.cssClass}" 
                              style="height: ${element.height}; background: transparent;">
                             <div class="spacer-indicator">Spacer (${element.height})</div>
@@ -627,6 +614,9 @@ class FormBuilder {
 
         return `
             <div class="form-field-wrapper" data-element-id="${element.id}">
+                <div class="drag-handle" title="Drag to reorder">
+                    <i class="fas fa-grip-vertical"></i>
+                </div>
                 <div class="form-field">
                     ${element.label ? `<label class="form-label">${element.label}${element.required ? ' *' : ''}</label>` : ''}
                     ${fieldHtml}
@@ -719,8 +709,8 @@ class FormBuilder {
                     <div class="form-group">
                         <label>Required</label>
                         <div class="toggle-switch">
-                            <input type="checkbox" ${element.required ? 'checked' : ''} data-property="required">
-                            <label></label>
+                            <input type="checkbox" id="required-${element.id}" ${element.required ? 'checked' : ''} data-property="required">
+                            <label for="required-${element.id}"></label>
                         </div>
                     </div>
                 `;
@@ -805,22 +795,18 @@ class FormBuilder {
         
         // Text inputs and textareas
         propertiesContent.querySelectorAll('input[data-property], textarea[data-property], select[data-property]').forEach(input => {
-            input.addEventListener('input', (e) => {
-                const property = e.target.dataset.property;
-                let value = e.target.value;
-                
-                if (e.target.type === 'checkbox') {
-                    value = e.target.checked;
-                }
-                
-                this.updateElementProperty(property, value);
-            });
-
-            // Add change event for checkboxes (required for toggle switches)
+            // For checkboxes (toggle switches), use change event
             if (input.type === 'checkbox') {
                 input.addEventListener('change', (e) => {
                     const property = e.target.dataset.property;
                     const value = e.target.checked;
+                    this.updateElementProperty(property, value);
+                });
+            } else {
+                // For other inputs, use input event
+                input.addEventListener('input', (e) => {
+                    const property = e.target.dataset.property;
+                    const value = e.target.value;
                     this.updateElementProperty(property, value);
                 });
             }
@@ -851,7 +837,7 @@ class FormBuilder {
         if (this.selectedElement) {
             this.selectedElement[property] = value;
             this.renderForm();
-            this.selectElement(this.selectedElement.id); // Maintain selection
+            this.selectElementWithoutPropertiesUpdate(this.selectedElement.id); // Maintain selection without re-rendering properties
         }
     }
 
