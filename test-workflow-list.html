@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Workflow List</title>
+    <link rel="stylesheet" href="./styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Copy the workflow-specific styles from workflow-list.html */
+        .workflows-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .workflow-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .workflow-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        .no-workflows {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+            grid-column: 1 / -1;
+        }
+
+        .no-workflows i {
+            font-size: 64px;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+
+        .no-workflows h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+
+        .no-workflows p {
+            margin: 0 0 30px 0;
+        }
+
+        .no-workflows .create-new-workflow-btn {
+            padding: 12px 24px;
+            font-size: 14px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            max-width: 200px;
+        }
+
+        .no-workflows .create-new-workflow-btn i {
+            font-size: 14px;
+            margin-bottom: 0;
+            color: white;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: #333;
+            font-size: 24px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #666;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .modal-body {
+            padding: 30px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .template-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .template-option {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .template-option:hover,
+        .template-option.active {
+            border-color: #667eea;
+            background: #f8f7ff;
+        }
+
+        .template-option i {
+            font-size: 32px;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .template-option h4 {
+            margin: 0 0 8px 0;
+            color: #333;
+        }
+
+        .template-option p {
+            margin: 0;
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center; margin: 40px 0;">Test Workflow List</h1>
+    
+    <div style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+        <div class="workflows-grid" id="workflows-grid">
+            <div class="no-workflows">
+                <i class="fas fa-project-diagram"></i>
+                <h3>No workflows yet</h3>
+                <p>Create your first workflow to automate processes across your pages, forms, and widgets.</p>
+                <button class="btn btn-primary create-new-workflow-btn" onclick="createNewWorkflow()">
+                    <i class="fas fa-plus"></i> Create Your First Workflow
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for creating new workflow -->
+    <div class="modal-overlay" id="create-workflow-modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create New Workflow</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="create-workflow-form">
+                    <div class="form-group">
+                        <label>Workflow Name</label>
+                        <input type="text" id="workflow-name" placeholder="Enter workflow name..." required>
+                    </div>
+                    <div class="form-group">
+                        <label>Workflow Description</label>
+                        <textarea id="workflow-description" placeholder="Brief description of the workflow purpose..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select id="workflow-category">
+                            <option value="other">Other</option>
+                            <option value="automation">Automation</option>
+                            <option value="integration">Integration</option>
+                            <option value="notification">Notification</option>
+                            <option value="data-processing">Data Processing</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Choose Template</label>
+                        <div class="template-options">
+                            <div class="template-option active" data-template="blank">
+                                <i class="fas fa-file-alt"></i>
+                                <h4>Blank Workflow</h4>
+                                <p>Start with a completely blank workflow</p>
+                            </div>
+                            <div class="template-option" data-template="form-submission">
+                                <i class="fas fa-wpforms"></i>
+                                <h4>Form Submission</h4>
+                                <p>Process form submissions and send notifications</p>
+                            </div>
+                            <div class="template-option" data-template="user-onboarding">
+                                <i class="fas fa-user-plus"></i>
+                                <h4>User Onboarding</h4>
+                                <p>Automate new user registration and setup</p>
+                            </div>
+                            <div class="template-option" data-template="data-sync">
+                                <i class="fas fa-sync"></i>
+                                <h4>Data Sync</h4>
+                                <p>Sync data between different systems</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Create Workflow</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function createNewWorkflow() {
+            const modal = document.getElementById('create-workflow-modal');
+            modal.style.display = 'flex';
+            
+            // Set up template selection
+            const templateOptions = modal.querySelectorAll('.template-option');
+            templateOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    templateOptions.forEach(opt => opt.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+        }
+        
+        function closeModal() {
+            const modal = document.getElementById('create-workflow-modal');
+            modal.style.display = 'none';
+        }
+        
+        // Handle form submission
+        document.getElementById('create-workflow-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Workflow created successfully!');
+            closeModal();
+        });
+    </script>
+</body>
+</html>

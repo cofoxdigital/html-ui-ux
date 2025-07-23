@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Viewer - Phoenix Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        /* Loading State */
+        .loading-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e2e8f0;
+            border-top-color: #4f46e5;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Error State */
+        .error-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .error-content {
+            text-align: center;
+            max-width: 500px;
+        }
+
+        .error-icon {
+            font-size: 64px;
+            color: #ef4444;
+            margin-bottom: 24px;
+        }
+
+        .error-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 12px;
+        }
+
+        .error-message {
+            font-size: 16px;
+            color: #64748b;
+            margin-bottom: 32px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background: #4338ca;
+        }
+
+        /* Page Container */
+        .page-container {
+            width: 100%;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Widget Styles */
+        .widget-container {
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .widget-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #1e293b;
+        }
+
+        /* Form Styles */
+        .form-container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .form-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #1e293b;
+        }
+
+        .form-description {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-checkbox-group,
+        .form-radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .form-checkbox-label,
+        .form-radio-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .form-submit {
+            background: #4f46e5;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .form-submit:hover {
+            background: #4338ca;
+        }
+
+        /* Responsive Grid */
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: -10px;
+        }
+
+        .col {
+            padding: 10px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .col-1 { flex: 0 0 8.333%; max-width: 8.333%; }
+        .col-2 { flex: 0 0 16.667%; max-width: 16.667%; }
+        .col-3 { flex: 0 0 25%; max-width: 25%; }
+        .col-4 { flex: 0 0 33.333%; max-width: 33.333%; }
+        .col-5 { flex: 0 0 41.667%; max-width: 41.667%; }
+        .col-6 { flex: 0 0 50%; max-width: 50%; }
+        .col-7 { flex: 0 0 58.333%; max-width: 58.333%; }
+        .col-8 { flex: 0 0 66.667%; max-width: 66.667%; }
+        .col-9 { flex: 0 0 75%; max-width: 75%; }
+        .col-10 { flex: 0 0 83.333%; max-width: 83.333%; }
+        .col-11 { flex: 0 0 91.667%; max-width: 91.667%; }
+        .col-12 { flex: 0 0 100%; max-width: 100%; }
+
+        @media (max-width: 768px) {
+            .col {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+        }
+
+        /* Section Styles */
+        .section {
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Text Elements */
+        h1 { font-size: 36px; font-weight: 700; margin-bottom: 20px; }
+        h2 { font-size: 30px; font-weight: 600; margin-bottom: 18px; }
+        h3 { font-size: 24px; font-weight: 600; margin-bottom: 16px; }
+        h4 { font-size: 20px; font-weight: 500; margin-bottom: 14px; }
+        h5 { font-size: 18px; font-weight: 500; margin-bottom: 12px; }
+        h6 { font-size: 16px; font-weight: 500; margin-bottom: 10px; }
+
+        p { margin-bottom: 16px; }
+
+        /* Button Elements */
+        .button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .button:hover {
+            background: #4338ca;
+            transform: translateY(-1px);
+        }
+
+        .button-secondary {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .button-secondary:hover {
+            background: #e2e8f0;
+            color: #475569;
+        }
+
+        /* Image Styles */
+        .image {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Divider */
+        .divider {
+            height: 1px;
+            background: #e2e8f0;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Preview Mode Banner -->
+    <div id="preview-banner" style="display: none; position: fixed; top: 0; left: 0; right: 0; background: #4f46e5; color: white; padding: 10px 20px; z-index: 9999; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <div style="max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <i class="fas fa-eye"></i>
+                <span style="font-weight: 500;">Workflow Preview Mode</span>
+                <span id="preview-info" style="font-size: 14px; opacity: 0.9;"></span>
+            </div>
+            <button onclick="exitPreview()" style="background: white; color: #4f46e5; border: none; padding: 6px 16px; border-radius: 4px; font-size: 14px; cursor: pointer; font-weight: 500;">
+                Exit Preview
+            </button>
+        </div>
+    </div>
+    
+    <div id="app" style="transition: margin-top 0.3s;">
+        <!-- Loading State -->
+        <div class="loading-container" id="loading">
+            <div class="spinner"></div>
+            <p>Loading page...</p>
+        </div>
+
+        <!-- Error State -->
+        <div class="error-container" id="error" style="display: none;">
+            <div class="error-content">
+                <i class="fas fa-exclamation-circle error-icon"></i>
+                <h1 class="error-title">Page Not Found</h1>
+                <p class="error-message" id="error-message">The page you're looking for doesn't exist or has been removed.</p>
+                <a href="pages.html" class="btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Pages
+                </a>
+            </div>
+        </div>
+
+        <!-- Page Content -->
+        <div id="page-content" style="display: none;"></div>
+    </div>
+
+    <!-- Always load workflow engine for form submissions -->
+    <script src="workflow-engine.js"></script>
+    
+    <script>
+        // Get page ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const pageId = urlParams.get('id');
+        const isPreview = urlParams.get('preview') === 'true';
+
+        // Elements
+        const loadingEl = document.getElementById('loading');
+        const errorEl = document.getElementById('error');
+        const errorMessageEl = document.getElementById('error-message');
+        const pageContentEl = document.getElementById('page-content');
+        const previewBanner = document.getElementById('preview-banner');
+        const previewInfo = document.getElementById('preview-info');
+        const appEl = document.getElementById('app');
+
+        // Check preview mode
+        if (isPreview) {
+            setupPreviewMode();
+        }
+
+        function setupPreviewMode() {
+            // Show preview banner
+            previewBanner.style.display = 'block';
+            appEl.style.marginTop = '50px';
+
+            // Get preview workflow from sessionStorage
+            const previewWorkflow = JSON.parse(sessionStorage.getItem('previewWorkflow') || '{}');
+            
+            if (previewWorkflow.name) {
+                previewInfo.textContent = `Testing workflow: ${previewWorkflow.name}`;
+            }
+
+            // Wait for workflow engine to be ready
+            function registerPreviewWorkflow() {
+                if (window.workflowEngine) {
+                    // Enable debug mode for preview
+                    window.workflowEngine.debugMode = true;
+                    
+                    // Register preview workflow
+                    if (previewWorkflow.id) {
+                        window.workflowEngine.registerWorkflow(previewWorkflow);
+                        console.log('Preview workflow registered:', previewWorkflow.name);
+                        console.log('Workflow nodes:', previewWorkflow.nodes);
+                        console.log('Event listeners:', Array.from(window.workflowEngine.eventListeners.keys()));
+                    }
+                } else {
+                    // Retry after a short delay
+                    setTimeout(registerPreviewWorkflow, 100);
+                }
+            }
+            
+            // Start registration process
+            registerPreviewWorkflow();
+        }
+
+        function exitPreview() {
+            // Clear preview data
+            sessionStorage.removeItem('previewWorkflow');
+            sessionStorage.removeItem('previewMode');
+            
+            // Close the tab/window
+            window.close();
+            
+            // If window.close() doesn't work (e.g., not opened by script), redirect
+            setTimeout(() => {
+                window.location.href = 'workflow-builder.html';
+            }, 100);
+        }
+
+        // Load page
+        async function loadPage() {
+            if (!pageId) {
+                showError('No page ID provided');
+                return;
+            }
+
+            try {
+                // Get page from localStorage using the correct key format
+                const pageData = localStorage.getItem(`page_${pageId}`);
+                
+                if (!pageData) {
+                    showError('Page not found');
+                    return;
+                }
+                
+                const page = JSON.parse(pageData);
+                
+                // Check if page is published
+                if (!page.published && page.status !== 'published') {
+                    showError('This page is not published yet');
+                    return;
+                }
+
+                // Set page title
+                document.title = page.title + ' - Phoenix Platform';
+
+                // Render page content
+                renderPage(page);
+
+                // Initialize workflows for this page
+                initializePageWorkflows(page);
+
+                // Hide loading, show content
+                loadingEl.style.display = 'none';
+                pageContentEl.style.display = 'block';
+
+            } catch (error) {
+                console.error('Error loading page:', error);
+                showError('Error loading page');
+            }
+        }
+
+        function showError(message) {
+            loadingEl.style.display = 'none';
+            errorMessageEl.textContent = message;
+            errorEl.style.display = 'flex';
+        }
+
+        function renderPage(page) {
+            // Clear existing content
+            pageContentEl.innerHTML = '';
+
+            // Create page container
+            const pageContainer = document.createElement('div');
+            pageContainer.className = 'page-container';
+            pageContainer.style.backgroundColor = page.settings?.backgroundColor || '#ffffff';
+            pageContainer.style.minHeight = '100vh';
+
+            // Check if page has direct HTML content (from page editor)
+            if (page.content) {
+                // Render the saved HTML content directly
+                pageContainer.innerHTML = page.content;
+                
+                // Process forms in the page
+                processPageForms(pageContainer);
+            } else if (page.sections) {
+                // Fallback to section-based rendering if available
+                page.sections.forEach(section => {
+                    const sectionEl = renderSection(section);
+                    pageContainer.appendChild(sectionEl);
+                });
+            }
+
+            pageContentEl.appendChild(pageContainer);
+        }
+
+        function renderSection(section) {
+            const sectionEl = document.createElement('div');
+            sectionEl.className = 'section';
+            sectionEl.style.backgroundColor = section.backgroundColor || 'transparent';
+            sectionEl.style.padding = section.padding || '40px 20px';
+
+            const container = document.createElement('div');
+            container.className = 'container';
+
+            // Render rows
+            section.rows.forEach(row => {
+                const rowEl = renderRow(row);
+                container.appendChild(rowEl);
+            });
+
+            sectionEl.appendChild(container);
+            return sectionEl;
+        }
+
+        function renderRow(row) {
+            const rowEl = document.createElement('div');
+            rowEl.className = 'row';
+
+            // Render columns
+            row.columns.forEach(column => {
+                const colEl = renderColumn(column);
+                rowEl.appendChild(colEl);
+            });
+
+            return rowEl;
+        }
+
+        function renderColumn(column) {
+            const colEl = document.createElement('div');
+            colEl.className = `col col-${column.width}`;
+
+            // Render elements
+            column.elements.forEach(element => {
+                const elementEl = renderElement(element);
+                if (elementEl) {
+                    colEl.appendChild(elementEl);
+                }
+            });
+
+            return colEl;
+        }
+
+        function renderElement(element) {
+            switch (element.type) {
+                case 'text':
+                    return renderTextElement(element);
+                case 'heading':
+                    return renderHeadingElement(element);
+                case 'button':
+                    return renderButtonElement(element);
+                case 'image':
+                    return renderImageElement(element);
+                case 'form':
+                    return renderFormElement(element);
+                case 'widget':
+                    return renderWidgetElement(element);
+                case 'divider':
+                    return renderDividerElement(element);
+                default:
+                    console.warn('Unknown element type:', element.type);
+                    return null;
+            }
+        }
+
+        function renderTextElement(element) {
+            const p = document.createElement('p');
+            p.textContent = element.content || 'Lorem ipsum dolor sit amet...';
+            p.style.fontSize = element.fontSize || '16px';
+            p.style.color = element.color || '#1e293b';
+            p.style.textAlign = element.align || 'left';
+            return p;
+        }
+
+        function renderHeadingElement(element) {
+            const tag = element.level || 'h2';
+            const heading = document.createElement(tag);
+            heading.textContent = element.content || 'Heading';
+            heading.style.color = element.color || '#1e293b';
+            heading.style.textAlign = element.align || 'left';
+            return heading;
+        }
+
+        function renderButtonElement(element) {
+            const button = document.createElement('button');
+            button.className = element.variant === 'secondary' ? 'button button-secondary' : 'button';
+            button.textContent = element.text || 'Button';
+            button.id = element.id || `button-${Date.now()}`;
+            
+            if (element.action === 'link' && element.url) {
+                button.onclick = () => window.location.href = element.url;
+            }
+            
+            return button;
+        }
+
+        function renderImageElement(element) {
+            const img = document.createElement('img');
+            img.className = 'image';
+            img.src = element.src || 'https://via.placeholder.com/600x400';
+            img.alt = element.alt || 'Image';
+            return img;
+        }
+
+        function renderFormElement(element) {
+            const container = document.createElement('div');
+            container.className = 'form-container';
+            container.id = `form-${element.formId}`;
+
+            // Get form from localStorage
+            const forms = JSON.parse(localStorage.getItem('forms') || '[]');
+            const form = forms.find(f => f.id === element.formId);
+
+            if (!form) {
+                container.innerHTML = '<p>Form not found</p>';
+                return container;
+            }
+
+            // Render form
+            const formEl = document.createElement('form');
+            formEl.id = `form-element-${form.id}`;
+            formEl.dataset.formId = form.id;
+            
+            if (form.title) {
+                const title = document.createElement('h2');
+                title.className = 'form-title';
+                title.textContent = form.title;
+                formEl.appendChild(title);
+            }
+
+            if (form.description) {
+                const desc = document.createElement('p');
+                desc.className = 'form-description';
+                desc.textContent = form.description;
+                formEl.appendChild(desc);
+            }
+
+            // Render form fields
+            form.fields.forEach(field => {
+                const fieldEl = renderFormField(field);
+                formEl.appendChild(fieldEl);
+            });
+
+            // Submit button
+            const submitBtn = document.createElement('button');
+            submitBtn.type = 'submit';
+            submitBtn.className = 'form-submit';
+            submitBtn.textContent = form.submitText || 'Submit';
+            formEl.appendChild(submitBtn);
+
+            // Handle form submission
+            formEl.onsubmit = (e) => {
+                e.preventDefault();
+                const formData = new FormData(formEl);
+                const data = Object.fromEntries(formData);
+                
+                // Trigger form submit event for workflows
+                window.dispatchEvent(new CustomEvent('formSubmit', {
+                    detail: { formId: form.id, data }
+                }));
+            };
+
+            container.appendChild(formEl);
+            return container;
+        }
+
+        function renderFormField(field) {
+            const group = document.createElement('div');
+            group.className = 'form-group';
+
+            const label = document.createElement('label');
+            label.className = 'form-label';
+            label.textContent = field.label;
+            label.htmlFor = field.id;
+            group.appendChild(label);
+
+            switch (field.type) {
+                case 'text':
+                case 'email':
+                case 'password':
+                case 'number':
+                case 'tel':
+                case 'url':
+                    const input = document.createElement('input');
+                    input.type = field.type;
+                    input.id = field.id;
+                    input.name = field.id;
+                    input.className = 'form-input';
+                    input.placeholder = field.placeholder || '';
+                    input.required = field.required || false;
+                    group.appendChild(input);
+                    break;
+
+                case 'textarea':
+                    const textarea = document.createElement('textarea');
+                    textarea.id = field.id;
+                    textarea.name = field.id;
+                    textarea.className = 'form-textarea';
+                    textarea.placeholder = field.placeholder || '';
+                    textarea.required = field.required || false;
+                    group.appendChild(textarea);
+                    break;
+
+                case 'select':
+                    const select = document.createElement('select');
+                    select.id = field.id;
+                    select.name = field.id;
+                    select.className = 'form-select';
+                    select.required = field.required || false;
+                    
+                    field.options?.forEach(option => {
+                        const optionEl = document.createElement('option');
+                        optionEl.value = option.value;
+                        optionEl.textContent = option.label;
+                        select.appendChild(optionEl);
+                    });
+                    
+                    group.appendChild(select);
+                    break;
+
+                case 'checkbox':
+                    const checkboxGroup = document.createElement('div');
+                    checkboxGroup.className = 'form-checkbox-group';
+                    
+                    field.options?.forEach(option => {
+                        const label = document.createElement('label');
+                        label.className = 'form-checkbox-label';
+                        
+                        const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.name = field.id;
+                        checkbox.value = option.value;
+                        
+                        label.appendChild(checkbox);
+                        label.appendChild(document.createTextNode(option.label));
+                        checkboxGroup.appendChild(label);
+                    });
+                    
+                    group.appendChild(checkboxGroup);
+                    break;
+
+                case 'radio':
+                    const radioGroup = document.createElement('div');
+                    radioGroup.className = 'form-radio-group';
+                    
+                    field.options?.forEach(option => {
+                        const label = document.createElement('label');
+                        label.className = 'form-radio-label';
+                        
+                        const radio = document.createElement('input');
+                        radio.type = 'radio';
+                        radio.name = field.id;
+                        radio.value = option.value;
+                        
+                        label.appendChild(radio);
+                        label.appendChild(document.createTextNode(option.label));
+                        radioGroup.appendChild(label);
+                    });
+                    
+                    group.appendChild(radioGroup);
+                    break;
+            }
+
+            return group;
+        }
+
+        function renderWidgetElement(element) {
+            const container = document.createElement('div');
+            container.className = 'widget-container';
+            container.id = `widget-${element.widgetId}`;
+
+            // Get widget from localStorage
+            const widgets = JSON.parse(localStorage.getItem('widgets') || '[]');
+            const widget = widgets.find(w => w.id === element.widgetId);
+
+            if (!widget) {
+                container.innerHTML = '<p>Widget not found</p>';
+                return container;
+            }
+
+            // Render widget based on type
+            if (widget.title) {
+                const title = document.createElement('h3');
+                title.className = 'widget-title';
+                title.textContent = widget.title;
+                container.appendChild(title);
+            }
+
+            // Create widget content based on type
+            const content = document.createElement('div');
+            content.innerHTML = `<p>Widget: ${widget.type}</p>`;
+            container.appendChild(content);
+
+            // Initialize widget with data
+            if (widget.dataSource) {
+                // Fetch and display data
+                content.innerHTML += `<p>Data source: ${widget.dataSource}</p>`;
+            }
+
+            return container;
+        }
+
+        function renderDividerElement(element) {
+            const divider = document.createElement('div');
+            divider.className = 'divider';
+            divider.style.margin = element.spacing || '20px 0';
+            return divider;
+        }
+
+        function initializePageWorkflows(page) {
+            // Get workflows from localStorage
+            const workflows = JSON.parse(localStorage.getItem('publishedWorkflows') || '[]');
+            
+            // Filter workflows for this page
+            const pageWorkflows = workflows.filter(w => {
+                return w.nodes.some(node => 
+                    node.type === 'trigger' && 
+                    node.data.subtype === 'page_load' &&
+                    node.data.pageId === page.id
+                );
+            });
+
+            // Initialize each workflow
+            pageWorkflows.forEach(workflow => {
+                console.log('Initializing workflow:', workflow.name);
+                // Workflow execution will be handled by the workflow engine
+            });
+        }
+
+        // Add notification styles and function
+        const notificationStyles = document.createElement('style');
+        notificationStyles.textContent = `
+            .notification {
+                position: fixed;
+                top: 70px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 4px;
+                background: white;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                transform: translateX(400px);
+                transition: transform 0.3s ease;
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            
+            .notification.show {
+                transform: translateX(0);
+            }
+            
+            .notification.success {
+                background: #d4edda;
+                color: #155724;
+                border: 1px solid #c3e6cb;
+            }
+            
+            .notification.error {
+                background: #f8d7da;
+                color: #721c24;
+                border: 1px solid #f5c6cb;
+            }
+            
+            .notification.info {
+                background: #d1ecf1;
+                color: #0c5460;
+                border: 1px solid #bee5eb;
+            }
+            
+            .notification.warning {
+                background: #fff3cd;
+                color: #856404;
+                border: 1px solid #ffeaa7;
+            }
+        `;
+        document.head.appendChild(notificationStyles);
+        
+        function showNotification(message, type = 'info', duration = 3000) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 100);
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, duration);
+        }
+
+        // Load and register workflows
+        function loadWorkflows() {
+            const workflows = JSON.parse(localStorage.getItem('workflows') || '[]');
+            const publishedWorkflows = workflows.filter(w => w.status === 'published');
+            
+            console.log('Loading workflows:', publishedWorkflows.length);
+            
+            publishedWorkflows.forEach(workflow => {
+                if (window.workflowEngine) {
+                    window.workflowEngine.registerWorkflow(workflow);
+                    console.log('Registered workflow:', workflow.name, workflow.id);
+                    console.log('Workflow nodes:', workflow.nodes);
+                }
+            });
+            
+            // Log all registered event listeners
+            if (window.workflowEngine) {
+                console.log('All event listeners after loading:', Array.from(window.workflowEngine.eventListeners.keys()));
+            }
+        }
+
+        // Wait for workflow engine to be ready, then load workflows
+        function initializeWorkflows() {
+            if (window.workflowEngine) {
+                loadWorkflows();
+            } else {
+                // Retry after a short delay
+                setTimeout(initializeWorkflows, 100);
+            }
+        }
+
+        // Process forms in the page to attach proper event handlers
+        function processPageForms(container) {
+            // Find all form sections
+            const formSections = container.querySelectorAll('.page-section');
+            
+            formSections.forEach(section => {
+                // Check if this section has a form select dropdown
+                const formSelect = section.querySelector('select[id^="form-select-"]');
+                if (formSelect && formSelect.value) {
+                    const selectedFormId = formSelect.value;
+                    console.log('Found form section with selected form ID:', selectedFormId);
+                    
+                    // Find the form element in the preview div
+                    const formPreviewDiv = section.querySelector('[id^="form-preview-"]');
+                    if (formPreviewDiv) {
+                        const form = formPreviewDiv.querySelector('form');
+                        if (form) {
+                            // Add data attribute with the actual form ID
+                            form.dataset.formId = selectedFormId;
+                            
+                            // Attach submit handler
+                            form.addEventListener('submit', function(e) {
+                                e.preventDefault();
+                                const formData = new FormData(form);
+                                const data = Object.fromEntries(formData);
+                                
+                                console.log('Form submitted with ID:', selectedFormId, 'Data:', data);
+                                
+                                // Dispatch event with the correct form ID
+                                const event = new CustomEvent('formSubmit', {
+                                    detail: { 
+                                        formId: selectedFormId, 
+                                        data: data,
+                                        formElement: form
+                                    }
+                                });
+                                console.log('Dispatching formSubmit event:', event.detail);
+                                window.dispatchEvent(event);
+                                
+                                // Show default success message if no workflow handles it
+                                setTimeout(() => {
+                                    if (!document.querySelector('.notification')) {
+                                        showNotification('Form submitted successfully', 'success');
+                                    }
+                                }, 500);
+                            });
+                        }
+                    }
+                }
+            });
+            
+            // Also handle forms that were rendered directly (not through page editor)
+            const directForms = container.querySelectorAll('form[data-form-id]');
+            directForms.forEach(form => {
+                if (!form.hasAttribute('data-processed')) {
+                    form.setAttribute('data-processed', 'true');
+                    const formId = form.dataset.formId;
+                    
+                    form.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        const formData = new FormData(form);
+                        const data = Object.fromEntries(formData);
+                        
+                        console.log('Direct form submitted with ID:', formId, 'Data:', data);
+                        
+                        // Dispatch event
+                        const event = new CustomEvent('formSubmit', {
+                            detail: { 
+                                formId: formId, 
+                                data: data,
+                                formElement: form
+                            }
+                        });
+                        window.dispatchEvent(event);
+                    });
+                }
+            });
+        }
+
+        // Initialize page
+        loadPage();
+        
+        // Initialize workflows after page loads
+        initializeWorkflows();
+    </script>
+</body>
+</html>

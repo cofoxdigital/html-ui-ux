@@ -997,25 +997,89 @@ class FormBuilder {
         const formData = {
             id: this.formId,
             name: this.formName,
-            elements: this.formElements,
+            fields: this.formElements, // Changed from 'elements' to 'fields' to match page editor
+            type: 'custom', // Add form type
+            status: 'draft', // Default status is draft
             settings: {
                 theme: 'default',
                 primaryColor: '#4F46E5'
             },
+            submitText: 'Submit Form',
+            createdAt: localStorage.getItem(`form_${this.formId}_created`) || new Date().toISOString(),
             updatedAt: new Date().toISOString()
         };
 
         // Save to localStorage for demo purposes
         localStorage.setItem(`form_${this.formId}`, JSON.stringify(formData));
+        localStorage.setItem(`form_${this.formId}_created`, formData.createdAt);
+        
+        // Also update the forms list in phoenix_forms
+        this.updateFormsList(formData);
         
         // Show success message
         this.showNotification('Form saved successfully!', 'success');
     }
 
     publishForm() {
-        this.saveForm();
-        // In a real application, this would publish the form
+        // Create form data with published status
+        const formData = {
+            id: this.formId,
+            name: this.formName,
+            fields: this.formElements, // Changed from 'elements' to 'fields' to match page editor
+            type: 'custom', // Add form type
+            status: 'published', // Set status to published
+            settings: {
+                theme: 'default',
+                primaryColor: '#4F46E5'
+            },
+            submitText: 'Submit Form',
+            createdAt: localStorage.getItem(`form_${this.formId}_created`) || new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            publishedAt: new Date().toISOString()
+        };
+
+        // Save to localStorage
+        localStorage.setItem(`form_${this.formId}`, JSON.stringify(formData));
+        localStorage.setItem(`form_${this.formId}_created`, formData.createdAt);
+        
+        // Update the forms list in phoenix_forms
+        this.updateFormsList(formData);
+        
+        // Show success message
         this.showNotification('Form published successfully!', 'success');
+    }
+
+    updateFormsList(formData) {
+        try {
+            // Get existing forms list
+            let formsData = localStorage.getItem('phoenix_forms');
+            let forms = [];
+            
+            if (formsData) {
+                const parsed = JSON.parse(formsData);
+                forms = parsed.forms || [];
+            }
+            
+            // Find if form already exists
+            const existingIndex = forms.findIndex(f => f.id === formData.id);
+            
+            if (existingIndex >= 0) {
+                // Update existing form
+                forms[existingIndex] = formData;
+            } else {
+                // Add new form
+                forms.push(formData);
+            }
+            
+            // Save back to localStorage
+            localStorage.setItem('phoenix_forms', JSON.stringify({
+                forms: forms,
+                lastUpdated: new Date().toISOString()
+            }));
+            
+        } catch (error) {
+            console.error('Error updating forms list:', error);
+        }
     }
 
     loadFormData() {
@@ -1023,7 +1087,8 @@ class FormBuilder {
             const savedForm = localStorage.getItem(`form_${this.formId}`);
             if (savedForm) {
                 const formData = JSON.parse(savedForm);
-                this.formElements = formData.elements || [];
+                // Support both 'fields' (new) and 'elements' (old) for backward compatibility
+                this.formElements = formData.fields || formData.elements || [];
                 this.renderForm();
             }
         }

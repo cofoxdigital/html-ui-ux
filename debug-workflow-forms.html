@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Workflow Forms</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .test-dropdown {
+            margin: 10px 0;
+            padding: 10px;
+            background: #e3f2fd;
+            border-radius: 4px;
+        }
+        select {
+            padding: 8px;
+            margin: 5px;
+            min-width: 200px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background: #c8e6c9;
+            color: #2e7d32;
+        }
+        .error {
+            background: #ffcdd2;
+            color: #c62828;
+        }
+        .info {
+            background: #e1f5fe;
+            color: #0277bd;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: #2196F3;
+            color: white;
+        }
+        button:hover {
+            background: #1976D2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Debug Workflow Forms Integration</h1>
+    
+    <div class="section">
+        <h2>1. Check LocalStorage Data</h2>
+        <button onclick="checkLocalStorage()">Check LocalStorage</button>
+        <div id="storage-data"></div>
+    </div>
+    
+    <div class="section">
+        <h2>2. Test Form Options Generation</h2>
+        <button onclick="testFormOptions()">Generate Form Options</button>
+        <div id="form-options-test"></div>
+    </div>
+    
+    <div class="section">
+        <h2>3. Test Dropdown Population</h2>
+        <div class="test-dropdown">
+            <label>Test Form Dropdown:</label>
+            <select id="test-form-select">
+                <option value="">Loading...</option>
+            </select>
+        </div>
+        <button onclick="populateTestDropdown()">Populate Dropdown</button>
+        <div id="dropdown-status"></div>
+    </div>
+    
+    <div class="section">
+        <h2>4. Create Test Form</h2>
+        <button onclick="createTestForm()">Create & Publish Test Form</button>
+        <div id="create-status"></div>
+    </div>
+    
+    <div class="section">
+        <h2>5. Test Workflow Builder Functions</h2>
+        <button onclick="testWorkflowFunctions()">Test getFormOptions Function</button>
+        <div id="function-test"></div>
+    </div>
+
+    <script>
+        function checkLocalStorage() {
+            const forms = localStorage.getItem('forms');
+            const pages = localStorage.getItem('pages');
+            const widgets = localStorage.getItem('widgets');
+            
+            let html = '<h3>Raw LocalStorage Data:</h3>';
+            
+            // Forms
+            html += '<h4>Forms:</h4>';
+            if (forms) {
+                try {
+                    const formsData = JSON.parse(forms);
+                    html += `<pre>${JSON.stringify(formsData, null, 2)}</pre>`;
+                    html += `<div class="status info">Found ${formsData.length} forms, ${formsData.filter(f => f.status === 'published').length} published</div>`;
+                } catch (e) {
+                    html += `<div class="status error">Error parsing forms: ${e.message}</div>`;
+                }
+            } else {
+                html += '<div class="status error">No forms in localStorage</div>';
+            }
+            
+            // Pages
+            html += '<h4>Pages:</h4>';
+            if (pages) {
+                try {
+                    const pagesData = JSON.parse(pages);
+                    html += `<pre>${JSON.stringify(pagesData, null, 2)}</pre>`;
+                } catch (e) {
+                    html += `<div class="status error">Error parsing pages: ${e.message}</div>`;
+                }
+            } else {
+                html += '<div class="status error">No pages in localStorage</div>';
+            }
+            
+            // Widgets
+            html += '<h4>Widgets:</h4>';
+            if (widgets) {
+                try {
+                    const widgetsData = JSON.parse(widgets);
+                    html += `<pre>${JSON.stringify(widgetsData, null, 2)}</pre>`;
+                } catch (e) {
+                    html += `<div class="status error">Error parsing widgets: ${e.message}</div>`;
+                }
+            } else {
+                html += '<div class="status error">No widgets in localStorage</div>';
+            }
+            
+            document.getElementById('storage-data').innerHTML = html;
+        }
+        
+        function testFormOptions() {
+            // Simulate the getFormOptions function from workflow-builder.js
+            function getFormOptions(selectedId) {
+                const forms = JSON.parse(localStorage.getItem('forms') || '[]');
+                console.log('Forms from localStorage:', forms);
+                console.log('Filtering for published forms...');
+                
+                const publishedForms = forms.filter(f => f.status === 'published');
+                console.log('Published forms:', publishedForms);
+                
+                const options = publishedForms
+                    .map(f => `<option value="${f.id}" ${f.id === selectedId ? 'selected' : ''}>${f.name}</option>`)
+                    .join('');
+                
+                return options;
+            }
+            
+            const options = getFormOptions();
+            const html = `
+                <h3>Generated Options HTML:</h3>
+                <pre>${options || 'No options generated'}</pre>
+                <h3>Preview:</h3>
+                <select>
+                    <option value="">Select a form...</option>
+                    ${options}
+                </select>
+            `;
+            
+            document.getElementById('form-options-test').innerHTML = html;
+        }
+        
+        function populateTestDropdown() {
+            const forms = JSON.parse(localStorage.getItem('forms') || '[]');
+            const select = document.getElementById('test-form-select');
+            
+            select.innerHTML = '<option value="">Select a form...</option>';
+            
+            const publishedForms = forms.filter(f => f.status === 'published');
+            
+            if (publishedForms.length === 0) {
+                select.innerHTML = '<option value="">No published forms found</option>';
+                document.getElementById('dropdown-status').innerHTML = 
+                    '<div class="status error">No published forms found. Create and publish a form first.</div>';
+                return;
+            }
+            
+            publishedForms.forEach(form => {
+                const option = document.createElement('option');
+                option.value = form.id;
+                option.textContent = `${form.name} (${form.id})`;
+                select.appendChild(option);
+            });
+            
+            document.getElementById('dropdown-status').innerHTML = 
+                `<div class="status success">Added ${publishedForms.length} forms to dropdown</div>`;
+        }
+        
+        function createTestForm() {
+            const forms = JSON.parse(localStorage.getItem('forms') || '[]');
+            
+            const newForm = {
+                id: `form_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                name: `Test Form ${forms.length + 1}`,
+                description: 'Test form for workflow builder',
+                status: 'published',
+                fields: [
+                    {
+                        id: 'field_1',
+                        type: 'text',
+                        label: 'Name',
+                        required: true
+                    },
+                    {
+                        id: 'field_2',
+                        type: 'email',
+                        label: 'Email',
+                        required: true
+                    }
+                ],
+                created: new Date().toISOString(),
+                lastModified: new Date().toISOString()
+            };
+            
+            forms.push(newForm);
+            localStorage.setItem('forms', JSON.stringify(forms));
+            
+            document.getElementById('create-status').innerHTML = 
+                `<div class="status success">Created and published form: ${newForm.name} (${newForm.id})</div>`;
+            
+            // Refresh other sections
+            checkLocalStorage();
+            testFormOptions();
+            populateTestDropdown();
+        }
+        
+        function testWorkflowFunctions() {
+            // Copy the exact function from workflow-builder.js
+            function getFormOptions(selectedId) {
+                const forms = JSON.parse(localStorage.getItem('forms') || '[]');
+                return forms
+                    .filter(f => f.status === 'published')
+                    .map(f => `<option value="${f.id}" ${f.id === selectedId ? 'selected' : ''}>${f.name}</option>`)
+                    .join('');
+            }
+            
+            const result = getFormOptions();
+            
+            let html = '<h3>Function Test Results:</h3>';
+            html += '<h4>getFormOptions() output:</h4>';
+            html += `<pre>${result || '(empty string)'}</pre>`;
+            
+            // Test with actual select element
+            html += '<h4>In actual select element:</h4>';
+            html += `<select>
+                <option value="">Select a form...</option>
+                ${result}
+            </select>`;
+            
+            // Debug info
+            const forms = JSON.parse(localStorage.getItem('forms') || '[]');
+            html += '<h4>Debug Info:</h4>';
+            html += `<div class="status info">Total forms: ${forms.length}</div>`;
+            html += `<div class="status info">Published forms: ${forms.filter(f => f.status === 'published').length}</div>`;
+            
+            document.getElementById('function-test').innerHTML = html;
+        }
+        
+        // Run initial check
+        window.onload = () => {
+            checkLocalStorage();
+        };
+    </script>
+</body>
+</html>

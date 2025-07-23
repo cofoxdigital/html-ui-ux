@@ -124,6 +124,30 @@
         .sidebar-content {
             flex: 1;
             overflow-y: auto;
+            overflow-x: hidden;
+            height: calc(100vh - 220px); /* Fixed height instead of max-height */
+            padding-bottom: 20px;
+            scrollbar-width: thin;
+            scrollbar-color: #6c5ce7 #f0f0f0;
+        }
+
+        /* Custom scrollbar for webkit browsers */
+        .sidebar-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .sidebar-content::-webkit-scrollbar-track {
+            background: #f0f0f0;
+            border-radius: 4px;
+        }
+
+        .sidebar-content::-webkit-scrollbar-thumb {
+            background: #6c5ce7;
+            border-radius: 4px;
+        }
+
+        .sidebar-content::-webkit-scrollbar-thumb:hover {
+            background: #5a4fcf;
         }
 
         .tab-panel {
@@ -504,6 +528,16 @@
                             <h4>Pricing Table</h4>
                             <p>Compare pricing plans and features</p>
                         </div>
+                        <div class="section-item" draggable="true" data-section="widget">
+                            <i class="fas fa-chart-line"></i>
+                            <h4>Widget</h4>
+                            <p>Add a published widget to your page</p>
+                        </div>
+                        <div class="section-item" draggable="true" data-section="form">
+                            <i class="fas fa-wpforms"></i>
+                            <h4>Form</h4>
+                            <p>Add a published form to your page</p>
+                        </div>
                     </div>
                 </div>
 
@@ -655,7 +689,22 @@
             loadPageData();
             setupDragAndDrop();
             setupTextEditor();
+            setupSidebarScroll();
         });
+
+        // Setup sidebar scrolling
+        function setupSidebarScroll() {
+            const sidebarContent = document.querySelector('.sidebar-content');
+            const sidebar = document.querySelector('.editor-sidebar');
+            
+            // Make sidebar scrollable when hovering
+            sidebar.addEventListener('wheel', function(e) {
+                if (e.target.closest('.sidebar-content')) {
+                    e.preventDefault();
+                    sidebarContent.scrollTop += e.deltaY;
+                }
+            });
+        }
 
         function loadPageData() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -792,6 +841,13 @@
         }
 
         function getSectionHTML(type, sectionId) {
+            // Handle widget and form sections specially
+            if (type === 'widget') {
+                return getWidgetSectionHTML(sectionId);
+            } else if (type === 'form') {
+                return getFormSectionHTML(sectionId);
+            }
+            
             const templates = {
                 hero: `
                     <div class="section-content">
@@ -1292,6 +1348,369 @@
                 savePage();
                 showNotification('Page published successfully!', 'success');
             }
+        }
+
+        // Get published widgets from localStorage
+        function getPublishedWidgets() {
+            try {
+                const widgetsData = localStorage.getItem('phoenix_widgets');
+                if (widgetsData) {
+                    const parsed = JSON.parse(widgetsData);
+                    return parsed.widgets.filter(w => w.status === 'published') || [];
+                }
+            } catch (error) {
+                console.error('Error loading widgets:', error);
+            }
+            return [];
+        }
+
+        // Get published forms from localStorage
+        function getPublishedForms() {
+            try {
+                const formsData = localStorage.getItem('phoenix_forms');
+                if (formsData) {
+                    const parsed = JSON.parse(formsData);
+                    return parsed.forms.filter(f => f.status === 'published') || [];
+                }
+            } catch (error) {
+                console.error('Error loading forms:', error);
+            }
+            return [];
+        }
+
+        // Generate widget section HTML
+        function getWidgetSectionHTML(sectionId) {
+            const widgets = getPublishedWidgets();
+            
+            if (widgets.length === 0) {
+                return `
+                    <div class="section-content">
+                        <button class="drag-handle" draggable="true" title="Drag to reorder">
+                            <i class="fas fa-grip-vertical"></i>
+                        </button>
+                        <div class="section-controls">
+                            <button class="control-btn delete" onclick="deleteSection('${sectionId}')" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        <div style="padding: 40px 20px; text-align: center; background: #f8f9fa; border-radius: 8px;">
+                            <i class="fas fa-chart-line" style="font-size: 48px; color: #ddd; margin-bottom: 20px;"></i>
+                            <h3 style="color: #666; margin-bottom: 10px;">No Published Widgets Available</h3>
+                            <p style="color: #999;">Create and publish widgets in the Widget Builder first.</p>
+                            <a href="widget-builder.html" class="btn btn-primary" style="margin-top: 20px;">Create Widget</a>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Create a dropdown to select widget
+            return `
+                <div class="section-content">
+                    <button class="drag-handle" draggable="true" title="Drag to reorder">
+                        <i class="fas fa-grip-vertical"></i>
+                    </button>
+                    <div class="section-controls">
+                        <button class="control-btn" onclick="editSection('${sectionId}')" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="control-btn delete" onclick="deleteSection('${sectionId}')" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <div style="padding: 20px;">
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">Select Widget:</label>
+                            <select id="widget-select-${sectionId}" onchange="loadSelectedWidget('${sectionId}')" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                                <option value="">Choose a widget...</option>
+                                ${widgets.map(widget => `
+                                    <option value="${widget.id}">${widget.name} - ${widget.category}</option>
+                                `).join('')}
+                            </select>
+                        </div>
+                        <div id="widget-preview-${sectionId}" style="min-height: 200px; border: 2px dashed #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #999;">
+                            <div style="text-align: center;">
+                                <i class="fas fa-chart-line" style="font-size: 48px; margin-bottom: 10px;"></i>
+                                <p>Select a widget to preview</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Generate form section HTML
+        function getFormSectionHTML(sectionId) {
+            const forms = getPublishedForms();
+            
+            if (forms.length === 0) {
+                return `
+                    <div class="section-content">
+                        <button class="drag-handle" draggable="true" title="Drag to reorder">
+                            <i class="fas fa-grip-vertical"></i>
+                        </button>
+                        <div class="section-controls">
+                            <button class="control-btn delete" onclick="deleteSection('${sectionId}')" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        <div style="padding: 40px 20px; text-align: center; background: #f8f9fa; border-radius: 8px;">
+                            <i class="fas fa-wpforms" style="font-size: 48px; color: #ddd; margin-bottom: 20px;"></i>
+                            <h3 style="color: #666; margin-bottom: 10px;">No Published Forms Available</h3>
+                            <p style="color: #999;">Create and publish forms in the Form Builder first.</p>
+                            <a href="form-builder.html" class="btn btn-primary" style="margin-top: 20px;">Create Form</a>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Create a dropdown to select form
+            return `
+                <div class="section-content">
+                    <button class="drag-handle" draggable="true" title="Drag to reorder">
+                        <i class="fas fa-grip-vertical"></i>
+                    </button>
+                    <div class="section-controls">
+                        <button class="control-btn" onclick="editSection('${sectionId}')" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="control-btn delete" onclick="deleteSection('${sectionId}')" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <div style="padding: 20px;">
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">Select Form:</label>
+                            <select id="form-select-${sectionId}" onchange="loadSelectedForm('${sectionId}')" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                                <option value="">Choose a form...</option>
+                                ${forms.map(form => `
+                                    <option value="${form.id}">${form.name} - ${form.type}</option>
+                                `).join('')}
+                            </select>
+                        </div>
+                        <div id="form-preview-${sectionId}" style="min-height: 200px; border: 2px dashed #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #999;">
+                            <div style="text-align: center;">
+                                <i class="fas fa-wpforms" style="font-size: 48px; margin-bottom: 10px;"></i>
+                                <p>Select a form to preview</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Load selected widget
+        function loadSelectedWidget(sectionId) {
+            const select = document.getElementById(`widget-select-${sectionId}`);
+            const previewDiv = document.getElementById(`widget-preview-${sectionId}`);
+            const widgetId = select.value;
+            
+            if (!widgetId) {
+                previewDiv.innerHTML = `
+                    <div style="text-align: center;">
+                        <i class="fas fa-chart-line" style="font-size: 48px; margin-bottom: 10px; color: #ddd;"></i>
+                        <p style="color: #999;">Select a widget to preview</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Get widget data
+            const widgets = getPublishedWidgets();
+            const widget = widgets.find(w => w.id === widgetId);
+            
+            if (widget && widget.definition && widget.definition.components) {
+                // Render widget components
+                previewDiv.innerHTML = `
+                    <div style="background: white; padding: 20px; border-radius: 8px;">
+                        <h3 style="margin-bottom: 20px; color: #333;">${widget.name}</h3>
+                        ${renderWidgetComponents(widget.definition.components)}
+                    </div>
+                `;
+            }
+        }
+
+        // Load selected form
+        function loadSelectedForm(sectionId) {
+            const select = document.getElementById(`form-select-${sectionId}`);
+            const previewDiv = document.getElementById(`form-preview-${sectionId}`);
+            const formId = select.value;
+            
+            if (!formId) {
+                previewDiv.innerHTML = `
+                    <div style="text-align: center;">
+                        <i class="fas fa-wpforms" style="font-size: 48px; margin-bottom: 10px; color: #ddd;"></i>
+                        <p style="color: #999;">Select a form to preview</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Get form data
+            const forms = getPublishedForms();
+            const form = forms.find(f => f.id === formId);
+            
+            if (form && form.fields) {
+                // Render form fields
+                previewDiv.innerHTML = `
+                    <div style="background: white; padding: 20px; border-radius: 8px;">
+                        <h3 style="margin-bottom: 20px; color: #333;">${form.name}</h3>
+                        <form style="display: grid; gap: 15px;">
+                            ${renderFormFields(form.fields)}
+                            <button type="submit" style="background: #6c5ce7; color: white; padding: 12px; border: none; border-radius: 6px; cursor: pointer; margin-top: 10px;">
+                                ${form.submitText || 'Submit'}
+                            </button>
+                        </form>
+                    </div>
+                `;
+            }
+        }
+
+        // Render widget components (simplified version)
+        function renderWidgetComponents(components) {
+            return components.map(component => {
+                switch (component.type) {
+                    case 'kpi-metric':
+                        return `
+                            <div style="background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%); color: white; padding: 24px; border-radius: 12px; text-align: center; margin-bottom: 15px;">
+                                <div style="font-size: 32px; font-weight: 700; margin-bottom: 8px;">${component.props.value}</div>
+                                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">${component.props.label}</div>
+                                <div style="font-size: 12px; padding: 4px 8px; background: rgba(255,255,255,0.2); border-radius: 12px; display: inline-block;">${component.props.change}</div>
+                            </div>
+                        `;
+                    case 'line-chart':
+                    case 'bar-chart':
+                    case 'pie-chart':
+                        return `
+                            <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; margin-bottom: 15px;">
+                                <div style="font-size: 16px; font-weight: 600; margin-bottom: 15px; color: #333;">${component.props.title}</div>
+                                <div style="height: 200px; background: #f8f9fa; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #666;">
+                                    <i class="fas fa-chart-${component.type.includes('line') ? 'line' : component.type.includes('bar') ? 'bar' : 'pie'}" style="font-size: 48px; color: #ddd;"></i>
+                                </div>
+                            </div>
+                        `;
+                    case 'progress-bar':
+                        const percentage = (component.props.value / component.props.target) * 100;
+                        return `
+                            <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; margin-bottom: 15px;">
+                                <div style="font-size: 14px; color: #333; margin-bottom: 10px;">${component.props.label}</div>
+                                <div style="background: #f0f0f0; border-radius: 10px; height: 20px; margin-bottom: 10px;">
+                                    <div style="background: #4F46E5; height: 100%; border-radius: 10px; width: ${Math.min(percentage, 100)}%; transition: width 0.3s;"></div>
+                                </div>
+                                <div style="font-size: 12px; color: #666;">${component.props.value}${component.props.unit} / ${component.props.target}${component.props.unit} (${Math.round(percentage)}%)</div>
+                            </div>
+                        `;
+                    case 'data-table':
+                        return `
+                            <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; margin-bottom: 15px;">
+                                <h4 style="margin-bottom: 15px; color: #333;">${component.props.title}</h4>
+                                <div style="overflow-x: auto;">
+                                    <table style="width: 100%; border-collapse: collapse;">
+                                        <thead>
+                                            <tr>
+                                                ${component.props.columns.map(col => `
+                                                    <th style="text-align: left; padding: 8px; border-bottom: 1px solid #e0e0e0; font-weight: 600; color: #333; text-transform: capitalize;">
+                                                        ${col}
+                                                    </th>
+                                                `).join('')}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${component.props.data.slice(0, 3).map(row => `
+                                                <tr>
+                                                    ${component.props.columns.map(col => `
+                                                        <td style="padding: 8px; border-bottom: 1px solid #f0f0f0; color: #666;">
+                                                            ${row[col] || 'N/A'}
+                                                        </td>
+                                                    `).join('')}
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        `;
+                    case 'activity-feed':
+                        return `
+                            <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; margin-bottom: 15px;">
+                                <h4 style="margin-bottom: 15px; color: #333;">${component.props.title}</h4>
+                                <div>
+                                    ${component.props.activities.slice(0, 3).map(activity => `
+                                        <div style="display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0;">
+                                            <i class="${activity.icon}" style="margin-right: 12px; color: #4F46E5;"></i>
+                                            <div style="flex: 1;">
+                                                <span style="font-size: 14px; color: #333;">${activity.message}</span>
+                                                <small style="display: block; color: #666; margin-top: 4px;">${activity.time}</small>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                    default:
+                        return `<div style="padding: 20px; background: #f8f9fa; border-radius: 8px; margin-bottom: 15px; text-align: center; color: #666;">
+                            ${component.type} component
+                        </div>`;
+                }
+            }).join('');
+        }
+
+        // Render form fields
+        function renderFormFields(fields) {
+            return fields.map(field => {
+                const baseStyle = 'padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; width: 100%;';
+                
+                switch (field.type) {
+                    case 'text':
+                        return `<input type="text" placeholder="${field.label}" style="${baseStyle}" ${field.required ? 'required' : ''}>`;
+                    case 'email':
+                        return `<input type="email" placeholder="${field.label}" style="${baseStyle}" ${field.required ? 'required' : ''}>`;
+                    case 'tel':
+                        return `<input type="tel" placeholder="${field.label}" style="${baseStyle}" ${field.required ? 'required' : ''}>`;
+                    case 'number':
+                        return `<input type="number" placeholder="${field.label}" style="${baseStyle}" ${field.required ? 'required' : ''}>`;
+                    case 'textarea':
+                        return `<textarea placeholder="${field.label}" rows="4" style="${baseStyle} resize: vertical;" ${field.required ? 'required' : ''}></textarea>`;
+                    case 'select':
+                        return `
+                            <select style="${baseStyle}" ${field.required ? 'required' : ''}>
+                                <option value="">${field.label}</option>
+                                ${field.options ? field.options.map(opt => `<option value="${opt}">${opt}</option>`).join('') : ''}
+                            </select>
+                        `;
+                    case 'checkbox':
+                        return `
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" ${field.required ? 'required' : ''}>
+                                <span>${field.label}</span>
+                            </label>
+                        `;
+                    case 'radio':
+                        return `
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">${field.label}</label>
+                                ${field.options ? field.options.map((opt, idx) => `
+                                    <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer;">
+                                        <input type="radio" name="radio-${field.id}" value="${opt}" ${idx === 0 && field.required ? 'required' : ''}>
+                                        <span>${opt}</span>
+                                    </label>
+                                `).join('') : ''}
+                            </div>
+                        `;
+                    case 'date':
+                        return `<input type="date" style="${baseStyle}" ${field.required ? 'required' : ''}>`;
+                    case 'time':
+                        return `<input type="time" style="${baseStyle}" ${field.required ? 'required' : ''}>`;
+                    case 'file':
+                        return `
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">${field.label}</label>
+                                <input type="file" style="${baseStyle}" ${field.required ? 'required' : ''}>
+                            </div>
+                        `;
+                    default:
+                        return `<input type="text" placeholder="${field.label}" style="${baseStyle}">`;
+                }
+            }).join('');
         }
 
         // Utility functions

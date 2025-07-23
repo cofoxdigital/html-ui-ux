@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Registration Example - Complete Website with Workflows</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            text-align: center;
+            font-size: 2.5em;
+        }
+
+        .section {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .section h3 {
+            color: #34495e;
+            margin: 20px 0 10px 0;
+            font-size: 1.3em;
+        }
+
+        .workflow-diagram {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .workflow-step {
+            background: white;
+            border: 2px solid #3498db;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 10px 0;
+            position: relative;
+        }
+
+        .workflow-step::after {
+            content: '↓';
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 20px;
+            color: #3498db;
+        }
+
+        .workflow-step:last-child::after {
+            display: none;
+        }
+
+        .workflow-step.trigger {
+            border-color: #e74c3c;
+            background: #fee;
+        }
+
+        .workflow-step.action {
+            border-color: #27ae60;
+            background: #efe;
+        }
+
+        .workflow-step.logic {
+            border-color: #f39c12;
+            background: #ffe;
+        }
+
+        .code-block {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 6px;
+            margin: 15px 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        .demo-button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 5px;
+            transition: background 0.3s;
+        }
+
+        .demo-button:hover {
+            background: #2980b9;
+        }
+
+        .demo-button.success {
+            background: #27ae60;
+        }
+
+        .demo-button.success:hover {
+            background: #229954;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .feature-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid #e9ecef;
+        }
+
+        .feature-card h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .feature-card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .feature-card li {
+            padding: 5px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .feature-card li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .implementation-steps {
+            counter-reset: step-counter;
+        }
+
+        .implementation-step {
+            position: relative;
+            padding-left: 50px;
+            margin: 20px 0;
+            counter-increment: step-counter;
+        }
+
+        .implementation-step::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #3498db;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+        }
+
+        .alert.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .alert.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>Building a Complete Event Registration Website</h1>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Overview Section -->
+        <div class="section">
+            <h2>🎯 Overview</h2>
+            <p>This example demonstrates how to use the Page Builder, Form Builder, Widget Builder, and Workflow Builder together to create a complete event registration website with automated workflows.</p>
+            
+            <div class="alert info">
+                <strong>What We'll Build:</strong> A multi-page event registration system with form validation, data storage, dynamic dashboards, and automated email-like notifications.
+            </div>
+        </div>
+
+        <!-- Website Structure Section -->
+        <div class="section">
+            <h2>🏗️ Website Structure</h2>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4>📄 Pages</h4>
+                    <ul>
+                        <li>Home Page (Event Info)</li>
+                        <li>Registration Form Page</li>
+                        <li>Payment Page</li>
+                        <li>Confirmation Page</li>
+                        <li>Admin Dashboard</li>
+                    </ul>
+                </div>
+                
+                <div class="feature-card">
+                    <h4>📝 Forms</h4>
+                    <ul>
+                        <li>Registration Form</li>
+                        <li>Payment Form</li>
+                        <li>Contact Form</li>
+                    </ul>
+                </div>
+                
+                <div class="feature-card">
+                    <h4>📊 Widgets</h4>
+                    <ul>
+                        <li>Registration Counter</li>
+                        <li>Seats Available</li>
+                        <li>Recent Registrations</li>
+                        <li>Revenue Chart</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Implementation Steps Section -->
+        <div class="section">
+            <h2>🚀 Implementation Steps</h2>
+            
+            <div class="implementation-steps">
+                <div class="implementation-step">
+                    <h3>Create the Registration Form</h3>
+                    <p>Use the Form Builder to create a comprehensive registration form:</p>
+                    <div class="code-block">
+Form Fields:
+- Full Name (text, required)
+- Email (email, required)
+- Phone (tel, required)
+- Company (text, optional)
+- Ticket Type (select: Standard, VIP, Student)
+- Dietary Requirements (checkbox: Vegetarian, Vegan, Gluten-Free)
+- Special Requests (textarea)
+                    </div>
+                </div>
+
+                <div class="implementation-step">
+                    <h3>Create the Widgets</h3>
+                    <p>Build dynamic widgets to display registration data:</p>
+                    <div class="code-block">
+Registration Counter Widget:
+- Type: Number Display
+- Data Source: localStorage['event_registrations'].length
+- Update: Real-time
+
+Seats Available Widget:
+- Type: Progress Bar
+- Max Value: 100
+- Current: 100 - registrations.length
+- Color: Green > Yellow > Red based on availability
+                    </div>
+                </div>
+
+                <div class="implementation-step">
+                    <h3>Design the Pages</h3>
+                    <p>Use the Page Builder to create each page:</p>
+                    <div class="code-block">
+Home Page Layout:
+┌─────────────────────────────────┐
+│         Event Header            │
+├─────────────┬───────────────────┤
+│   Event     │  Registration     │
+│   Details   │  Counter Widget   │
+├─────────────┼───────────────────┤
+│  Register   │  Seats Available  │
+│  Button     │  Widget           │
+└─────────────┴───────────────────┘
+                    </div>
+                </div>
+
+                <div class="implementation-step">
+                    <h3>Create the Main Workflow</h3>
+                    <p>Build the registration workflow that connects everything:</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Workflow Section -->
+        <div class="section">
+            <h2>🔄 Main Registration Workflow</h2>
+            
+            <div class="workflow-diagram">
+                <div class="workflow-step trigger">
+                    <strong>Trigger:</strong> Registration Form Submit
+                    <br><small>When user submits the registration form</small>
+                </div>
+                
+                <div class="workflow-step action">
+                    <strong>Action:</strong> Show Loading Message
+                    <br><small>"Processing your registration..."</small>
+                </div>
+                
+                <div class="workflow-step logic">
+                    <strong>Logic:</strong> Check Seat Availability
+                    <br><small>If seats_available > 0</small>
+                </div>
+                
+                <div class="workflow-step action">
+                    <strong>Action:</strong> Save Registration Data
+                    <br><small>Append to 'event_registrations' array</small>
+                </div>
+                
+                <div class="workflow-step action">
+                    <strong>Action:</strong> Update Widgets
+                    <br><small>Increment counter, decrease available seats</small>
+                </div>
+                
+                <div class="workflow-step action">
+                    <strong>Action:</strong> Set Session Variable
+                    <br><small>Store registration_id for payment page</small>
+                </div>
+                
+                <div class="workflow-step action">
+                    <strong>Action:</strong> Navigate to Payment Page
+                    <br><small>Pass registration data</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Workflows Section -->
+        <div class="section">
+            <h2>📋 Additional Workflows</h2>
+            
+            <h3>Payment Workflow</h3>
+            <div class="workflow-diagram">
+                <div class="workflow-step trigger">
+                    <strong>Trigger:</strong> Payment Form Submit
+                </div>
+                <div class="workflow-step action">
+                    <strong>Action:</strong> Validate Payment
+                </div>
+                <div class="workflow-step action">
+                    <strong>Action:</strong> Update Registration Status
+                </div>
+                <div class="workflow-step action">
+                    <strong>Action:</strong> Show Success Notification
+                </div>
+                <div class="workflow-step action">
+                    <strong>Action:</strong> Navigate to Confirmation
+                </div>
+            </div>
+
+            <h3>Admin Dashboard Workflow</h3>
+            <div class="workflow-diagram">
+                <div class="workflow-step trigger">
+                    <strong>Trigger:</strong> Page Load (Admin Dashboard)
+                </div>
+                <div class="workflow-step action">
+                    <strong>Action:</strong> Load Registration Data
+                </div>
+                <div class="workflow-step action">
+                    <strong>Action:</strong> Update All Dashboard Widgets
+                </div>
+                <div class="workflow-step logic">
+                    <strong>Logic:</strong> Calculate Statistics
+                </div>
+                <div class="workflow-step action">
+                    <strong>Action:</strong> Display Charts and Tables
+                </div>
+            </div>
+        </div>
+
+        <!-- Demo Section -->
+        <div class="section">
+            <h2>🎮 Try It Yourself</h2>
+            
+            <p>Follow these steps to build this event registration website:</p>
+            
+            <ol style="margin: 20px 0; padding-left: 30px;">
+                <li>Open the Form Builder and create the registration form</li>
+                <li>Open the Widget Builder and create the counter widgets</li>
+                <li>Open the Page Builder and design your pages</li>
+                <li>Open the Workflow Builder and create the workflows</li>
+                <li>Test everything using the Preview mode</li>
+            </ol>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="demo-button" onclick="window.open('form-builder.html', '_blank')">
+                    <i class="fas fa-edit"></i> Open Form Builder
+                </button>
+                <button class="demo-button" onclick="window.open('widget-builder.html', '_blank')">
+                    <i class="fas fa-chart-bar"></i> Open Widget Builder
+                </button>
+                <button class="demo-button" onclick="window.open('pages.html', '_blank')">
+                    <i class="fas fa-file"></i> Open Page Builder
+                </button>
+                <button class="demo-button success" onclick="window.open('workflow-builder.html', '_blank')">
+                    <i class="fas fa-project-diagram"></i> Open Workflow Builder
+                </button>
+            </div>
+        </div>
+
+        <!-- Advanced Features Section -->
+        <div class="section">
+            <h2>🚀 Advanced Features</h2>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4>Conditional Logic</h4>
+                    <ul>
+                        <li>VIP tickets get special confirmation</li>
+                        <li>Student discount validation</li>
+                        <li>Early bird pricing logic</li>
+                        <li>Waitlist when sold out</li>
+                    </ul>
+                </div>
+                
+                <div class="feature-card">
+                    <h4>Data Processing</h4>
+                    <ul>
+                        <li>Calculate total revenue</li>
+                        <li>Generate unique ticket IDs</li>
+                        <li>Format confirmation emails</li>
+                        <li>Export attendee lists</li>
+                    </ul>
+                </div>
+                
+                <div class="feature-card">
+                    <h4>User Experience</h4>
+                    <ul>
+                        <li>Real-time seat updates</li>
+                        <li>Progress indicators</li>
+                        <li>Error handling</li>
+                        <li>Mobile responsive</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Code Examples Section -->
+        <div class="section">
+            <h2>💻 Code Examples</h2>
+            
+            <h3>Workflow Configuration</h3>
+            <div class="code-block">
+{
+  "name": "Event Registration Workflow",
+  "trigger": {
+    "type": "form_submit",
+    "formId": "event_registration_form"
+  },
+  "actions": [
+    {
+      "type": "show_message",
+      "config": {
+        "message": "Processing registration...",
+        "type": "info"
+      }
+    },
+    {
+      "type": "condition",
+      "config": {
+        "conditions": [{
+          "left": "{{seats_available}}",
+          "operator": ">",
+          "right": "0"
+        }],
+        "true_path": "continue_registration",
+        "false_path": "show_waitlist"
+      }
+    },
+    {
+      "type": "save_data",
+      "config": {
+        "key": "event_registrations",
+        "append": true,
+        "data": {
+          "id": "{{generate_id()}}",
+          "name": "{{trigger.form.name}}",
+          "email": "{{trigger.form.email}}",
+          "ticket_type": "{{trigger.form.ticket_type}}",
+          "timestamp": "{{current_timestamp()}}"
+        }
+      }
+    }
+  ]
+}
+            </div>
+
+            <h3>Widget Data Binding</h3>
+            <div class="code-block">
+// Registration Counter Widget
+{
+  "type": "number",
+  "dataSource": "localStorage",
+  "key": "event_registrations",
+  "transform": "array.length",
+  "updateTrigger": "storage_change"
+}
+
+// Seats Available Widget
+{
+  "type": "progress",
+  "max": 100,
+  "current": "100 - {{registrations.length}}",
+  "colorRules": [
+    { "threshold": 80, "color": "green" },
+    { "threshold": 50, "color": "yellow" },
+    { "threshold": 0, "color": "red" }
+  ]
+}
+            </div>
+        </div>
+
+        <!-- Tips Section -->
+        <div class="section">
+            <h2>💡 Pro Tips</h2>
+            
+            <div class="alert warning">
+                <strong>Testing:</strong> Always test your workflows in preview mode before publishing. Use the browser console to debug any issues.
+            </div>
+            
+            <ul style="margin: 20px 0; padding-left: 30px;">
+                <li><strong>Start Simple:</strong> Build and test one workflow at a time</li>
+                <li><strong>Use Meaningful Names:</strong> Name your forms, widgets, and workflows clearly</li>
+                <li><strong>Plan Data Structure:</strong> Design your data storage schema before building</li>
+                <li><strong>Handle Errors:</strong> Add condition checks for edge cases</li>
+                <li><strong>Optimize Performance:</strong> Minimize unnecessary data operations</li>
+                <li><strong>Document Complex Logic:</strong> Add descriptions to complex workflow nodes</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Add some interactivity to the demo buttons
+        document.querySelectorAll('.demo-button').forEach(button => {
+            button.addEventListener('click', function() {
+                // Visual feedback
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 100);
+            });
+        });
+
+        // Smooth scroll for internal links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

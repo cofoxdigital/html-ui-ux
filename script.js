@@ -1121,6 +1121,10 @@ document.addEventListener('DOMContentLoaded', function() {
             window.location.href = 'pages.html';
         } else if (name === 'Form Builder') {
             window.location.href = 'form-list.html';
+        } else if (name === 'Widget Builder') {
+            window.location.href = 'widget-list.html';
+        } else if (name === 'Workflow Builder') {
+            window.location.href = 'workflow-list.html';
         } else {
             showNotification(`${name} launched successfully!`, 'success');
         }

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Workflow Form IDs</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .debug-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        .data-display {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .form-info {
+            margin: 10px 0;
+            padding: 10px;
+            background: #e3f2fd;
+            border-radius: 4px;
+        }
+        .workflow-info {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f3e5f5;
+            border-radius: 4px;
+        }
+        .match {
+            background: #c8e6c9;
+            padding: 2px 4px;
+            border-radius: 2px;
+        }
+        .no-match {
+            background: #ffcdd2;
+            padding: 2px 4px;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Debug: Workflow Form ID Matching</h1>
+        
+        <div class="debug-section">
+            <h2>Forms in System</h2>
+            <div id="forms-list"></div>
+        </div>
+        
+        <div class="debug-section">
+            <h2>Workflows in System</h2>
+            <div id="workflows-list"></div>
+        </div>
+        
+        <div class="debug-section">
+            <h2>Page Content Analysis</h2>
+            <div id="page-analysis"></div>
+        </div>
+        
+        <div class="debug-section">
+            <h2>Form ID Matching Test</h2>
+            <div id="matching-test"></div>
+        </div>
+    </div>
+
+    <script>
+        // Load and display forms
+        function loadForms() {
+            const formsDiv = document.getElementById('forms-list');
+            
+            // Check multiple storage keys for forms
+            const formKeys = ['forms', 'phoenix_forms'];
+            let allForms = [];
+            
+            formKeys.forEach(key => {
+                const data = localStorage.getItem(key);
+                if (data) {
+                    try {
+                        const parsed = JSON.parse(data);
+                        const forms = parsed.forms || parsed;
+                        if (Array.isArray(forms)) {
+                            allForms = allForms.concat(forms);
+                        }
+                    } catch (e) {
+                        console.error('Error parsing', key, e);
+                    }
+                }
+            });
+            
+            // Also check individual form keys
+            for (let key in localStorage) {
+                if (key.startsWith('form_') && !key.includes('_created')) {
+                    try {
+                        const form = JSON.parse(localStorage.getItem(key));
+                        if (form && form.id) {
+                            allForms.push(form);
+                        }
+                    } catch (e) {
+                        console.error('Error parsing', key, e);
+                    }
+                }
+            }
+            
+            // Remove duplicates
+            const uniqueForms = Array.from(new Map(allForms.map(f => [f.id, f])).values());
+            
+            formsDiv.innerHTML = uniqueForms.map(form => `
+                <div class="form-info">
+                    <strong>Form: ${form.name}</strong><br>
+                    ID: <span class="match">${form.id}</span><br>
+                    Status: ${form.status}<br>
+                    Fields: ${form.fields ? form.fields.length : 0}
+                </div>
+            `).join('');
+        }
+        
+        // Load and display workflows
+        function loadWorkflows() {
+            const workflowsDiv = document.getElementById('workflows-list');
+            const workflows = JSON.parse(localStorage.getItem('workflows') || '[]');
+            
+            workflowsDiv.innerHTML = workflows.map(workflow => {
+                const formTriggers = workflow.nodes.filter(n => n.type === 'trigger' && n.subtype === 'form_submit');
+                return `
+                    <div class="workflow-info">
+                        <strong>Workflow: ${workflow.name}</strong><br>
+                        ID: ${workflow.id}<br>
+                        Status: ${workflow.status}<br>
+                        Form Triggers: ${formTriggers.map(t => `
+                            <span class="match">${t.config.formId}</span>
+                        `).join(', ') || 'None'}
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Analyze page content
+        function analyzePageContent() {
+            const analysisDiv = document.getElementById('page-analysis');
+            const pageId = '1753188811932'; // Login page
+            const pageData = localStorage.getItem(`page_${pageId}`);
+            
+            if (pageData) {
+                const page = JSON.parse(pageData);
+                const content = page.content;
+                
+                // Extract form-related information
+                const formSelectMatch = content.match(/form-select-section-\d+/g);
+                const selectedFormMatch = content.match(/value="(\d+)">([^<]+)<\/option>/g);
+                
+                analysisDiv.innerHTML = `
+                    <h3>Page: ${page.title}</h3>
+                    <div class="data-display">
+                        Form Selects Found: ${formSelectMatch ? formSelectMatch.join(', ') : 'None'}<br><br>
+                        Form Options in Select:<br>
+                        ${selectedFormMatch ? selectedFormMatch.join('\n') : 'None'}
+                    </div>
+                `;
+            }
+        }
+        
+        // Test form ID matching
+        function testMatching() {
+            const testDiv = document.getElementById('matching-test');
+            
+            // Get the login workflow
+            const workflows = JSON.parse(localStorage.getItem('workflows') || '[]');
+            const loginWorkflow = workflows.find(w => w.name === 'Login');
+            
+            if (loginWorkflow) {
+                const formTrigger = loginWorkflow.nodes.find(n => n.type === 'trigger' && n.subtype === 'form_submit');
+                const expectedFormId = formTrigger?.config?.formId;
+                
+                testDiv.innerHTML = `
+                    <h3>Login Workflow Form Trigger</h3>
+                    <p>Expected Form ID: <span class="match">${expectedFormId}</span></p>
+                    <p>What's happening:</p>
+                    <ol>
+                        <li>Form in page has select dropdown with value="${expectedFormId}"</li>
+                        <li>But form submission is using section ID "preview-section-1"</li>
+                        <li>Workflow engine is looking for: <span class="no-match">form_submit_preview-section-1</span></li>
+                        <li>But it should be looking for: <span class="match">form_submit_${expectedFormId}</span></li>
+                    </ol>
+                    <h4>Solution:</h4>
+                    <p>The page-viewer.html needs to properly extract the form ID from the select dropdown value when the form is rendered.</p>
+                `;
+            }
+        }
+        
+        // Load all data
+        loadForms();
+        loadWorkflows();
+        analyzePageContent();
+        testMatching();
+    </script>
+</body>
+</html>

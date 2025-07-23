@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Widget Builder - Phoenix Enterprise Coach Dashboard</title>
+    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="./form-builder-styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.css" rel="stylesheet">
+    <style>
+        /* Widget Builder Specific Styles */
+        .widget-builder-body {
+            background: #f8f9fa;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .widget-builder-header {
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .widget-builder-container {
+            display: flex;
+            height: calc(100vh - 70px);
+        }
+
+        /* Component Sidebar */
+        .widget-components-sidebar {
+            width: 280px;
+            background: white;
+            border-right: 1px solid #e0e0e0;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .components-header {
+            padding: 20px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .components-header h3 {
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 18px;
+        }
+
+        .component-search {
+            position: relative;
+        }
+
+        .component-search i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+        }
+
+        .component-search input {
+            width: 100%;
+            padding: 10px 10px 10px 40px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .component-categories {
+            padding: 0;
+        }
+
+        .component-category {
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 20px;
+            cursor: pointer;
+            background: #f8f9fa;
+            border: none;
+            width: 100%;
+            text-align: left;
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .category-header:hover {
+            background: #f0f0f0;
+        }
+
+        .category-header i:first-child {
+            margin-right: 10px;
+            color: #4F46E5;
+        }
+
+        .category-components {
+            padding: 0;
+            background: white;
+        }
+
+        .component-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            cursor: grab;
+            border-bottom: 1px solid #f8f9fa;
+            transition: all 0.2s;
+        }
+
+        .component-item:hover {
+            background: #f8f9fa;
+        }
+
+        .component-item:active {
+            cursor: grabbing;
+        }
+
+        .component-item i {
+            margin-right: 12px;
+            color: #666;
+            width: 16px;
+            text-align: center;
+        }
+
+        .component-item span {
+            font-size: 14px;
+            color: #333;
+        }
+
+        /* Canvas Area */
+        .widget-canvas-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #f8f9fa;
+        }
+
+        .canvas-toolbar {
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .widget-canvas {
+            flex: 1;
+            padding: 20px;
+            overflow: auto;
+        }
+
+        .canvas-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .widget-preview {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            min-height: 400px;
+            position: relative;
+        }
+
+        .widget-header {
+            padding: 20px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .widget-preview-title {
+            margin: 0 0 8px 0;
+            color: #333;
+            font-size: 20px;
+        }
+
+        .widget-preview-description {
+            margin: 0;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .widget-content {
+            padding: 20px;
+            min-height: 300px;
+            position: relative;
+        }
+
+        .empty-widget-message {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-widget-message i {
+            font-size: 48px;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+
+        .empty-widget-message h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+
+        .empty-widget-message p {
+            margin: 0;
+        }
+
+        /* Properties Panel */
+        .widget-properties-sidebar {
+            width: 320px;
+            background: white;
+            border-left: 1px solid #e0e0e0;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .properties-header {
+            padding: 20px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .properties-header h3 {
+            margin: 0;
+            color: #333;
+            font-size: 18px;
+        }
+
+        .properties-content {
+            padding: 20px;
+        }
+
+        .no-selection {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .no-selection i {
+            font-size: 32px;
+            color: #ddd;
+            margin-bottom: 15px;
+        }
+
+        .property-tabs {
+            display: flex;
+            border-bottom: 1px solid #e0e0e0;
+            margin-bottom: 20px;
+        }
+
+        .property-tab {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        .property-tab.active {
+            color: #4F46E5;
+            border-bottom: 2px solid #4F46E5;
+        }
+
+        .property-section {
+            margin-bottom: 25px;
+        }
+
+        .property-section h4 {
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .property-group {
+            margin-bottom: 15px;
+        }
+
+        .property-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .property-group input,
+        .property-group select,
+        .property-group textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .property-group input:focus,
+        .property-group select:focus,
+        .property-group textarea:focus {
+            outline: none;
+            border-color: #4F46E5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .color-picker-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .color-picker {
+            width: 40px;
+            height: 32px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .color-input {
+            flex: 1;
+        }
+
+        /* Widget Components */
+        .widget-component {
+            position: relative;
+            margin-bottom: 15px;
+            border: 2px solid transparent;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .widget-component:hover {
+            border-color: #4F46E5;
+        }
+
+        .widget-component.selected {
+            border-color: #4F46E5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .component-controls {
+            position: absolute;
+            top: -30px;
+            right: 0;
+            display: none;
+            gap: 5px;
+        }
+
+        .widget-component:hover .component-controls,
+        .widget-component.selected .component-controls {
+            display: flex;
+        }
+
+        .control-btn {
+            background: #4F46E5;
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .control-btn:hover {
+            background: #3730A3;
+        }
+
+        .control-btn.delete {
+            background: #EF4444;
+        }
+
+        .control-btn.delete:hover {
+            background: #DC2626;
+        }
+
+        /* Specific Widget Components */
+        .kpi-metric {
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            color: white;
+            padding: 24px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .kpi-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .kpi-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .kpi-change {
+            font-size: 12px;
+            padding: 4px 8px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 12px;
+            display: inline-block;
+        }
+
+        .chart-widget {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .chart-placeholder {
+            height: 200px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .action-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .action-button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .action-button.primary {
+            background: #4F46E5;
+            color: white;
+        }
+
+        .action-button.secondary {
+            background: #6B7280;
+            color: white;
+        }
+
+        .action-button.success {
+            background: #10B981;
+            color: white;
+        }
+
+        .action-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .text-component {
+            padding: 12px;
+            border: 1px dashed #ddd;
+            border-radius: 6px;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+        }
+
+        .text-component[contenteditable="true"] {
+            outline: none;
+            border-color: #4F46E5;
+        }
+
+        /* Drag and Drop */
+        .drop-zone {
+            min-height: 100px;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+
+        .drop-zone.drag-over {
+            border-color: #4F46E5;
+            background: rgba(79, 70, 229, 0.05);
+        }
+
+        /* Sortable.js styles */
+        .sortable-ghost {
+            opacity: 0.4;
+            background: rgba(79, 70, 229, 0.1);
+            border: 2px dashed #4F46E5;
+        }
+
+        .sortable-chosen {
+            opacity: 0.8;
+            transform: scale(1.02);
+        }
+
+        .sortable-drag {
+            opacity: 0.6;
+            transform: rotate(5deg);
+        }
+
+        /* Widget content drag over state */
+        .widget-content.drag-over {
+            background: rgba(79, 70, 229, 0.05);
+            border: 2px dashed #4F46E5;
+            border-radius: 8px;
+        }
+
+        /* Component item dragging states */
+        .component-item.sortable-chosen {
+            background: #f0f0f0;
+            transform: scale(1.05);
+        }
+
+        .component-item.sortable-ghost {
+            opacity: 0.3;
+            background: rgba(79, 70, 229, 0.1);
+        }
+
+        /* Notification styles */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 6px;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .notification.success {
+            background: #10B981;
+        }
+
+        .notification.error {
+            background: #EF4444;
+        }
+
+        .notification.info {
+            background: #3B82F6;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Chatbot collapsed state */
+        .chatbot-body.collapsed {
+            display: none !important;
+        }
+
+        /* Typing indicator */
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .typing-dots span {
+            width: 6px;
+            height: 6px;
+            background: #666;
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dots span:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+
+        .typing-dots span:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+
+        @keyframes typing {
+            0%, 80%, 100% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .widget-components-sidebar {
+                width: 250px;
+            }
+            
+            .widget-properties-sidebar {
+                width: 280px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .widget-builder-container {
+                flex-direction: column;
+            }
+            
+            .widget-components-sidebar,
+            .widget-properties-sidebar {
+                width: 100%;
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+<body class="widget-builder-body">
+    <!-- Header -->
+    <header class="widget-builder-header">
+        <div class="header-left">
+            <div class="logo">
+                <i class="fas fa-fire"></i>
+                <span>Phoenix</span>
+            </div>
+            <div class="breadcrumb">
+                <span><a href="index.html">Dashboard</a></span>
+                <i class="fas fa-chevron-right"></i>
+                <span><a href="widget-list.html">Widget Builder</a></span>
+                <i class="fas fa-chevron-right"></i>
+                <span id="widget-name-breadcrumb">New Widget</span>
+            </div>
+        </div>
+        <div class="header-center">
+            <div class="form-title-editor">
+                <input type="text" id="widget-title" placeholder="Untitled Widget" class="form-title-input">
+                <button class="btn-icon" id="edit-title" title="Edit widget title">
+                    <i class="fas fa-edit"></i>
+                </button>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="form-actions">
+                <button class="btn btn-outline" id="preview-widget">
+                    <i class="fas fa-eye"></i>
+                    Preview
+                </button>
+                <button class="btn btn-secondary" id="save-widget">
+                    <i class="fas fa-save"></i>
+                    Save
+                </button>
+                <button class="btn btn-primary" id="publish-widget">
+                    <i class="fas fa-rocket"></i>
+                    Publish
+                </button>
+            </div>
+            <div class="user-profile">
+                <img src="./man_professional.webp" alt="Profile">
+                <span>John Doe</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Builder Interface -->
+    <div class="widget-builder-container">
+        <!-- Left Sidebar - Widget Components -->
+        <aside class="widget-components-sidebar">
+            <div class="components-header">
+                <h3>Widget Components</h3>
+                <div class="component-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search components..." id="component-search">
+                </div>
+            </div>
+
+            <div class="component-categories">
+                <!-- Analytics Components -->
+                <div class="component-category active" data-category="analytics">
+                    <button class="category-header">
+                        <span><i class="fas fa-chart-line"></i> Analytics</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="category-components">
+                        <div class="component-item" data-type="kpi-metric">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>KPI Metric</span>
+                        </div>
+                        <div class="component-item" data-type="line-chart">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Line Chart</span>
+                        </div>
+                        <div class="component-item" data-type="bar-chart">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Bar Chart</span>
+                        </div>
+                        <div class="component-item" data-type="pie-chart">
+                            <i class="fas fa-chart-pie"></i>
+                            <span>Pie Chart</span>
+                        </div>
+                        <div class="component-item" data-type="progress-bar">
+                            <i class="fas fa-tasks"></i>
+                            <span>Progress Bar</span>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Display Components -->
+                <div class="component-category" data-category="display">
+                    <button class="category-header">
+                        <span><i class="fas fa-th-large"></i> Display</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="category-components">
+                        <div class="component-item" data-type="data-table">
+                            <i class="fas fa-table"></i>
+                            <span>Data Table</span>
+                        </div>
+                        <div class="component-item" data-type="activity-feed">
+                            <i class="fas fa-stream"></i>
+                            <span>Activity Feed</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Center - Widget Canvas -->
+        <main class="widget-canvas-container">
+            <div class="canvas-toolbar">
+                <div class="toolbar-left">
+                    <button class="btn-icon" id="undo-action" title="Undo">
+                        <i class="fas fa-undo"></i>
+                    </button>
+                    <button class="btn-icon" id="redo-action" title="Redo">
+                        <i class="fas fa-redo"></i>
+                    </button>
+                    <div class="toolbar-divider"></div>
+                    <button class="btn-icon" id="clear-widget" title="Clear Widget">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+                <div class="toolbar-center">
+                    <div class="device-preview">
+                        <button class="device-btn active" data-device="desktop" title="Desktop View">
+                            <i class="fas fa-desktop"></i>
+                        </button>
+                        <button class="device-btn" data-device="tablet" title="Tablet View">
+                            <i class="fas fa-tablet-alt"></i>
+                        </button>
+                        <button class="device-btn" data-device="mobile" title="Mobile View">
+                            <i class="fas fa-mobile-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="toolbar-right">
+                    <div class="zoom-controls">
+                        <button class="btn-icon" id="zoom-out" title="Zoom Out">
+                            <i class="fas fa-search-minus"></i>
+                        </button>
+                        <span class="zoom-level">100%</span>
+                        <button class="btn-icon" id="zoom-in" title="Zoom In">
+                            <i class="fas fa-search-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="widget-canvas" id="widget-canvas">
+                <div class="canvas-content">
+                    <div class="widget-preview" id="widget-preview">
+                        <div class="widget-header">
+                            <h2 class="widget-preview-title">Untitled Widget</h2>
+                            <p class="widget-preview-description">Add components to build your widget</p>
+                        </div>
+                        <div class="widget-content" id="widget-content">
+                            <div class="empty-widget-message">
+                                <i class="fas fa-puzzle-piece"></i>
+                                <h3>Start Building Your Widget</h3>
+                                <p>Drag components from the left sidebar to add them to your widget</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Right Sidebar - Properties Panel -->
+        <aside class="widget-properties-sidebar">
+            <div class="properties-header">
+                <h3>Properties</h3>
+            </div>
+
+            <div class="properties-content" id="properties-content">
+                <div class="no-selection">
+                    <i class="fas fa-mouse-pointer"></i>
+                    <p>Select a component to edit its properties</p>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Preview Modal -->
+    <div id="preview-modal" class="modal" style="display: none;">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h2>Widget Preview</h2>
+                <button class="modal-close" id="close-preview-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="preview-container" id="preview-container">
+                    <!-- Widget preview will be rendered here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="close-preview">Close</button>
+                <button type="button" class="btn btn-primary" id="test-widget">Test Widget</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chatbot -->
+    <div class="chatbot" id="chatbot">
+        <div class="chatbot-header">
+            <div class="chatbot-title">
+                <i class="fas fa-robot"></i>
+                Widget Assistant
+            </div>
+            <button class="chatbot-toggle" id="chatbot-toggle">
+                <i class="fas fa-minus"></i>
+            </button>
+        </div>
+        <div class="chatbot-body" id="chatbot-body">
+            <div class="chatbot-messages" id="chatbot-messages">
+                <div class="message bot-message">
+                    <div class="message-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="message-content">
+                        Hi! I'm your Widget Assistant. I can help you build widgets, suggest components, and answer questions about the widget builder. How can I assist you today?
+                    </div>
+                </div>
+            </div>
+            <div class="chatbot-input">
+                <input type="text" id="chatbot-input" placeholder="Ask me anything about widgets...">
+                <button id="chatbot-send" disabled>
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="widget-builder.js"></script>
+</body>
+</html>

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workflow Builder - Phoenix Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="workflow-styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <button class="btn-icon" onclick="window.location.href='index.html'">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <div class="breadcrumb">
+                    <a href="index.html">Phoenix Platform</a>
+                    <i class="fas fa-chevron-right"></i>
+                    <a href="workflow-list.html">Workflows</a>
+                    <i class="fas fa-chevron-right"></i>
+                    <span id="workflow-name-breadcrumb">New Workflow</span>
+                </div>
+            </div>
+            <div class="header-center">
+                <input type="text" id="workflow-title" class="form-title-input" placeholder="Workflow Name" value="New Workflow">
+            </div>
+            <div class="header-right">
+                <button class="btn btn-outline" id="test-workflow">
+                    <i class="fas fa-play"></i> Test
+                </button>
+                <button class="btn btn-outline" id="save-workflow">
+                    <i class="fas fa-save"></i> Save
+                </button>
+                <button class="btn btn-info" id="preview-workflow">
+                    <i class="fas fa-eye"></i> Preview
+                </button>
+                <button class="btn btn-primary" id="publish-workflow">
+                    <i class="fas fa-cloud-upload-alt"></i> Publish
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="builder-container">
+            <!-- Left Sidebar - Node Palette -->
+            <aside class="builder-sidebar">
+                <div class="sidebar-header">
+                    <h3>Workflow Nodes</h3>
+                    <input type="text" id="node-search" class="search-input" placeholder="Search nodes...">
+                </div>
+                
+                <div class="node-categories">
+                    <!-- Triggers Category -->
+                    <div class="node-category">
+                        <div class="category-header">
+                            <i class="fas fa-bolt"></i>
+                            <span>Triggers</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="category-nodes">
+                            <div class="node-item" draggable="true" data-node-type="trigger" data-node-subtype="form_submit">
+                                <i class="fas fa-wpforms"></i>
+                                <span>Form Submit</span>
+                            </div>
+                            <div class="node-item" draggable="true" data-node-type="trigger" data-node-subtype="page_load">
+                                <i class="fas fa-file"></i>
+                                <span>Page Load</span>
+                            </div>
+                            <div class="node-item" draggable="true" data-node-type="trigger" data-node-subtype="button_click">
+                                <i class="fas fa-mouse"></i>
+                                <span>Button Click</span>
+                            </div>
+                            <div class="node-item" draggable="true" data-node-type="trigger" data-node-subtype="timer">
+                                <i class="fas fa-clock"></i>
+                                <span>Timer</span>
+                            </div>
+                            <div class="node-item" draggable="true" data-node-type="trigger" data-node-subtype="data_change">
+                                <i class="fas fa-database"></i>
+                                <span>Data Change</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions Category -->
+                    <div class="node-category">
+                        <div class="category-header">
+                            <i class="fas fa-play-circle"></i>
+                            <span>Actions</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="category-nodes">
+                            <div class="node-item" draggable="true" data-node-type="action" data-node-subtype="navigate">
+                                <i class="fas fa-directions"></i>
+                                <span>Navigate</span>
+                            </div>
+                            <div class="node-item" draggable="true" data-node-type="action" data-node-subtype="show_message">
+                                <i class="fas fa-comment"></i>
+                                <span>Show Message</span>
+                            </div>
+                            <div class="node-item" draggable="true" data-node-type="action" data-node-subtype="update_widget">
+                                <i class="fas fa-chart-line"></i>
+                                <span>Update Widget</span>
+                            </div>
+                            <div class="node-item" draggable="true" data-node-type="action" data-node-subtype="save_data">
+                                <i class="fas fa-database"></i>
+                                <span>Save Data</span>
+                            </div>
+                            <div class="node-item" draggable="true" data-node-type="action" data-node-subtype="delete_data">
+                                <i class="fas fa-trash"></i>
+                                <span>Delete Data</span>
+                            </div>
+                            <div class="node-item" draggable="true" data-node-type="action" data-node-subtype="set_variable">
+                                <i class="fas fa-code"></i>
+                                <span>Set Variable</span>
+                            </div>
+                            <div class="node-item" draggable="true" data-node-type="action" data-node-subtype="show_element">
+                                <i class="fas fa-eye"></i>
+                                <span>Show/Hide Element</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Logic Category -->
+                    <div class="node-category">
+                        <div class="category-header">
+                            <i class="fas fa-code-branch"></i>
+                            <span>Logic</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="category-nodes">
+                            <div class="node-item" draggable="true" data-node-type="logic" data-node-subtype="condition">
+                                <i class="fas fa-code-branch"></i>
+                                <span>If/Else</span>
+                            </div>
+                            <div class="node-item" draggable="true" data-node-type="logic" data-node-subtype="switch">
+                                <i class="fas fa-random"></i>
+                                <span>Switch</span>
+                            </div>
+                            <div class="node-item" draggable="true" data-node-type="logic" data-node-subtype="loop">
+                                <i class="fas fa-redo"></i>
+                                <span>Loop</span>
+                            </div>
+                            <div class="node-item" draggable="true" data-node-type="logic" data-node-subtype="wait">
+                                <i class="fas fa-pause"></i>
+                                <span>Wait</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Data Category -->
+                    <div class="node-category">
+                        <div class="category-header">
+                            <i class="fas fa-exchange-alt"></i>
+                            <span>Data</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="category-nodes">
+                            <div class="node-item" draggable="true" data-node-type="data" data-node-subtype="transform">
+                                <i class="fas fa-exchange-alt"></i>
+                                <span>Transform</span>
+                            </div>
+                            <div class="node-item" draggable="true" data-node-type="data" data-node-subtype="calculate">
+                                <i class="fas fa-calculator"></i>
+                                <span>Calculate</span>
+                            </div>
+                            <div class="node-item" draggable="true" data-node-type="data" data-node-subtype="filter">
+                                <i class="fas fa-filter"></i>
+                                <span>Filter</span>
+                            </div>
+                            <div class="node-item" draggable="true" data-node-type="data" data-node-subtype="merge">
+                                <i class="fas fa-object-group"></i>
+                                <span>Merge</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Center - Canvas Area -->
+            <main class="builder-main">
+                <div class="canvas-toolbar">
+                    <div class="toolbar-left">
+                        <button class="btn-icon" id="zoom-in" title="Zoom In">
+                            <i class="fas fa-search-plus"></i>
+                        </button>
+                        <button class="btn-icon" id="zoom-out" title="Zoom Out">
+                            <i class="fas fa-search-minus"></i>
+                        </button>
+                        <button class="btn-icon" id="zoom-fit" title="Fit to Screen">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                        <span class="zoom-level">100%</span>
+                    </div>
+                    <div class="toolbar-center">
+                        <button class="btn-icon" id="undo-action" title="Undo (Ctrl+Z)">
+                            <i class="fas fa-undo"></i>
+                        </button>
+                        <button class="btn-icon" id="redo-action" title="Redo (Ctrl+Shift+Z)">
+                            <i class="fas fa-redo"></i>
+                        </button>
+                        <button class="btn-icon" id="clear-canvas" title="Clear Canvas">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <div class="toolbar-right">
+                        <button class="btn-icon" id="auto-layout" title="Auto Layout">
+                            <i class="fas fa-magic"></i>
+                        </button>
+                        <button class="btn-icon" id="toggle-grid" title="Toggle Grid">
+                            <i class="fas fa-th"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="workflow-canvas" id="workflow-canvas">
+                    <svg class="workflow-connections" id="workflow-connections"></svg>
+                    <div class="canvas-content" id="canvas-content">
+                        <div class="empty-canvas-message">
+                            <i class="fas fa-project-diagram"></i>
+                            <h3>Start Building Your Workflow</h3>
+                            <p>Drag nodes from the left sidebar to create your workflow</p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Right Sidebar - Properties Panel -->
+            <aside class="properties-panel">
+                <div class="panel-header">
+                    <h3>Properties</h3>
+                </div>
+                <div class="properties-content" id="properties-content">
+                    <div class="no-selection">
+                        <i class="fas fa-mouse-pointer"></i>
+                        <p>Select a node to edit its properties</p>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- Test Modal -->
+    <div class="modal" id="test-modal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h2>Test Workflow</h2>
+                <button class="btn-icon" id="close-test-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="test-container">
+                    <div class="test-sidebar">
+                        <h3>Test Data</h3>
+                        <div id="test-data-help" class="property-help" style="margin-bottom: 10px;">
+                            <p>Enter test data in JSON format based on your trigger nodes.</p>
+                        </div>
+                        <div class="test-data-editor">
+                            <textarea id="test-data" placeholder='{"form": {"name": "John", "email": "john@example.com"}}'>{}</textarea>
+                        </div>
+                        <button class="btn btn-primary" id="run-test">
+                            <i class="fas fa-play"></i> Run Test
+                        </button>
+                    </div>
+                    <div class="test-results">
+                        <h3>Execution Log</h3>
+                        <div class="execution-log" id="test-results">
+                            <div class="log-empty">
+                                <i class="fas fa-clipboard-list"></i>
+                                <p>Run a test to see execution logs</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Connection Context Menu -->
+    <div class="context-menu" id="connection-menu">
+        <div class="menu-item" data-action="delete">
+            <i class="fas fa-trash"></i>
+            <span>Delete Connection</span>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="workflow-engine.js"></script>
+    <script src="workflow-canvas.js"></script>
+    <script src="workflow-builder.js"></script>
+</body>
+</html>

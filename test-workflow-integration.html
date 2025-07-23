@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Workflow Integration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        h2 {
+            margin-top: 0;
+        }
+        .item {
+            padding: 10px;
+            margin: 5px 0;
+            background: #f5f5f5;
+            border-radius: 4px;
+        }
+        .published {
+            background: #e8f5e9;
+        }
+        .draft {
+            background: #fff3e0;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: #2196F3;
+            color: white;
+        }
+        button:hover {
+            background: #1976D2;
+        }
+        .success {
+            color: #4CAF50;
+        }
+        .error {
+            color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <h1>Workflow Integration Test</h1>
+    
+    <div class="section">
+        <h2>Forms</h2>
+        <div id="forms-list"></div>
+        <button onclick="createSampleForm()">Create Sample Form</button>
+        <button onclick="publishAllForms()">Publish All Forms</button>
+    </div>
+    
+    <div class="section">
+        <h2>Pages</h2>
+        <div id="pages-list"></div>
+        <button onclick="createSamplePage()">Create Sample Page</button>
+        <button onclick="publishAllPages()">Publish All Pages</button>
+    </div>
+    
+    <div class="section">
+        <h2>Widgets</h2>
+        <div id="widgets-list"></div>
+        <button onclick="createSampleWidget()">Create Sample Widget</button>
+        <button onclick="publishAllWidgets()">Publish All Widgets</button>
+    </div>
+    
+    <div class="section">
+        <h2>Quick Actions</h2>
+        <button onclick="createAndPublishAll()">Create & Publish Sample Items</button>
+        <button onclick="clearAll()">Clear All Data</button>
+    </div>
+    
+    <div id="status"></div>
+
+    <script>
+        function loadItems() {
+            // Load forms
+            const forms = JSON.parse(localStorage.getItem('forms') || '[]');
+            const formsList = document.getElementById('forms-list');
+            if (forms.length === 0) {
+                formsList.innerHTML = '<p>No forms found</p>';
+            } else {
+                formsList.innerHTML = forms.map(f => 
+                    `<div class="item ${f.status}">
+                        <strong>${f.name}</strong> - ${f.status || 'draft'}
+                        ${f.id ? `<small>(${f.id})</small>` : ''}
+                    </div>`
+                ).join('');
+            }
+            
+            // Load pages
+            const pages = JSON.parse(localStorage.getItem('pages') || '[]');
+            const pagesList = document.getElementById('pages-list');
+            if (pages.length === 0) {
+                pagesList.innerHTML = '<p>No pages found</p>';
+            } else {
+                pagesList.innerHTML = pages.map(p => 
+                    `<div class="item ${p.status}">
+                        <strong>${p.name}</strong> - ${p.status || 'draft'}
+                        ${p.id ? `<small>(${p.id})</small>` : ''}
+                    </div>`
+                ).join('');
+            }
+            
+            // Load widgets
+            const widgets = JSON.parse(localStorage.getItem('widgets') || '[]');
+            const widgetsList = document.getElementById('widgets-list');
+            if (widgets.length === 0) {
+                widgetsList.innerHTML = '<p>No widgets found</p>';
+            } else {
+                widgetsList.innerHTML = widgets.map(w => 
+                    `<div class="item ${w.status}">
+                        <strong>${w.name}</strong> - ${w.status || 'draft'}
+                        ${w.id ? `<small>(${w.id})</small>` : ''}
+                    </div>`
+                ).join('');
+            }
+        }
+        
+        function createSampleForm() {
+            const forms = JSON.parse(localStorage.getItem('forms') || '[]');
+            const newForm = {
+                id: `form_${Date.now()}`,
+                name: `Contact Form ${forms.length + 1}`,
+                description: 'Sample contact form for testing',
+                status: 'draft',
+                fields: [
+                    { id: 'name', type: 'text', label: 'Name', required: true },
+                    { id: 'email', type: 'email', label: 'Email', required: true },
+                    { id: 'message', type: 'textarea', label: 'Message', required: false }
+                ],
+                created: new Date().toISOString()
+            };
+            forms.push(newForm);
+            localStorage.setItem('forms', JSON.stringify(forms));
+            showStatus('Sample form created', 'success');
+            loadItems();
+        }
+        
+        function createSamplePage() {
+            const pages = JSON.parse(localStorage.getItem('pages') || '[]');
+            const newPage = {
+                id: `page_${Date.now()}`,
+                name: `Landing Page ${pages.length + 1}`,
+                description: 'Sample landing page for testing',
+                status: 'draft',
+                content: '<h1>Welcome</h1><p>This is a sample page.</p>',
+                created: new Date().toISOString()
+            };
+            pages.push(newPage);
+            localStorage.setItem('pages', JSON.stringify(pages));
+            showStatus('Sample page created', 'success');
+            loadItems();
+        }
+        
+        function createSampleWidget() {
+            const widgets = JSON.parse(localStorage.getItem('widgets') || '[]');
+            const newWidget = {
+                id: `widget_${Date.now()}`,
+                name: `Dashboard Widget ${widgets.length + 1}`,
+                type: 'chart',
+                description: 'Sample chart widget for testing',
+                status: 'draft',
+                config: {
+                    chartType: 'line',
+                    data: [10, 20, 30, 40, 50]
+                },
+                created: new Date().toISOString()
+            };
+            widgets.push(newWidget);
+            localStorage.setItem('widgets', JSON.stringify(widgets));
+            showStatus('Sample widget created', 'success');
+            loadItems();
+        }
+        
+        function publishAllForms() {
+            const forms = JSON.parse(localStorage.getItem('forms') || '[]');
+            forms.forEach(form => {
+                form.status = 'published';
+            });
+            localStorage.setItem('forms', JSON.stringify(forms));
+            showStatus('All forms published', 'success');
+            loadItems();
+        }
+        
+        function publishAllPages() {
+            const pages = JSON.parse(localStorage.getItem('pages') || '[]');
+            pages.forEach(page => {
+                page.status = 'published';
+            });
+            localStorage.setItem('pages', JSON.stringify(pages));
+            showStatus('All pages published', 'success');
+            loadItems();
+        }
+        
+        function publishAllWidgets() {
+            const widgets = JSON.parse(localStorage.getItem('widgets') || '[]');
+            widgets.forEach(widget => {
+                widget.status = 'published';
+            });
+            localStorage.setItem('widgets', JSON.stringify(widgets));
+            showStatus('All widgets published', 'success');
+            loadItems();
+        }
+        
+        function createAndPublishAll() {
+            // Create sample items
+            createSampleForm();
+            createSamplePage();
+            createSampleWidget();
+            
+            // Wait a bit then publish all
+            setTimeout(() => {
+                publishAllForms();
+                publishAllPages();
+                publishAllWidgets();
+                showStatus('All sample items created and published!', 'success');
+            }, 100);
+        }
+        
+        function clearAll() {
+            if (confirm('This will clear all forms, pages, and widgets. Are you sure?')) {
+                localStorage.removeItem('forms');
+                localStorage.removeItem('pages');
+                localStorage.removeItem('widgets');
+                showStatus('All data cleared', 'success');
+                loadItems();
+            }
+        }
+        
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.innerHTML = `<p class="${type}">${message}</p>`;
+            setTimeout(() => {
+                status.innerHTML = '';
+            }, 3000);
+        }
+        
+        // Load items on page load
+        loadItems();
+    </script>
+</body>
+</html>

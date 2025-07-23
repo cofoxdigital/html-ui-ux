@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workflow Integration Demo - Phoenix Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .demo-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .demo-header h1 {
+            font-size: 36px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .demo-header p {
+            font-size: 18px;
+            color: #666;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .workflow-concept {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+        }
+
+        .workflow-concept h2 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .workflow-concept h2 i {
+            color: #4F46E5;
+        }
+
+        .concept-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .concept-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 25px;
+            border: 1px solid #e0e0e0;
+            transition: all 0.3s;
+        }
+
+        .concept-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .concept-card h3 {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .concept-card h3 i {
+            font-size: 24px;
+        }
+
+        .concept-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .workflow-example {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 30px;
+            margin-top: 30px;
+        }
+
+        .workflow-example h4 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .workflow-steps {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            overflow-x: auto;
+            padding: 20px 0;
+        }
+
+        .workflow-step {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            min-width: 200px;
+            text-align: center;
+            position: relative;
+        }
+
+        .workflow-step.trigger {
+            border-color: #10B981;
+        }
+
+        .workflow-step.action {
+            border-color: #4F46E5;
+        }
+
+        .workflow-step.logic {
+            border-color: #F59E0B;
+        }
+
+        .workflow-step i {
+            font-size: 32px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .workflow-step.trigger i {
+            color: #10B981;
+        }
+
+        .workflow-step.action i {
+            color: #4F46E5;
+        }
+
+        .workflow-step.logic i {
+            color: #F59E0B;
+        }
+
+        .workflow-step h5 {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .workflow-step p {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .workflow-arrow {
+            font-size: 24px;
+            color: #999;
+        }
+
+        .integration-showcase {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+        }
+
+        .integration-showcase h2 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .integration-example {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 30px;
+        }
+
+        .integration-side {
+            padding: 20px;
+        }
+
+        .integration-side h3 {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+
+        .code-comment {
+            color: #6A9955;
+        }
+
+        .code-keyword {
+            color: #569CD6;
+        }
+
+        .code-string {
+            color: #CE9178;
+        }
+
+        .code-function {
+            color: #DCDCAA;
+        }
+
+        .try-it-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 60px 40px;
+            text-align: center;
+            margin-top: 60px;
+        }
+
+        .try-it-section h2 {
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+
+        .try-it-section p {
+            font-size: 18px;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .try-it-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .try-it-buttons .btn {
+            background: white;
+            color: #4F46E5;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .try-it-buttons .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        @media (max-width: 768px) {
+            .integration-example {
+                grid-template-columns: 1fr;
+            }
+
+            .workflow-steps {
+                flex-direction: column;
+            }
+
+            .workflow-arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <button class="btn-icon" onclick="window.location.href='index.html'">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h1>Phoenix Platform</h1>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="demo-container">
+            <div class="demo-header">
+                <h1>Building Complete Websites with Workflows</h1>
+                <p>Learn how Phoenix Platform's Workflow Builder integrates with Page Builder to create dynamic, interactive websites without coding</p>
+            </div>
+
+            <!-- How Workflows Work -->
+            <div class="workflow-concept">
+                <h2><i class="fas fa-cogs"></i> How Workflows Transform Your Website</h2>
+                
+                <div class="concept-grid">
+                    <div class="concept-card">
+                        <h3><i class="fas fa-bolt" style="color: #10B981;"></i> Triggers</h3>
+                        <p>Start workflows based on user actions like form submissions, button clicks, page loads, or data changes. Connect any element on your page to trigger automated processes.</p>
+                    </div>
+                    
+                    <div class="concept-card">
+                        <h3><i class="fas fa-play-circle" style="color: #4F46E5;"></i> Actions</h3>
+                        <p>Execute tasks like navigating between pages, showing messages, updating widgets with live data, saving form submissions, or modifying page elements dynamically.</p>
+                    </div>
+                    
+                    <div class="concept-card">
+                        <h3><i class="fas fa-code-branch" style="color: #F59E0B;"></i> Logic</h3>
+                        <p>Add intelligence with conditions, loops, and data transformations. Create personalized experiences based on user input or stored data.</p>
+                    </div>
+                </div>
+
+                <div class="workflow-example">
+                    <h4>Example: Contact Form Workflow</h4>
+                    <div class="workflow-steps">
+                        <div class="workflow-step trigger">
+                            <i class="fas fa-wpforms"></i>
+                            <h5>Form Submit</h5>
+                            <p>User submits contact form</p>
+                        </div>
+                        
+                        <i class="fas fa-arrow-right workflow-arrow"></i>
+                        
+                        <div class="workflow-step action">
+                            <i class="fas fa-database"></i>
+                            <h5>Save Data</h5>
+                            <p>Store submission in localStorage</p>
+                        </div>
+                        
+                        <i class="fas fa-arrow-right workflow-arrow"></i>
+                        
+                        <div class="workflow-step action">
+                            <i class="fas fa-comment"></i>
+                            <h5>Show Message</h5>
+                            <p>Display success notification</p>
+                        </div>
+                        
+                        <i class="fas fa-arrow-right workflow-arrow"></i>
+                        
+                        <div class="workflow-step action">
+                            <i class="fas fa-directions"></i>
+                            <h5>Navigate</h5>
+                            <p>Redirect to thank you page</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Integration Showcase -->
+            <div class="integration-showcase">
+                <h2>Seamless Integration with Your Pages</h2>
+                
+                <div class="integration-example">
+                    <div class="integration-side">
+                        <h3><i class="fas fa-file-alt"></i> In Your Page</h3>
+                        <p style="margin-bottom: 20px;">Drop forms and widgets onto your pages using the visual Page Editor. Each element automatically becomes workflow-ready.</p>
+                        
+                        <div class="code-block">
+                            <span class="code-comment">// Your page automatically includes:</span><br>
+                            <span class="code-keyword">const</span> form = {<br>
+                            &nbsp;&nbsp;id: <span class="code-string">"contact-form"</span>,<br>
+                            &nbsp;&nbsp;fields: [<span class="code-string">"name"</span>, <span class="code-string">"email"</span>, <span class="code-string">"message"</span>]<br>
+                            };<br><br>
+                            <span class="code-comment">// Workflows can access form data:</span><br>
+                            <span class="code-function">onSubmit</span>: <span class="code-string">"{{trigger.form.email}}"</span>
+                        </div>
+                    </div>
+                    
+                    <div class="integration-side">
+                        <h3><i class="fas fa-project-diagram"></i> In Your Workflow</h3>
+                        <p style="margin-bottom: 20px;">Create visual workflows that respond to page events and update your content dynamically.</p>
+                        
+                        <div class="code-block">
+                            <span class="code-comment">// Workflow automatically handles:</span><br>
+                            <span class="code-keyword">trigger</span>: <span class="code-string">"form_submit"</span><br>
+                            <span class="code-keyword">actions</span>: [<br>
+                            &nbsp;&nbsp;{<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;type: <span class="code-string">"save_data"</span>,<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;key: <span class="code-string">"submissions"</span><br>
+                            &nbsp;&nbsp;},<br>
+                            &nbsp;&nbsp;{<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;type: <span class="code-string">"update_widget"</span>,<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;data: <span class="code-string">"{{saved_data}}"</span><br>
+                            &nbsp;&nbsp;}<br>
+                            ]
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Real-World Use Cases -->
+            <div class="workflow-concept">
+                <h2><i class="fas fa-lightbulb"></i> Real-World Website Examples</h2>
+                
+                <div class="concept-grid">
+                    <div class="concept-card">
+                        <h3><i class="fas fa-shopping-cart" style="color: #10B981;"></i> E-Commerce Flow</h3>
+                        <p>Create product catalogs with dynamic filtering, shopping cart functionality, and checkout processes - all without backend code.</p>
+                    </div>
+                    
+                    <div class="concept-card">
+                        <h3><i class="fas fa-chart-line" style="color: #4F46E5;"></i> Dashboard Sites</h3>
+                        <p>Build interactive dashboards where widgets update based on user selections, form inputs, or timed intervals.</p>
+                    </div>
+                    
+                    <div class="concept-card">
+                        <h3><i class="fas fa-user-check" style="color: #F59E0B;"></i> Multi-Step Forms</h3>
+                        <p>Design complex forms with conditional logic, progress tracking, and data validation across multiple pages.</p>
+                    </div>
+                    
+                    <div class="concept-card">
+                        <h3><i class="fas fa-bell" style="color: #8B5CF6;"></i> Event Registration</h3>
+                        <p>Create event sites with registration forms, confirmation emails, attendee counters, and personalized thank you pages.</p>
+                    </div>
+                    
+                    <div class="concept-card">
+                        <h3><i class="fas fa-poll" style="color: #EC4899;"></i> Survey Applications</h3>
+                        <p>Build surveys with branching logic, real-time results visualization, and data export capabilities.</p>
+                    </div>
+                    
+                    <div class="concept-card">
+                        <h3><i class="fas fa-graduation-cap" style="color: #14B8A6;"></i> Learning Platforms</h3>
+                        <p>Develop course websites with progress tracking, quiz functionality, and personalized learning paths.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Try It Section -->
+            <div class="try-it-section">
+                <h2>Ready to Build Your Website?</h2>
+                <p>Start creating dynamic, interactive websites with our visual builders</p>
+                <div class="try-it-buttons">
+                    <button class="btn" onclick="window.location.href='page-editor.html'">
+                        <i class="fas fa-file-alt"></i> Start with Page Builder
+                    </button>
+                    <button class="btn" onclick="window.location.href='workflow-builder.html'">
+                        <i class="fas fa-project-diagram"></i> Explore Workflows
+                    </button>
+                    <button class="btn" onclick="window.location.href='form-builder.html'">
+                        <i class="fas fa-wpforms"></i> Create a Form
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add some interactive animations
+        document.addEventListener('DOMContentLoaded', () => {
+            // Animate concept cards on scroll
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '0';
+                        entry.target.style.transform = 'translateY(20px)';
+                        setTimeout(() => {
+                            entry.target.style.transition = 'all 0.6s ease';
+                            entry.target.style.opacity = '1';
+                            entry.target.style.transform = 'translateY(0)';
+                        }, 100);
+                    }
+                });
+            });
+
+            document.querySelectorAll('.concept-card').forEach(card => {
+                observer.observe(card);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gauge Component Test</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 0;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .gauge-widget {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+        }
+        
+        .gauge-label {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+            text-align: center;
+        }
+        
+        .gauge-value {
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+            margin-top: 10px;
+        }
+        
+        .progress-widget {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+        }
+        
+        .progress-label {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .progress-value {
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+            margin-top: 10px;
+        }
+        
+        .controls {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .control-group {
+            margin: 10px 0;
+        }
+        
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        .control-group input {
+            width: 200px;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h2 {
+            color: #4F46E5;
+            border-bottom: 2px solid #4F46E5;
+            padding-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Gauge & Progress Bar Component Test</h1>
+        
+        <div class="controls">
+            <h2>Controls</h2>
+            <div class="control-group">
+                <label>Current Value:</label>
+                <input type="number" id="current-value" value="89.3" step="0.1">
+            </div>
+            <div class="control-group">
+                <label>Target Value:</label>
+                <input type="number" id="target-value" value="100" step="0.1" min="1">
+            </div>
+            <div class="control-group">
+                <label>Unit:</label>
+                <input type="text" id="unit-value" value="%">
+            </div>
+        </div>
+        
+        <h2>Fixed Gauge Component</h2>
+        <div id="gauge-container"></div>
+        
+        <h2>Fixed Progress Bar Component</h2>
+        <div id="progress-container"></div>
+    </div>
+
+    <script>
+        function renderGauge(currentValue, targetValue, unit, label) {
+            const gaugePercentage = (currentValue / targetValue) * 100;
+            const clampedPercentage = Math.min(Math.max(gaugePercentage, 0), 100);
+            const gaugeAngle = (clampedPercentage / 100) * 180;
+            
+            const centerX = 100;
+            const centerY = 100;
+            const radius = 80;
+            const startAngle = 180;
+            const endAngle = startAngle - gaugeAngle;
+            
+            const endX = centerX + radius * Math.cos(endAngle * Math.PI / 180);
+            const endY = centerY + radius * Math.sin(endAngle * Math.PI / 180);
+            
+            const largeArcFlag = gaugeAngle > 180 ? 1 : 0;
+            
+            return `
+                <div class="gauge-widget">
+                    <div class="gauge-label">${label}</div>
+                    <div class="gauge-container" style="position: relative; width: 200px; height: 120px; margin: 20px auto;">
+                        <svg width="200" height="120" viewBox="0 0 200 120">
+                            <!-- Background arc -->
+                            <path d="M 20 100 A 80 80 0 0 1 180 100" 
+                                  fill="none" 
+                                  stroke="#f0f0f0" 
+                                  stroke-width="12" 
+                                  stroke-linecap="round"/>
+                            <!-- Progress arc -->
+                            ${gaugeAngle > 0 ? `
+                            <path d="M 20 100 A 80 80 0 ${largeArcFlag} 1 ${endX} ${endY}" 
+                                  fill="none" 
+                                  stroke="#4F46E5" 
+                                  stroke-width="12" 
+                                  stroke-linecap="round"
+                                  style="transition: all 0.3s ease;"/>
+                            ` : ''}
+                            <!-- Center text -->
+                            <text x="100" y="85" text-anchor="middle" style="font-size: 24px; font-weight: bold; fill: #333;">
+                                ${Math.round(clampedPercentage)}%
+                            </text>
+                        </svg>
+                    </div>
+                    <div class="gauge-value">
+                        ${currentValue}${unit} / ${targetValue}${unit} (${Math.round(clampedPercentage)}%)
+                    </div>
+                </div>
+            `;
+        }
+        
+        function renderProgressBar(currentValue, targetValue, unit, label) {
+            const progressPercentage = (currentValue / targetValue) * 100;
+            
+            return `
+                <div class="progress-widget">
+                    <div class="progress-label">${label}</div>
+                    <div class="progress-bar-container" style="background: #f0f0f0; border-radius: 10px; height: 20px; margin: 10px 0;">
+                        <div class="progress-bar-fill" style="background: #4F46E5; height: 100%; border-radius: 10px; width: ${Math.min(progressPercentage, 100)}%; transition: width 0.3s;"></div>
+                    </div>
+                    <div class="progress-value">
+                        ${currentValue}${unit} / ${targetValue}${unit} (${Math.round(progressPercentage)}%)
+                    </div>
+                </div>
+            `;
+        }
+        
+        function updateComponents() {
+            const currentValue = parseFloat(document.getElementById('current-value').value) || 0;
+            const targetValue = parseFloat(document.getElementById('target-value').value) || 100;
+            const unit = document.getElementById('unit-value').value || '';
+            
+            document.getElementById('gauge-container').innerHTML = renderGauge(
+                currentValue, 
+                targetValue, 
+                unit, 
+                'Performance Score'
+            );
+            
+            document.getElementById('progress-container').innerHTML = renderProgressBar(
+                currentValue, 
+                targetValue, 
+                unit, 
+                'Goal Progress'
+            );
+        }
+        
+        // Initial render
+        updateComponents();
+        
+        // Add event listeners
+        document.getElementById('current-value').addEventListener('input', updateComponents);
+        document.getElementById('target-value').addEventListener('input', updateComponents);
+        document.getElementById('unit-value').addEventListener('input', updateComponents);
+    </script>
+</body>
+</html>

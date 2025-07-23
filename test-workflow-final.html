@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Final Workflow Test</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .login-form {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        input:focus {
+            outline: none;
+            border-color: #4f46e5;
+        }
+        button {
+            width: 100%;
+            background: #4f46e5;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #4338ca;
+        }
+        .console {
+            margin-top: 30px;
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 5px;
+            border-left: 3px solid transparent;
+        }
+        .log-info { border-left-color: #3b82f6; }
+        .log-success { border-left-color: #10b981; }
+        .log-error { border-left-color: #ef4444; }
+        .log-warning { border-left-color: #f59e0b; }
+        
+        /* Notification styles */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 4px;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .notification.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .notification.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .notification.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="login-form">
+            <h1>Login</h1>
+            <form id="login-form" data-form-id="1753250038592">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                </div>
+                <button type="submit">Login</button>
+            </form>
+        </div>
+        
+        <div class="console">
+            <div id="console-output">
+                <div class="log-entry log-info">Console initialized. Waiting for actions...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load workflow engine -->
+    <script src="workflow-engine.js"></script>
+    
+    <script>
+        const consoleOutput = document.getElementById('console-output');
+        
+        function log(message, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            const timestamp = new Date().toLocaleTimeString();
+            entry.textContent = `[${timestamp}] ${message}`;
+            consoleOutput.appendChild(entry);
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+        
+        // Load and register workflows
+        function loadWorkflows() {
+            const workflows = JSON.parse(localStorage.getItem('workflows') || '[]');
+            log(`Found ${workflows.length} workflows in localStorage`, 'info');
+            
+            const publishedWorkflows = workflows.filter(w => w.status === 'published');
+            log(`${publishedWorkflows.length} workflows are published`, 'info');
+            
+            publishedWorkflows.forEach(workflow => {
+                if (window.workflowEngine) {
+                    window.workflowEngine.registerWorkflow(workflow);
+                    log(`Registered workflow: ${workflow.name} (${workflow.id})`, 'success');
+                    
+                    // Log trigger details
+                    const triggers = workflow.nodes.filter(n => n.type === 'trigger');
+                    triggers.forEach(trigger => {
+                        if (trigger.subtype === 'form_submit') {
+                            log(`  - Form trigger for ID: ${trigger.config.formId}`, 'info');
+                        }
+                    });
+                }
+            });
+            
+            // Log all registered listeners
+            if (window.workflowEngine) {
+                const listeners = Array.from(window.workflowEngine.eventListeners.keys());
+                log(`Registered event listeners: ${listeners.join(', ')}`, 'info');
+            }
+        }
+        
+        // Handle form submission
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formId = this.dataset.formId;
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+            
+            log(`Form submitted!`, 'warning');
+            log(`Form ID: ${formId}`, 'info');
+            log(`Form data: ${JSON.stringify(data)}`, 'info');
+            
+            // Dispatch the event
+            const event = new CustomEvent('formSubmit', {
+                detail: {
+                    formId: formId,
+                    data: data,
+                    formElement: this
+                }
+            });
+            
+            log(`Dispatching formSubmit event...`, 'info');
+            window.dispatchEvent(event);
+        });
+        
+        // Listen for workflow events
+        window.addEventListener('workflowStarted', (e) => {
+            log(`✅ Workflow started: ${e.detail.workflowId}`, 'success');
+        });
+        
+        window.addEventListener('workflowCompleted', (e) => {
+            log(`✅ Workflow completed: ${e.detail.workflowId}`, 'success');
+        });
+        
+        window.addEventListener('actionExecuted', (e) => {
+            log(`⚡ Action executed: ${e.detail.action.subtype}`, 'success');
+        });
+        
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            log('Page loaded, initializing workflow engine...', 'info');
+            
+        // Wait for workflow engine to be ready
+        function initializeWhenReady() {
+            if (typeof workflowEngine !== 'undefined') {
+                window.workflowEngine = workflowEngine;
+                log('Workflow engine is ready!', 'success');
+                loadWorkflows();
+            } else {
+                log('Waiting for workflow engine...', 'warning');
+                setTimeout(initializeWhenReady, 100);
+            }
+        }
+        
+        initializeWhenReady();
+        });
+        
+        // Override the navigate action to log it
+        window.addEventListener('navigate', (e) => {
+            log(`📍 Navigate action: Going to page ${e.detail.pageId} in ${e.detail.delay}ms`, 'warning');
+            
+            // For testing, just log instead of actually navigating
+            setTimeout(() => {
+                log(`📍 Would navigate to: page-viewer.html?id=${e.detail.pageId}`, 'warning');
+                // Uncomment the line below to actually navigate:
+                // window.location.href = `page-viewer.html?id=${e.detail.pageId}`;
+            }, e.detail.delay);
+        });
+    </script>
+</body>
+</html>

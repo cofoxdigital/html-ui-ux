@@ -593,7 +593,10 @@
                     </div>
                     <h3>Workflow Builder</h3>
                     <p>Automate processes with visual workflow designer</p>
-                    <button class="btn btn-primary">Launch Builder</button>
+                    <button class="btn btn-primary" onclick="window.location.href='workflow-list.html'">Launch Builder</button>
+                    <button class="btn btn-secondary" onclick="window.location.href='workflow-demo.html'" style="margin-top: 10px;">
+                        <i class="fas fa-info-circle"></i> Learn More
+                    </button>
                 </div>
 
                 <div class="builder-card">
@@ -611,7 +614,7 @@
                     </div>
                     <h3>Widget Builder</h3>
                     <p>Build reusable UI components and widgets</p>
-                    <button class="btn btn-primary">Launch Builder</button>
+                    <button class="btn btn-primary" onclick="window.location.href='widget-list.html'">Launch Builder</button>
                 </div>
 
                 <div class="builder-card">
@@ -663,6 +666,81 @@
                     <h3>Theme Builder</h3>
                     <p>Customize branding and visual themes across platforms</p>
                     <button class="btn btn-primary">Launch Builder</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Complete Website Builder Section -->
+        <div id="website-builder" class="content-section">
+            <div class="section-header">
+                <h1>Build Complete Websites with Workflows</h1>
+                <div class="quick-actions">
+                    <button class="btn btn-primary" onclick="window.location.href='workflow-builder.html'">
+                        <i class="fas fa-project-diagram"></i>
+                        Open Workflow Builder
+                    </button>
+                </div>
+            </div>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <i class="fas fa-file-alt"></i>
+                    <h3>Page Builder</h3>
+                    <p>Create and design custom pages with drag-and-drop components</p>
+                    <a href="pages.html" class="btn">Open Page Builder</a>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-edit"></i>
+                    <h3>Form Builder</h3>
+                    <p>Build dynamic forms with various field types and validation</p>
+                    <a href="form-builder.html" class="btn">Open Form Builder</a>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-chart-bar"></i>
+                    <h3>Widget Builder</h3>
+                    <p>Create interactive widgets and data visualizations</p>
+                    <a href="widget-builder.html" class="btn">Open Widget Builder</a>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-project-diagram"></i>
+                    <h3>Workflow Builder</h3>
+                    <p>Connect everything with automated workflows and business logic</p>
+                    <a href="workflow-builder.html" class="btn">Open Workflow Builder</a>
+                </div>
+            </div>
+
+            <div class="dashboard-card" style="margin-top: 30px;">
+                <h3>📚 Documentation & Examples</h3>
+                <div class="builders-grid">
+                    <div class="builder-card">
+                        <div class="builder-icon">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <h3>Integration Guide</h3>
+                        <p>Learn how to use all builders together to create complete websites</p>
+                        <button class="btn btn-primary" onclick="window.open('workflow-website-integration.md', '_blank')">Read Guide</button>
+                    </div>
+                    
+                    <div class="builder-card">
+                        <div class="builder-icon">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <h3>Event Registration Example</h3>
+                        <p>See a complete example of building an event registration website</p>
+                        <button class="btn btn-primary" onclick="window.open('example-event-registration-site.html', '_blank')">View Example</button>
+                    </div>
+                    
+                    <div class="builder-card">
+                        <div class="builder-icon">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <h3>Workflow Demo</h3>
+                        <p>Interactive demo showing workflow capabilities</p>
+                        <button class="btn btn-primary" onclick="window.open('workflow-demo.html', '_blank')">Try Demo</button>
+                    </div>
                 </div>
             </div>
         </div>

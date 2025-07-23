@@ -124,15 +124,15 @@ class FormListManager {
                         const listForm = {
                             id: formData.id,
                             name: formData.name,
-                            description: `Form with ${formData.elements ? formData.elements.length : 0} elements`,
-                            category: this.getCategoryFromElements(formData.elements || []),
-                            status: 'draft', // All saved forms are drafts since we removed auto-save
+                            description: `Form with ${formData.fields ? formData.fields.length : (formData.elements ? formData.elements.length : 0)} elements`,
+                            category: this.getCategoryFromElements(formData.fields || formData.elements || []),
+                            status: formData.status || 'draft', // Use the actual status from form data
                             created: formData.createdAt || formData.updatedAt || new Date().toISOString().split('T')[0],
                             updated: formData.updatedAt ? formData.updatedAt.split('T')[0] : new Date().toISOString().split('T')[0],
                             views: 0,
                             submissions: 0,
                             conversion: 0,
-                            elements: formData.elements || []
+                            elements: formData.fields || formData.elements || []
                         };
                         this.forms.push(listForm);
                     }
@@ -153,7 +153,7 @@ class FormListManager {
         if (!elements || elements.length === 0) return 'other';
         
         const hasEmail = elements.some(el => el.type === 'email');
-        const hasPhone = elements.some(el => el.type === 'phone');
+        const hasPhone = elements.some(el => el.type === 'phone' || el.type === 'tel');
         const hasRating = elements.some(el => el.type === 'rating');
         const hasFile = elements.some(el => el.type === 'file');
         

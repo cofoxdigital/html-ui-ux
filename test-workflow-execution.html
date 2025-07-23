@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Workflow Execution</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        h1, h2 {
+            color: #333;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .section h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        button {
+            background: #4f46e5;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: 500;
+            margin-right: 10px;
+        }
+        
+        button:hover {
+            background: #4338ca;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .btn-success {
+            background: #28a745;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        #console {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 13px;
+            height: 300px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+        
+        .console-entry {
+            margin: 2px 0;
+            padding: 2px 0;
+            border-bottom: 1px solid #333;
+        }
+        
+        .console-time {
+            color: #858585;
+        }
+        
+        .console-info {
+            color: #4fc3f7;
+        }
+        
+        .console-success {
+            color: #81c784;
+        }
+        
+        .console-error {
+            color: #e57373;
+        }
+        
+        .console-warn {
+            color: #ffb74d;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .workflow-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+            max-height: 200px;
+        }
+        
+        .test-form {
+            background: #fff;
+            padding: 20px;
+            border: 2px solid #4f46e5;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Workflow Execution Tester</h1>
+        
+        <div class="workflow-info">
+            <p><strong>Purpose:</strong> This page helps test and debug workflow execution, especially for form submission → show message → page redirect workflows.</p>
+        </div>
+        
+        <div id="status" class="status info">
+            Initializing workflow engine...
+        </div>
+        
+        <div class="grid">
+            <div class="section">
+                <h3>1. Create Test Workflow</h3>
+                <p>This will create a workflow with your requirements:</p>
+                <ul>
+                    <li>Form submission trigger</li>
+                    <li>"Login successful" message (3 seconds)</li>
+                    <li>Page redirect</li>
+                </ul>
+                <button onclick="createTestWorkflow()" class="btn-success">Create Test Workflow</button>
+                <button onclick="loadExistingWorkflows()" class="btn-secondary">Load Existing Workflows</button>
+                
+                <div id="workflow-status" style="margin-top: 10px;"></div>
+            </div>
+            
+            <div class="section">
+                <h3>2. Test Form</h3>
+                <form id="test-login-form" class="test-form">
+                    <div class="form-group">
+                        <label for="username">Username:</label>
+                        <input type="text" id="username" name="username" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Password:</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    
+                    <button type="submit">Login</button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="section" style="margin-top: 20px;">
+            <h3>Console Output</h3>
+            <button onclick="clearConsole()" class="btn-secondary">Clear Console</button>
+            <div id="console"></div>
+        </div>
+        
+        <div class="section" style="margin-top: 20px;">
+            <h3>Workflow Details</h3>
+            <div id="workflow-details">
+                <p>No workflow loaded yet.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load workflow engine -->
+    <script src="workflow-engine.js"></script>
+    
+    <script>
+        const consoleEl = document.getElementById('console');
+        const statusEl = document.getElementById('status');
+        let testWorkflow = null;
+        
+        // Override console methods to capture logs
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        function addConsoleEntry(type, ...args) {
+            const time = new Date().toLocaleTimeString();
+            const message = args.map(arg => 
+                typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+            ).join(' ');
+            
+            const entry = document.createElement('div');
+            entry.className = 'console-entry';
+            entry.innerHTML = `<span class="console-time">[${time}]</span> <span class="console-${type}">${message}</span>`;
+            consoleEl.appendChild(entry);
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addConsoleEntry('info', ...args);
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addConsoleEntry('error', ...args);
+        };
+        
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            addConsoleEntry('warn', ...args);
+        };
+        
+        // Clear console
+        function clearConsole() {
+            consoleEl.innerHTML = '';
+        }
+        
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            if (typeof workflowEngine !== 'undefined') {
+                workflowEngine.debugMode = true;
+                statusEl.className = 'status success';
+                statusEl.textContent = 'Workflow engine loaded successfully!';
+                console.log('Workflow engine initialized with debug mode');
+            } else {
+                statusEl.className = 'status error';
+                statusEl.textContent = 'Error: Workflow engine not loaded';
+                console.error('workflowEngine is not defined');
+            }
+        });
+        
+        // Create test workflow
+        function createTestWorkflow() {
+            // First, let's check if we need to create a test page for redirect
+            const testPageId = 'test_success_page_' + Date.now();
+            const testPage = {
+                id: testPageId,
+                title: 'Login Success',
+                status: 'published',
+                published: true,
+                content: `
+                    <div style="text-align: center; padding: 50px;">
+                        <h1 style="color: #28a745;">Login Successful!</h1>
+                        <p>You have been successfully logged in.</p>
+                        <button onclick="window.location.href='test-workflow-execution.html'" style="padding: 10px 20px; background: #4f46e5; color: white; border: none; border-radius: 4px; cursor: pointer;">Back to Test</button>
+                    </div>
+                `
+            };
+            
+            // Save test page
+            localStorage.setItem(`page_${testPageId}`, JSON.stringify(testPage));
+            console.log('Created test success page:', testPageId);
+            
+            // Create the workflow
+            testWorkflow = {
+                id: 'test_login_workflow_' + Date.now(),
+                name: 'Login Form Workflow',
+                status: 'published',
+                nodes: [
+                    {
+                        id: 'trigger1',
+                        type: 'trigger',
+                        subtype: 'form_submit',
+                        config: {
+                            formId: 'test-login-form'
+                        },
+                        outputs: ['action1']
+                    },
+                    {
+                        id: 'action1',
+                        type: 'action',
+                        subtype: 'show_message',
+                        config: {
+                            message: 'Login successful',
+                            type: 'success',
+                            duration: 3000
+                        },
+                        outputs: ['action2']
+                    },
+                    {
+                        id: 'action2',
+                        type: 'action',
+                        subtype: 'navigate',
+                        config: {
+                            pageId: testPageId,
+                            delay: 3000  // Wait for message to show
+                        },
+                        outputs: []
+                    }
+                ]
+            };
+            
+            // Register with workflow engine
+            if (typeof workflowEngine !== 'undefined') {
+                workflowEngine.registerWorkflow(testWorkflow);
+                console.log('Test workflow registered:', testWorkflow.name);
+                console.log('Workflow ID:', testWorkflow.id);
+                console.log('Event listeners after registration:', Array.from(workflowEngine.eventListeners.keys()));
+                
+                // Save to localStorage
+                const workflows = JSON.parse(localStorage.getItem('workflows') || '[]');
+                workflows.push(testWorkflow);
+                localStorage.setItem('workflows', JSON.stringify(workflows));
+                
+                // Update UI
+                document.getElementById('workflow-status').innerHTML = `
+                    <div class="status success">
+                        Workflow created and registered!<br>
+                        ID: ${testWorkflow.id}
+                    </div>
+                `;
+                
+                displayWorkflowDetails(testWorkflow);
+            } else {
+                console.error('Cannot register workflow - engine not loaded');
+            }
+        }
+        
+        // Load existing workflows
+        function loadExistingWorkflows() {
+            const workflows = JSON.parse(localStorage.getItem('workflows') || '[]');
+            console.log('Found workflows in localStorage:', workflows.length);
+            
+            if (workflows.length > 0) {
+                // Find the most recent workflow with form trigger
+                const formWorkflow = workflows.find(w => 
+                    w.nodes.some(n => n.type === 'trigger' && n.subtype === 'form_submit')
+                );
+                
+                if (formWorkflow) {
+                    testWorkflow = formWorkflow;
+                    workflowEngine.registerWorkflow(formWorkflow);
+                    console.log('Loaded and registered workflow:', formWorkflow.name);
+                    
+                    document.getElementById('workflow-status').innerHTML = `
+                        <div class="status success">
+                            Loaded workflow: ${formWorkflow.name}<br>
+                            ID: ${formWorkflow.id}
+                        </div>
+                    `;
+                    
+                    displayWorkflowDetails(formWorkflow);
+                } else {
+                    document.getElementById('workflow-status').innerHTML = `
+                        <div class="status error">
+                            No workflows with form triggers found
+                        </div>
+                    `;
+                }
+            } else {
+                document.getElementById('workflow-status').innerHTML = `
+                    <div class="status error">
+                        No workflows found in localStorage
+                    </div>
+                `;
+            }
+        }
+        
+        // Display workflow details
+        function displayWorkflowDetails(workflow) {
+            const detailsEl = document.getElementById('workflow-details');
+            let html = `<h4>${workflow.name}</h4>`;
+            
+            workflow.nodes.forEach((node, index) => {
+                html += `<div style="margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 4px;">`;
+                html += `<strong>${index + 1}. ${node.type.toUpperCase()} - ${node.subtype}</strong><br>`;
+                
+                if (node.config) {
+                    html += `<pre>${JSON.stringify(node.config, null, 2)}</pre>`;
+                }
+                
+                if (node.outputs && node.outputs.length > 0) {
+                    html += `<small>→ Connects to: ${node.outputs.join(', ')}</small>`;
+                }
+                
+                html += `</div>`;
+            });
+            
+            detailsEl.innerHTML = html;
+        }
+        
+        // Handle form submission
+        document.getElementById('test-login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+            
+            console.log('=== FORM SUBMISSION ===');
+            console.log('Form ID:', this.id);
+            console.log('Form data:', data);
+            
+            // Dispatch the formSubmit event
+            const event = new CustomEvent('formSubmit', {
+                detail: {
+                    formId: this.id,
+                    data: data
+                }
+            });
+            
+            console.log('Dispatching formSubmit event with detail:', event.detail);
+            window.dispatchEvent(event);
+            
+            // Also try direct trigger
+            if (typeof workflowEngine !== 'undefined') {
+                console.log('Attempting direct trigger...');
+                workflowEngine.trigger('form_submit', {
+                    formId: this.id,
+                    data: data
+                });
+            }
+        });
+        
+        // Add notification styles
+        const style = document.createElement('style');
+        style.textContent = `
+            .notification {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 4px;
+                background: white;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                transform: translateX(400px);
+                transition: transform 0.3s ease;
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                max-width: 400px;
+            }
+            
+            .notification.show {
+                transform: translateX(0);
+            }
+            
+            .notification.success {
+                background: #d4edda;
+                color: #155724;
+                border: 1px solid #c3e6cb;
+            }
+            
+            .notification.error {
+                background: #f8d7da;
+                color: #721c24;
+                border: 1px solid #f5c6cb;
+            }
+            
+            .notification.info {
+                background: #d1ecf1;
+                color: #0c5460;
+                border: 1px solid #bee5eb;
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Listen for workflow events
+        window.addEventListener('workflow-log', function(e) {
+            console.log('[Workflow Event]', e.detail);
+        });
+    </script>
+</body>
+</html>
