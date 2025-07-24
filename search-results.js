@@ -1,4 +1,10 @@
 // Search Results Page JavaScript
+
+// Navigation function for onclick handlers
+function navigateTo(url) {
+    window.location.href = url;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Sample data for search functionality
     const searchData = {

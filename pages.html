@@ -543,37 +543,6 @@
         </div>
     </div>
 
-    <!-- AI Chatbot -->
-    <div id="chatbot" class="chatbot">
-        <div class="chatbot-header">
-            <div class="chatbot-title">
-                <i class="fas fa-robot"></i>
-                <span>Phoenix AI Assistant</span>
-            </div>
-            <button class="chatbot-toggle" id="chatbot-toggle">
-                <i class="fas fa-minus"></i>
-            </button>
-        </div>
-        <div class="chatbot-body" id="chatbot-body">
-            <div class="chatbot-messages" id="chatbot-messages">
-                <div class="message bot-message">
-                    <div class="message-avatar">
-                        <i class="fas fa-robot"></i>
-                    </div>
-                    <div class="message-content">
-                        <p>Hello! I'm your Phoenix AI Assistant. I can help you with page building, design tips, and answer questions about creating landing pages. How can I assist you today?</p>
-                    </div>
-                </div>
-            </div>
-            <div class="chatbot-input">
-                <input type="text" id="chatbot-input" placeholder="Ask me anything about page building...">
-                <button id="chatbot-send">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
-            </div>
-        </div>
-    </div>
-
     <script>
         // Pages data - will be loaded from localStorage
         let pages = [];
@@ -587,7 +556,6 @@
             setupTemplateSelection();
             setupFormHandlers();
             setupNavigation();
-            initializeChatbot();
             updateStatistics();
         });
 
@@ -945,116 +913,6 @@
             }, 3000);
         }
 
-        // Chatbot functionality
-        function initializeChatbot() {
-            const chatbot = document.getElementById('chatbot');
-            const chatbotToggle = document.getElementById('chatbot-toggle');
-            const chatbotBody = document.getElementById('chatbot-body');
-            const chatbotMessages = document.getElementById('chatbot-messages');
-            const chatbotInput = document.getElementById('chatbot-input');
-            const chatbotSend = document.getElementById('chatbot-send');
-            
-            if (!chatbot || !chatbotToggle || !chatbotBody || !chatbotMessages || !chatbotInput || !chatbotSend) {
-                return; // Elements not found, skip initialization
-            }
-            
-            let isCollapsed = false;
-            
-            // Toggle chatbot
-            chatbotToggle.addEventListener('click', function() {
-                isCollapsed = !isCollapsed;
-                if (isCollapsed) {
-                    chatbotBody.classList.add('collapsed');
-                    this.innerHTML = '<i class="fas fa-plus"></i>';
-                } else {
-                    chatbotBody.classList.remove('collapsed');
-                    this.innerHTML = '<i class="fas fa-minus"></i>';
-                }
-            });
-            
-            // Send message function
-            const sendMessage = () => {
-                const message = chatbotInput.value.trim();
-                if (!message) return;
-                
-                // Add user message
-                addChatMessage(message, 'user');
-                chatbotInput.value = '';
-                
-                // Simulate AI response
-                setTimeout(() => {
-                    const response = generatePageAIResponse(message);
-                    addChatMessage(response, 'bot');
-                }, 1000);
-            };
-            
-            // Event listeners
-            chatbotSend.addEventListener('click', sendMessage);
-            chatbotInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    sendMessage();
-                }
-            });
-        }
-        
-        // Add message to chat
-        function addChatMessage(text, sender) {
-            const chatbotMessages = document.getElementById('chatbot-messages');
-            if (!chatbotMessages) return;
-            
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${sender}-message`;
-            
-            const avatar = document.createElement('div');
-            avatar.className = 'message-avatar';
-            avatar.innerHTML = sender === 'bot' ? '<i class="fas fa-robot"></i>' : '<i class="fas fa-user"></i>';
-            
-            const content = document.createElement('div');
-            content.className = 'message-content';
-            content.innerHTML = `<p>${text}</p>`;
-            
-            messageDiv.appendChild(avatar);
-            messageDiv.appendChild(content);
-            
-            chatbotMessages.appendChild(messageDiv);
-            chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
-        }
-        
-        // AI Response Generator for Page Builder
-        function generatePageAIResponse(userMessage) {
-            const message = userMessage.toLowerCase();
-            
-            if (message.includes('create') || message.includes('new page')) {
-                return "To create a new page, click the 'Create New Page' button. You can choose from templates like Landing Page, Business Page, or Portfolio, or start with a blank page for complete customization.";
-            }
-            
-            if (message.includes('template')) {
-                return "We offer several page templates: Landing Page (hero section, features, CTA), Business Page (professional layout), Portfolio (showcase work), and Blank Page for custom designs. Each template provides a great starting point!";
-            }
-            
-            if (message.includes('edit') || message.includes('modify')) {
-                return "To edit a page, click the 'Edit' button on any page card. This will open the Page Editor where you can add content, customize styling, and configure page settings.";
-            }
-            
-            if (message.includes('duplicate') || message.includes('copy')) {
-                return "You can duplicate any page by clicking the 'Duplicate' button. This creates an exact copy that you can then modify without affecting the original page.";
-            }
-            
-            if (message.includes('publish') || message.includes('live')) {
-                return "Once your page is ready, you can publish it to make it live. Published pages get a public URL that you can share with your audience.";
-            }
-            
-            if (message.includes('seo') || message.includes('search')) {
-                return "For better SEO, make sure to set descriptive page titles, use clean URL slugs, add meta descriptions, and structure your content with proper headings.";
-            }
-            
-            if (message.includes('responsive') || message.includes('mobile')) {
-                return "All page templates are responsive by default. You can preview how your page looks on different devices and make adjustments as needed.";
-            }
-            
-            return "I can help you with page creation, editing, templates, publishing, and SEO optimization. What specific aspect of page building would you like assistance with?";
-        }
-
         // Close modal when clicking outside
         window.addEventListener('click', function(e) {
             if (e.target.classList.contains('modal-overlay')) {
@@ -1063,5 +921,6 @@
         });
     </script>
     <script src="./script.js"></script>
+    <script src="./chatbot.js"></script>
 </body>
 </html>
