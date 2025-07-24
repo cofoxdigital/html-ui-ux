@@ -271,6 +271,12 @@ class FormBuilder {
                     inline: false
                 };
 
+            case 'toggle':
+                return {
+                    ...baseElement,
+                    defaultValue: false
+                };
+
             case 'date':
             case 'time':
             case 'datetime':
@@ -437,7 +443,8 @@ class FormBuilder {
                            placeholder="${element.placeholder}" 
                            ${element.required ? 'required' : ''}
                            class="form-input ${element.cssClass}"
-                           style="width: ${element.width}">
+                           style="width: ${element.width}; padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; transition: all 0.2s;"
+                           value="${element.defaultValue || ''}">
                 `;
                 break;
 
@@ -447,7 +454,7 @@ class FormBuilder {
                               rows="${element.rows}"
                               ${element.required ? 'required' : ''}
                               class="form-textarea ${element.cssClass}"
-                              style="width: ${element.width}"></textarea>
+                              style="width: ${element.width}; padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; resize: vertical; transition: all 0.2s;">${element.defaultValue || ''}</textarea>
                 `;
                 break;
 
@@ -456,7 +463,8 @@ class FormBuilder {
                     <select ${element.required ? 'required' : ''} 
                             ${element.multiple ? 'multiple' : ''}
                             class="form-select ${element.cssClass}"
-                            style="width: ${element.width}">
+                            style="width: ${element.width}; padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; background: white; cursor: pointer;">
+                        <option value="">Choose an option...</option>
                         ${element.options.map(opt => 
                             `<option value="${opt.value}">${opt.label}</option>`
                         ).join('')}
@@ -466,12 +474,14 @@ class FormBuilder {
 
             case 'radio':
                 fieldHtml = `
-                    <div class="radio-group ${element.inline ? 'inline' : ''}">
+                    <div class="radio-group ${element.inline ? 'inline' : ''}" style="display: ${element.inline ? 'flex' : 'block'}; gap: 15px;">
                         ${element.options.map((opt, index) => `
-                            <label class="radio-label">
+                            <label class="radio-label" style="display: flex; align-items: center; margin-bottom: 8px; cursor: pointer;">
                                 <input type="radio" name="${element.id}" value="${opt.value}" 
-                                       ${element.required && index === 0 ? 'required' : ''}>
-                                <span class="radio-custom"></span>
+                                       ${element.required && index === 0 ? 'required' : ''}
+                                       ${index === 0 ? 'checked' : ''}
+                                       style="margin-right: 8px;">
+                                <span class="radio-custom" style="margin-right: 8px;"></span>
                                 ${opt.label}
                             </label>
                         `).join('')}
@@ -481,11 +491,13 @@ class FormBuilder {
 
             case 'checkbox':
                 fieldHtml = `
-                    <div class="checkbox-group ${element.inline ? 'inline' : ''}">
-                        ${element.options.map(opt => `
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="${element.id}[]" value="${opt.value}">
-                                <span class="checkbox-custom"></span>
+                    <div class="checkbox-group ${element.inline ? 'inline' : ''}" style="display: ${element.inline ? 'flex' : 'block'}; gap: 15px;">
+                        ${element.options.map((opt, index) => `
+                            <label class="checkbox-label" style="display: flex; align-items: center; margin-bottom: 8px; cursor: pointer;">
+                                <input type="checkbox" name="${element.id}[]" value="${opt.value}"
+                                       ${index === 0 ? 'checked' : ''}
+                                       style="margin-right: 8px;">
+                                <span class="checkbox-custom" style="margin-right: 8px;"></span>
                                 ${opt.label}
                             </label>
                         `).join('')}
@@ -493,33 +505,66 @@ class FormBuilder {
                 `;
                 break;
 
+            case 'toggle':
+                fieldHtml = `
+                    <style>
+                        .toggle-switch-${element.id} input:checked + .toggle-slider {
+                            background-color: #4F46E5;
+                        }
+                        .toggle-switch-${element.id} input:checked + .toggle-slider .toggle-knob {
+                            transform: translateX(26px);
+                        }
+                    </style>
+                    <div class="toggle-field" style="display: flex; align-items: center; gap: 12px;">
+                        <label class="toggle-switch toggle-switch-${element.id}" style="position: relative; display: inline-block; width: 50px; height: 24px;">
+                            <input type="checkbox" ${element.defaultValue ? 'checked' : ''} style="opacity: 0; width: 0; height: 0;">
+                            <span class="toggle-slider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 24px;">
+                                <span class="toggle-knob" style="position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%;"></span>
+                            </span>
+                        </label>
+                        <span>${element.label || 'Toggle Option'}</span>
+                    </div>
+                `;
+                break;
+
             case 'date':
             case 'time':
             case 'datetime-local':
+                const today = new Date().toISOString().split('T')[0];
+                const now = new Date().toTimeString().slice(0, 5);
                 fieldHtml = `
                     <input type="${element.type === 'datetime' ? 'datetime-local' : element.type}" 
                            ${element.required ? 'required' : ''}
                            class="form-input ${element.cssClass}"
-                           style="width: ${element.width}">
+                           style="width: ${element.width}; padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;"
+                           value="${element.type === 'date' ? today : element.type === 'time' ? now : ''}">
                 `;
                 break;
 
             case 'file':
                 fieldHtml = `
-                    <input type="file" 
-                           ${element.accept ? `accept="${element.accept}"` : ''}
-                           ${element.multiple ? 'multiple' : ''}
-                           ${element.required ? 'required' : ''}
-                           class="form-file ${element.cssClass}"
-                           style="width: ${element.width}">
+                    <div class="file-upload-wrapper" style="position: relative; overflow: hidden; display: inline-block;">
+                        <button class="btn btn-outline" style="padding: 10px 20px; border: 2px dashed #ddd; border-radius: 6px; background: #f8f9fa; cursor: pointer;">
+                            <i class="fas fa-cloud-upload-alt" style="margin-right: 8px;"></i>
+                            Choose File${element.multiple ? 's' : ''}
+                        </button>
+                        <input type="file" 
+                               ${element.accept ? `accept="${element.accept}"` : ''}
+                               ${element.multiple ? 'multiple' : ''}
+                               ${element.required ? 'required' : ''}
+                               class="form-file ${element.cssClass}"
+                               style="position: absolute; left: 0; top: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer;">
+                    </div>
+                    <span style="margin-left: 12px; color: #666; font-size: 14px;">No file chosen</span>
                 `;
                 break;
 
             case 'rating':
                 fieldHtml = `
-                    <div class="rating-field">
+                    <div class="rating-field" style="display: flex; gap: 5px; font-size: 24px;">
                         ${Array.from({length: element.maxRating}, (_, i) => `
-                            <i class="fas fa-star rating-star" data-rating="${i + 1}"></i>
+                            <i class="fas fa-star rating-star" data-rating="${i + 1}" 
+                               style="color: ${i < (element.defaultValue || 3) ? '#fbbf24' : '#e5e7eb'}; cursor: pointer; transition: color 0.2s;"></i>
                         `).join('')}
                     </div>
                 `;
@@ -527,14 +572,31 @@ class FormBuilder {
 
             case 'slider':
                 fieldHtml = `
-                    <input type="range" 
-                           min="${element.min}" 
-                           max="${element.max}" 
-                           step="${element.step}"
-                           value="${element.defaultValue}"
-                           class="form-slider ${element.cssClass}"
-                           style="width: ${element.width}">
-                    <div class="slider-value">${element.defaultValue}</div>
+                    <div class="slider-wrapper" style="width: ${element.width};">
+                        <input type="range" 
+                               min="${element.min}" 
+                               max="${element.max}" 
+                               step="${element.step}"
+                               value="${element.defaultValue}"
+                               class="form-slider ${element.cssClass}"
+                               style="width: 100%; height: 6px; border-radius: 3px; background: #e5e7eb; outline: none; -webkit-appearance: none;">
+                        <div class="slider-labels" style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: #666;">
+                            <span>${element.min}</span>
+                            <span class="slider-value" style="font-weight: 600; color: #4F46E5;">${element.defaultValue}</span>
+                            <span>${element.max}</span>
+                        </div>
+                    </div>
+                `;
+                break;
+
+            case 'signature':
+                fieldHtml = `
+                    <div class="signature-field" style="width: ${element.width}; height: 150px; border: 2px dashed #ddd; border-radius: 6px; background: #f8f9fa; display: flex; align-items: center; justify-content: center; cursor: crosshair;">
+                        <div style="text-align: center; color: #999;">
+                            <i class="fas fa-signature" style="font-size: 32px; margin-bottom: 8px;"></i>
+                            <p style="margin: 0; font-size: 14px;">Click to sign</p>
+                        </div>
+                    </div>
                 `;
                 break;
 

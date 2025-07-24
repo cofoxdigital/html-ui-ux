@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Widget Builder - Phoenix Enterprise</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f8f9fa;
+        }
+
+        .builder-container {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .builder-sidebar {
+            width: 300px;
+            background: white;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .builder-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            background: white;
+        }
+
+        .builder-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0 0 5px 0;
+            color: #333;
+        }
+
+        .builder-subtitle {
+            font-size: 14px;
+            color: #666;
+            margin: 0;
+        }
+
+        .builder-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .builder-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .builder-toolbar {
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .toolbar-right {
+            display: flex;
+            gap: 10px;
+        }
+
+        .builder-canvas {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .widget-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            min-height: 600px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            position: relative;
+            padding: 20px;
+        }
+
+        .sidebar-tabs {
+            display: flex;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .sidebar-tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .sidebar-tab.active {
+            color: #6c5ce7;
+            border-bottom: 2px solid #6c5ce7;
+        }
+
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            height: calc(100vh - 220px);
+            padding-bottom: 20px;
+        }
+
+        .tab-panel {
+            display: none;
+            padding: 20px;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        /* Widget Grid System */
+        .widget-grid {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .widget-row {
+            display: grid;
+            gap: 15px;
+            grid-template-columns: repeat(12, 1fr);
+        }
+
+        .widget-cell {
+            border: 2px dashed #e0e0e0;
+            border-radius: 6px;
+            min-height: 100px;
+            padding: 15px;
+            position: relative;
+            transition: all 0.2s;
+            background: #fafafa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .widget-cell:hover {
+            border-color: #6c5ce7;
+            background: rgba(108, 92, 231, 0.05);
+        }
+
+        .widget-cell.drag-over {
+            border-color: #6c5ce7;
+            background: rgba(108, 92, 231, 0.1);
+            transform: scale(1.02);
+        }
+
+        .widget-cell.has-content {
+            border-style: solid;
+            background: white;
+        }
+
+        /* Component Library */
+        .component-library {
+            display: grid;
+            gap: 10px;
+        }
+
+        .component-category {
+            margin-bottom: 20px;
+        }
+
+        .component-category h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .component-item {
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 12px;
+            cursor: grab;
+            transition: all 0.2s;
+            background: white;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .component-item:hover {
+            border-color: #6c5ce7;
+            box-shadow: 0 2px 8px rgba(108, 92, 231, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .component-item:active {
+            cursor: grabbing;
+        }
+
+        .component-item.dragging {
+            opacity: 0.5;
+        }
+
+        .component-item i {
+            font-size: 20px;
+            color: #6c5ce7;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        /* Preset Templates */
+        .template-item {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+            margin-bottom: 10px;
+        }
+
+        .template-item:hover {
+            border-color: #6c5ce7;
+            box-shadow: 0 2px 8px rgba(108, 92, 231, 0.1);
+        }
+
+        .template-item h4 {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .template-item p {
+            margin: 0;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .template-item i {
+            font-size: 24px;
+            color: #6c5ce7;
+            margin-bottom: 10px;
+        }
+
+        /* Layout Configuration */
+        .layout-config {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .layout-selector {
+            margin-top: 15px;
+        }
+
+        .layout-selector label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .layout-options {
+            display: flex;
+            gap: 10px;
+            justify-content: space-between;
+        }
+
+        .layout-option {
+            flex: 1;
+            padding: 15px 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .layout-option:hover {
+            border-color: #6c5ce7;
+            background: #f8f7ff;
+        }
+
+        .layout-option.active {
+            border-color: #6c5ce7;
+            background: #f8f7ff;
+            color: #6c5ce7;
+        }
+
+        .layout-preview {
+            display: flex;
+            gap: 2%;
+            margin-bottom: 8px;
+            height: 30px;
+        }
+
+        .preview-col {
+            background: #6c5ce7;
+            border-radius: 4px;
+            opacity: 0.7;
+        }
+
+        .layout-option.active .preview-col {
+            opacity: 1;
+        }
+
+        /* Widget Components */
+        .widget-chart {
+            width: 100%;
+            height: 300px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+        }
+
+        .widget-metric {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .metric-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: #6c5ce7;
+            margin: 0;
+        }
+
+        .metric-label {
+            font-size: 14px;
+            color: #666;
+            margin: 5px 0 0 0;
+        }
+
+        .metric-change {
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        .metric-change.positive {
+            color: #27ae60;
+        }
+
+        .metric-change.negative {
+            color: #e74c3c;
+        }
+
+        .widget-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .widget-table th,
+        .widget-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .widget-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .widget-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .widget-list li {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .widget-progress {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .widget-progress-bar {
+            height: 100%;
+            background: #6c5ce7;
+            transition: width 0.3s ease;
+        }
+
+        /* Responsive Grid Classes */
+        .col-1 { grid-column: span 1; }
+        .col-2 { grid-column: span 2; }
+        .col-3 { grid-column: span 3; }
+        .col-4 { grid-column: span 4; }
+        .col-5 { grid-column: span 5; }
+        .col-6 { grid-column: span 6; }
+        .col-7 { grid-column: span 7; }
+        .col-8 { grid-column: span 8; }
+        .col-9 { grid-column: span 9; }
+        .col-10 { grid-column: span 10; }
+        .col-11 { grid-column: span 11; }
+        .col-12 { grid-column: span 12; }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .btn-block {
+            width: 100%;
+            display: block;
+            text-align: center;
+        }
+
+        .widget-controls {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            display: flex;
+            gap: 5px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .widget-cell:hover .widget-controls {
+            opacity: 1;
+        }
+
+        .widget-control-btn {
+            width: 24px;
+            height: 24px;
+            border: none;
+            border-radius: 4px;
+            background: #6c5ce7;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            transition: all 0.2s;
+        }
+
+        .widget-control-btn:hover {
+            background: #5a4fcf;
+        }
+
+        .widget-control-btn.delete {
+            background: #e74c3c;
+        }
+
+        .widget-control-btn.delete:hover {
+            background: #c0392b;
+        }
+
+        .drop-zone {
+            min-height: 100px;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 14px;
+            margin: 20px 0;
+            transition: all 0.2s;
+        }
+
+        .drop-zone.drag-over {
+            border-color: #6c5ce7;
+            background: rgba(108, 92, 231, 0.05);
+            color: #6c5ce7;
+        }
+
+        .widget-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .widget-header h3 {
+            margin: 0 0 5px 0;
+            color: #333;
+            font-size: 18px;
+        }
+
+        .widget-header p {
+            margin: 0;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="builder-container">
+        <!-- Sidebar -->
+        <div class="builder-sidebar">
+            <div class="builder-header">
+                <h2 class="builder-title" id="widget-title">New Widget</h2>
+                <p class="builder-subtitle">Build data visualization widgets</p>
+                <div class="builder-actions">
+                    <a href="widget-list.html" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </a>
+                    <button class="btn btn-primary btn-sm" onclick="saveWidget()">
+                        <i class="fas fa-save"></i> Save
+                    </button>
+                </div>
+            </div>
+
+            <div class="sidebar-tabs">
+                <button class="sidebar-tab active" onclick="switchTab('templates')">Templates</button>
+                <button class="sidebar-tab" onclick="switchTab('components')">Components</button>
+                <button class="sidebar-tab" onclick="switchTab('settings')">Settings</button>
+            </div>
+
+            <div class="sidebar-content">
+                <!-- Templates Tab -->
+                <div class="tab-panel active" id="templates-panel">
+                    <h4 style="margin: 0 0 15px 0; color: #333;">Widget Templates</h4>
+                    
+                    <div class="template-item" onclick="loadTemplate('kpi-dashboard')">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <h4>KPI Dashboard</h4>
+                        <p>Key metrics in a grid layout</p>
+                    </div>
+                    
+                    <div class="template-item" onclick="loadTemplate('sales-chart')">
+                        <i class="fas fa-chart-line"></i>
+                        <h4>Sales Chart</h4>
+                        <p>Line chart with revenue data</p>
+                    </div>
+                    
+                    <div class="template-item" onclick="loadTemplate('user-stats')">
+                        <i class="fas fa-users"></i>
+                        <h4>User Statistics</h4>
+                        <p>User growth and engagement</p>
+                    </div>
+                    
+                    <div class="template-item" onclick="loadTemplate('activity-feed')">
+                        <i class="fas fa-stream"></i>
+                        <h4>Activity Feed</h4>
+                        <p>Recent activities list</p>
+                    </div>
+                    
+                    <div class="template-item" onclick="loadTemplate('progress-tracker')">
+                        <i class="fas fa-tasks"></i>
+                        <h4>Progress Tracker</h4>
+                        <p>Project progress bars</p>
+                    </div>
+                    
+                    <div class="template-item" onclick="loadTemplate('data-table')">
+                        <i class="fas fa-table"></i>
+                        <h4>Data Table</h4>
+                        <p>Sortable data table</p>
+                    </div>
+                </div>
+
+                <!-- Components Tab -->
+                <div class="tab-panel" id="components-panel">
+                    <div class="layout-config">
+                        <h4 style="margin: 0 0 10px 0; color: #333;">Widget Layout</h4>
+                        <div class="layout-selector">
+                            <label>Choose Layout:</label>
+                            <div class="layout-options">
+                                <button type="button" class="layout-option active" onclick="selectLayout('single')">
+                                    <div class="layout-preview">
+                                        <div class="preview-col" style="width: 100%"></div>
+                                    </div>
+                                    <span>Single</span>
+                                </button>
+                                <button type="button" class="layout-option" onclick="selectLayout('split')">
+                                    <div class="layout-preview">
+                                        <div class="preview-col" style="width: 48%"></div>
+                                        <div class="preview-col" style="width: 48%"></div>
+                                    </div>
+                                    <span>Split</span>
+                                </button>
+                                <button type="button" class="layout-option" onclick="selectLayout('grid')">
+                                    <div class="layout-preview">
+                                        <div class="preview-col" style="width: 48%"></div>
+                                        <div class="preview-col" style="width: 48%"></div>
+                                    </div>
+                                    <span>Grid</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="component-library">
+                        <div class="component-category">
+                            <h4>Charts</h4>
+                            <div class="component-grid">
+                                <div class="component-item" draggable="true" data-component="line-chart">
+                                    <i class="fas fa-chart-line"></i>
+                                    <div>Line Chart</div>
+                                </div>
+                                <div class="component-item" draggable="true" data-component="bar-chart">
+                                    <i class="fas fa-chart-bar"></i>
+                                    <div>Bar Chart</div>
+                                </div>
+                                <div class="component-item" draggable="true" data-component="pie-chart">
+                                    <i class="fas fa-chart-pie"></i>
+                                    <div>Pie Chart</div>
+                                </div>
+                                <div class="component-item" draggable="true" data-component="area-chart">
+                                    <i class="fas fa-chart-area"></i>
+                                    <div>Area Chart</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="component-category">
+                            <h4>Metrics</h4>
+                            <div class="component-grid">
+                                <div class="component-item" draggable="true" data-component="metric-card">
+                                    <i class="fas fa-square"></i>
+                                    <div>Metric Card</div>
+                                </div>
+                                <div class="component-item" draggable="true" data-component="gauge">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                    <div>Gauge</div>
+                                </div>
+                                <div class="component-item" draggable="true" data-component="progress">
+                                    <i class="fas fa-percent"></i>
+                                    <div>Progress</div>
+                                </div>
+                                <div class="component-item" draggable="true" data-component="counter">
+                                    <i class="fas fa-sort-numeric-up"></i>
+                                    <div>Counter</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="component-category">
+                            <h4>Data Display</h4>
+                            <div class="component-grid">
+                                <div class="component-item" draggable="true" data-component="data-table">
+                                    <i class="fas fa-table"></i>
+                                    <div>Data Table</div>
+                                </div>
+                                <div class="component-item" draggable="true" data-component="list">
+                                    <i class="fas fa-list"></i>
+                                    <div>List</div>
+                                </div>
+                                <div class="component-item" draggable="true" data-component="timeline">
+                                    <i class="fas fa-stream"></i>
+                                    <div>Timeline</div>
+                                </div>
+                                <div class="component-item" draggable="true" data-component="calendar">
+                                    <i class="fas fa-calendar"></i>
+                                    <div>Calendar</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Tab -->
+                <div class="tab-panel" id="settings-panel">
+                    <div class="form-group">
+                        <label>Widget Name</label>
+                        <input type="text" id="settings-name" placeholder="Enter widget name">
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="settings-description" rows="3" placeholder="Describe what this widget shows"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Update Frequency</label>
+                        <select id="settings-frequency">
+                            <option value="realtime">Real-time</option>
+                            <option value="1min">Every minute</option>
+                            <option value="5min">Every 5 minutes</option>
+                            <option value="15min">Every 15 minutes</option>
+                            <option value="hourly">Hourly</option>
+                            <option value="daily">Daily</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Data Source</label>
+                        <select id="settings-datasource">
+                            <option value="api">API Endpoint</option>
+                            <option value="database">Database Query</option>
+                            <option value="csv">CSV File</option>
+                            <option value="manual">Manual Entry</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Builder -->
+        <div class="builder-main">
+            <div class="builder-toolbar">
+                <div class="toolbar-left">
+                    <span style="color: #666; font-size: 14px;">
+                        <i class="fas fa-info-circle"></i> Drag components to build your widget
+                    </span>
+                </div>
+                <div class="toolbar-right">
+                    <button class="btn btn-outline btn-sm" onclick="previewWidget()">
+                        <i class="fas fa-eye"></i> Preview
+                    </button>
+                    <button class="btn btn-primary btn-sm" onclick="publishWidget()">
+                        <i class="fas fa-check"></i> Publish
+                    </button>
+                </div>
+            </div>
+
+            <div class="builder-canvas">
+                <div class="widget-container" id="widget-container">
+                    <div class="drop-zone" id="main-drop-zone">
+                        <i class="fas fa-chart-line"></i>
+                        Select a template or drag components to start
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentWidget = null;
+        let currentLayout = 'single';
+        let draggedComponent = null;
+
+        // Initialize builder
+        document.addEventListener('DOMContentLoaded', function() {
+            loadWidgetData();
+            setupDragAndDrop();
+        });
+
+        function loadWidgetData() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const widgetId = urlParams.get('id');
+
+            if (widgetId) {
+                const savedWidget = localStorage.getItem(`widget_${widgetId}`);
+                
+                if (savedWidget) {
+                    try {
+                        const widgetData = JSON.parse(savedWidget);
+                        currentWidget = widgetData;
+                        
+                        document.getElementById('widget-title').textContent = currentWidget.name || 'New Widget';
+                        document.getElementById('settings-name').value = currentWidget.name || '';
+                        document.getElementById('settings-description').value = currentWidget.description || '';
+                        document.getElementById('settings-frequency').value = currentWidget.updateFrequency || 'realtime';
+                        document.getElementById('settings-datasource').value = currentWidget.dataSource || 'api';
+
+                        if (currentWidget.content) {
+                            document.getElementById('widget-container').innerHTML = currentWidget.content;
+                            setupWidgetControls();
+                        }
+                    } catch (error) {
+                        console.error('Error loading widget data:', error);
+                        createNewWidget(widgetId);
+                    }
+                } else {
+                    createNewWidget(widgetId);
+                }
+            } else {
+                createNewWidget(Date.now());
+            }
+        }
+
+        function createNewWidget(widgetId) {
+            currentWidget = {
+                id: widgetId,
+                name: 'New Widget',
+                description: '',
+                content: '',
+                updateFrequency: 'realtime',
+                dataSource: 'api',
+                published: false
+            };
+        }
+
+        function switchTab(tabName) {
+            // Remove active class from all tabs and panels
+            document.querySelectorAll('.sidebar-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+            
+            // Add active class to selected tab and panel
+            event.target.classList.add('active');
+            document.getElementById(`${tabName}-panel`).classList.add('active');
+        }
+
+        function selectLayout(layout) {
+            currentLayout = layout;
+            
+            // Update active state
+            document.querySelectorAll('.layout-option').forEach(btn => btn.classList.remove('active'));
+            event.target.closest('.layout-option').classList.add('active');
+            
+            // Apply layout to widget container
+            applyLayout();
+        }
+
+        function applyLayout() {
+            const container = document.getElementById('widget-container');
+            
+            // Clear existing content if it's just the drop zone
+            const dropZone = container.querySelector('#main-drop-zone');
+            if (dropZone) {
+                container.innerHTML = '';
+            }
+            
+            // Create layout structure
+            let layoutHTML = '';
+            
+            switch(currentLayout) {
+                case 'single':
+                    layoutHTML = `
+                        <div class="widget-grid">
+                            <div class="widget-row">
+                                <div class="widget-cell col-12" data-cell="true">
+                                    <div class="drop-zone">Drop component here</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'split':
+                    layoutHTML = `
+                        <div class="widget-grid">
+                            <div class="widget-row">
+                                <div class="widget-cell col-6" data-cell="true">
+                                    <div class="drop-zone">Drop component here</div>
+                                </div>
+                                <div class="widget-cell col-6" data-cell="true">
+                                    <div class="drop-zone">Drop component here</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'grid':
+                    layoutHTML = `
+                        <div class="widget-grid">
+                            <div class="widget-row">
+                                <div class="widget-cell col-6" data-cell="true">
+                                    <div class="drop-zone">Drop component here</div>
+                                </div>
+                                <div class="widget-cell col-6" data-cell="true">
+                                    <div class="drop-zone">Drop component here</div>
+                                </div>
+                            </div>
+                            <div class="widget-row">
+                                <div class="widget-cell col-6" data-cell="true">
+                                    <div class="drop-zone">Drop component here</div>
+                                </div>
+                                <div class="widget-cell col-6" data-cell="true">
+                                    <div class="drop-zone">Drop component here</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+            }
+            
+            container.innerHTML = layoutHTML;
+            setupCellDropZones();
+        }
+
+        function loadTemplate(templateType) {
+            const container = document.getElementById('widget-container');
+            
+            switch(templateType) {
+                case 'kpi-dashboard':
+                    container.innerHTML = `
+                        <div class="widget-header">
+                            <h3>Key Performance Indicators</h3>
+                            <p>Real-time business metrics</p>
+                        </div>
+                        <div class="widget-grid">
+                            <div class="widget-row">
+                                <div class="widget-cell col-3 has-content">
+                                    <div class="widget-metric">
+                                        <p class="metric-value">$125,430</p>
+                                        <p class="metric-label">Total Revenue</p>
+                                        <p class="metric-change positive">↑ 12.5%</p>
+                                    </div>
+                                </div>
+                                <div class="widget-cell col-3 has-content">
+                                    <div class="widget-metric">
+                                        <p class="metric-value">1,234</p>
+                                        <p class="metric-label">New Users</p>
+                                        <p class="metric-change positive">↑ 8.3%</p>
+                                    </div>
+                                </div>
+                                <div class="widget-cell col-3 has-content">
+                                    <div class="widget-metric">
+                                        <p class="metric-value">89.2%</p>
+                                        <p class="metric-label">Conversion Rate</p>
+                                        <p class="metric-change negative">↓ 2.1%</p>
+                                    </div>
+                                </div>
+                                <div class="widget-cell col-3 has-content">
+                                    <div class="widget-metric">
+                                        <p class="metric-value">4.8</p>
+                                        <p class="metric-label">Avg. Rating</p>
+                                        <p class="metric-change positive">↑ 0.3</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'sales-chart':
+                    container.innerHTML = `
+                        <div class="widget-header">
+                            <h3>Sales Performance</h3>
+                            <p>Monthly revenue trend</p>
+                        </div>
+                        <div class="widget-grid">
+                            <div class="widget-row">
+                                <div class="widget-cell col-12 has-content">
+                                    <div class="widget-chart" style="position: relative; height: 300px;">
+                                        <canvas id="sales-chart-canvas"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    setTimeout(() => {
+                        const canvas = document.getElementById('sales-chart-canvas');
+                        if (canvas) {
+                            new Chart(canvas, {
+                                type: 'line',
+                                data: {
+                                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                                    datasets: [{
+                                        label: 'Sales Revenue',
+                                        data: [65000, 72000, 68000, 85000, 92000, 88000, 95000, 98000, 102000, 110000, 108000, 125000],
+                                        borderColor: '#6c5ce7',
+                                        backgroundColor: 'rgba(108, 92, 231, 0.1)',
+                                        tension: 0.4
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: {
+                                        legend: {
+                                            display: true,
+                                            position: 'top'
+                                        }
+                                    },
+                                    scales: {
+                                        y: {
+                                            beginAtZero: true,
+                                            ticks: {
+                                                callback: function(value) {
+                                                    return '$' + value.toLocaleString();
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                    }, 100);
+                    break;
+                    
+                case 'user-stats':
+                    container.innerHTML = `
+                        <div class="widget-header">
+                            <h3>User Statistics</h3>
+                            <p>User engagement metrics</p>
+                        </div>
+                        <div class="widget-grid">
+                            <div class="widget-row">
+                                <div class="widget-cell col-8 has-content">
+                                    <div class="widget-chart" style="position: relative; height: 300px;">
+                                        <canvas id="user-stats-canvas"></canvas>
+                                    </div>
+                                </div>
+                                <div class="widget-cell col-4 has-content">
+                                    <div class="widget-list">
+                                        <h4 style="margin: 0 0 15px 0;">Top Countries</h4>
+                                        <ul class="widget-list">
+                                            <li>USA <span>45%</span></li>
+                                            <li>UK <span>22%</span></li>
+                                            <li>Canada <span>18%</span></li>
+                                            <li>Others <span>15%</span></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    setTimeout(() => {
+                        const canvas = document.getElementById('user-stats-canvas');
+                        if (canvas) {
+                            new Chart(canvas, {
+                                type: 'bar',
+                                data: {
+                                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                                    datasets: [{
+                                        label: 'Active Users',
+                                        data: [1200, 1900, 1500, 2500, 2200, 3000, 2800],
+                                        backgroundColor: '#6c5ce7'
+                                    }, {
+                                        label: 'New Users',
+                                        data: [200, 300, 250, 400, 350, 500, 450],
+                                        backgroundColor: '#00b894'
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: {
+                                        legend: {
+                                            display: true,
+                                            position: 'top'
+                                        }
+                                    },
+                                    scales: {
+                                        y: {
+                                            beginAtZero: true
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                    }, 100);
+                    break;
+                    
+                case 'activity-feed':
+                    container.innerHTML = `
+                        <div class="widget-header">
+                            <h3>Recent Activity</h3>
+                            <p>Latest system events</p>
+                        </div>
+                        <div class="widget-grid">
+                            <div class="widget-row">
+                                <div class="widget-cell col-12 has-content">
+                                    <ul class="widget-list">
+                                        <li>
+                                            <div>
+                                                <strong>New user registered</strong><br>
+                                                <small style="color: #666;">John Doe - 2 minutes ago</small>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div>
+                                                <strong>Order completed</strong><br>
+                                                <small style="color: #666;">Order #1234 - 15 minutes ago</small>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div>
+                                                <strong>Payment received</strong><br>
+                                                <small style="color: #666;">$250.00 - 1 hour ago</small>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'progress-tracker':
+                    container.innerHTML = `
+                        <div class="widget-header">
+                            <h3>Project Progress</h3>
+                            <p>Current project status</p>
+                        </div>
+                        <div class="widget-grid">
+                            <div class="widget-row">
+                                <div class="widget-cell col-12 has-content">
+                                    <div style="padding: 20px;">
+                                        <div style="margin-bottom: 20px;">
+                                            <h4 style="margin: 0 0 5px 0;">Website Redesign</h4>
+                                            <div class="widget-progress">
+                                                <div class="widget-progress-bar" style="width: 75%;"></div>
+                                            </div>
+                                            <small style="color: #666;">75% Complete</small>
+                                        </div>
+                                        <div style="margin-bottom: 20px;">
+                                            <h4 style="margin: 0 0 5px 0;">Mobile App Development</h4>
+                                            <div class="widget-progress">
+                                                <div class="widget-progress-bar" style="width: 45%;"></div>
+                                            </div>
+                                            <small style="color: #666;">45% Complete</small>
+                                        </div>
+                                        <div>
+                                            <h4 style="margin: 0 0 5px 0;">API Integration</h4>
+                                            <div class="widget-progress">
+                                                <div class="widget-progress-bar" style="width: 90%;"></div>
+                                            </div>
+                                            <small style="color: #666;">90% Complete</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'data-table':
+                    container.innerHTML = `
+                        <div class="widget-header">
+                            <h3>Sales Data</h3>
+                            <p>Recent transactions</p>
+                        </div>
+                        <div class="widget-grid">
+                            <div class="widget-row">
+                                <div class="widget-cell col-12 has-content">
+                                    <table class="widget-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Order ID</th>
+                                                <th>Customer</th>
+                                                <th>Amount</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>#1234</td>
+                                                <td>John Doe</td>
+                                                <td>$250.00</td>
+                                                <td><span style="color: #27ae60;">Completed</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>#1235</td>
+                                                <td>Jane Smith</td>
+                                                <td>$180.50</td>
+                                                <td><span style="color: #f39c12;">Pending</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>#1236</td>
+                                                <td>Bob Johnson</td>
+                                                <td>$420.00</td>
+                                                <td><span style="color: #27ae60;">Completed</span></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+            }
+            
+            setupWidgetControls();
+        }
+
+        function setupDragAndDrop() {
+            // Setup draggable components
+            document.querySelectorAll('.component-item').forEach(component => {
+                component.addEventListener('dragstart', handleDragStart);
+                component.addEventListener('dragend', handleDragEnd);
+            });
+        }
+
+        function handleDragStart(e) {
+            draggedComponent = e.target;
+            e.target.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'copy';
+            e.dataTransfer.setData('componentType', e.target.dataset.component);
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+        }
+
+        function setupCellDropZones() {
+            document.querySelectorAll('.widget-cell').forEach(cell => {
+                cell.addEventListener('dragover', handleDragOver);
+                cell.addEventListener('drop', handleDrop);
+                cell.addEventListener('dragleave', handleDragLeave);
+            });
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+            
+            const componentType = e.dataTransfer.getData('componentType');
+            const cell = e.currentTarget;
+            
+            // Clear drop zone
+            cell.innerHTML = '';
+            cell.classList.add('has-content');
+            
+            // Add component based on type
+            const componentContent = createComponentContent(componentType);
+            cell.appendChild(componentContent);
+            
+            // Add controls
+            const controls = document.createElement('div');
+            controls.className = 'widget-controls';
+            controls.innerHTML = `
+                <button class="widget-control-btn" onclick="editComponent(this)">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="widget-control-btn delete" onclick="removeComponent(this)">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            cell.appendChild(controls);
+        }
+
+        function createComponentContent(type) {
+            const div = document.createElement('div');
+            
+            switch(type) {
+                case 'line-chart':
+                    div.className = 'widget-chart';
+                    div.style.position = 'relative';
+                    div.style.height = '300px';
+                    const lineCanvas = document.createElement('canvas');
+                    lineCanvas.id = 'chart-' + Date.now();
+                    div.appendChild(lineCanvas);
+                    
+                    // Create line chart after DOM update
+                    setTimeout(() => {
+                        new Chart(lineCanvas, {
+                            type: 'line',
+                            data: {
+                                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                                datasets: [{
+                                    label: 'Revenue',
+                                    data: [12000, 19000, 15000, 25000, 22000, 30000],
+                                    borderColor: '#6c5ce7',
+                                    backgroundColor: 'rgba(108, 92, 231, 0.1)',
+                                    tension: 0.4
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        display: true,
+                                        position: 'top'
+                                    }
+                                }
+                            }
+                        });
+                    }, 100);
+                    break;
+                    
+                case 'bar-chart':
+                    div.className = 'widget-chart';
+                    div.style.position = 'relative';
+                    div.style.height = '300px';
+                    const barCanvas = document.createElement('canvas');
+                    barCanvas.id = 'chart-' + Date.now();
+                    div.appendChild(barCanvas);
+                    
+                    setTimeout(() => {
+                        new Chart(barCanvas, {
+                            type: 'bar',
+                            data: {
+                                labels: ['Product A', 'Product B', 'Product C', 'Product D', 'Product E'],
+                                datasets: [{
+                                    label: 'Sales',
+                                    data: [12, 19, 8, 15, 10],
+                                    backgroundColor: [
+                                        '#6c5ce7',
+                                        '#00b894',
+                                        '#fdcb6e',
+                                        '#e17055',
+                                        '#74b9ff'
+                                    ]
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        display: false
+                                    }
+                                }
+                            }
+                        });
+                    }, 100);
+                    break;
+                    
+                case 'pie-chart':
+                    div.className = 'widget-chart';
+                    div.style.position = 'relative';
+                    div.style.height = '300px';
+                    const pieCanvas = document.createElement('canvas');
+                    pieCanvas.id = 'chart-' + Date.now();
+                    div.appendChild(pieCanvas);
+                    
+                    setTimeout(() => {
+                        new Chart(pieCanvas, {
+                            type: 'pie',
+                            data: {
+                                labels: ['Desktop', 'Mobile', 'Tablet', 'Other'],
+                                datasets: [{
+                                    data: [45, 35, 15, 5],
+                                    backgroundColor: [
+                                        '#6c5ce7',
+                                        '#00b894',
+                                        '#fdcb6e',
+                                        '#e17055'
+                                    ]
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        position: 'right'
+                                    }
+                                }
+                            }
+                        });
+                    }, 100);
+                    break;
+                    
+                case 'area-chart':
+                    div.className = 'widget-chart';
+                    div.style.position = 'relative';
+                    div.style.height = '300px';
+                    const areaCanvas = document.createElement('canvas');
+                    areaCanvas.id = 'chart-' + Date.now();
+                    div.appendChild(areaCanvas);
+                    
+                    setTimeout(() => {
+                        new Chart(areaCanvas, {
+                            type: 'line',
+                            data: {
+                                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                                datasets: [{
+                                    label: 'Visitors',
+                                    data: [1200, 1900, 1500, 2500, 2200, 3000, 2800],
+                                    borderColor: '#6c5ce7',
+                                    backgroundColor: 'rgba(108, 92, 231, 0.3)',
+                                    fill: true,
+                                    tension: 0.4
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        display: true,
+                                        position: 'top'
+                                    }
+                                }
+                            }
+                        });
+                    }, 100);
+                    break;
+                    
+                case 'metric-card':
+                    div.className = 'widget-metric';
+                    div.innerHTML = `
+                        <p class="metric-value">0</p>
+                        <p class="metric-label">Metric Label</p>
+                        <p class="metric-change positive">↑ 0%</p>
+                    `;
+                    break;
+                    
+                case 'gauge':
+                    div.innerHTML = '<div style="text-align: center; padding: 20px;"><i class="fas fa-tachometer-alt" style="font-size: 48px; color: #6c5ce7;"></i><p>Gauge Chart</p></div>';
+                    break;
+                    
+                case 'progress':
+                    div.innerHTML = `
+                        <div style="padding: 20px;">
+                            <h4 style="margin: 0 0 10px 0;">Progress</h4>
+                            <div class="widget-progress">
+                                <div class="widget-progress-bar" style="width: 60%;"></div>
+                            </div>
+                            <small style="color: #666;">60% Complete</small>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'counter':
+                    div.className = 'widget-metric';
+                    div.innerHTML = '<p class="metric-value">0</p><p class="metric-label">Counter</p>';
+                    break;
+                    
+                case 'data-table':
+                    div.innerHTML = `
+                        <table class="widget-table">
+                            <thead>
+                                <tr>
+                                    <th>Column 1</th>
+                                    <th>Column 2</th>
+                                    <th>Column 3</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Data 1</td>
+                                    <td>Data 2</td>
+                                    <td>Data 3</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    `;
+                    break;
+                    
+                case 'list':
+                    div.innerHTML = `
+                        <ul class="widget-list">
+                            <li>List Item 1 <span>Value</span></li>
+                            <li>List Item 2 <span>Value</span></li>
+                            <li>List Item 3 <span>Value</span></li>
+                        </ul>
+                    `;
+                    break;
+                    
+                case 'timeline':
+                    div.innerHTML = `
+                        <ul class="widget-list">
+                            <li>
+                                <div>
+                                    <strong>Event Title</strong><br>
+                                    <small style="color: #666;">Timestamp</small>
+                                </div>
+                            </li>
+                        </ul>
+                    `;
+                    break;
+                    
+                case 'calendar':
+                    div.innerHTML = '<div style="text-align: center; padding: 20px;"><i class="fas fa-calendar" style="font-size: 48px; color: #6c5ce7;"></i><p>Calendar View</p></div>';
+                    break;
+            }
+            
+            return div;
+        }
+
+        function removeComponent(btn) {
+            const cell = btn.closest('.widget-cell');
+            cell.innerHTML = '<div class="drop-zone">Drop component here</div>';
+            cell.classList.remove('has-content');
+        }
+
+        function editComponent(btn) {
+            alert('Component editing coming soon!');
+        }
+
+        function setupWidgetControls() {
+            setupCellDropZones();
+        }
+
+        function saveWidget() {
+            if (!currentWidget) return;
+            
+            currentWidget.name = document.getElementById('settings-name').value || 'New Widget';
+            currentWidget.description = document.getElementById('settings-description').value;
+            currentWidget.updateFrequency = document.getElementById('settings-frequency').value;
+            currentWidget.dataSource = document.getElementById('settings-datasource').value;
+            currentWidget.content = document.getElementById('widget-container').innerHTML;
+            
+            // Save to localStorage
+            localStorage.setItem(`widget_${currentWidget.id}`, JSON.stringify(currentWidget));
+            
+            // Update UI
+            document.getElementById('widget-title').textContent = currentWidget.name;
+            
+            alert('Widget saved successfully!');
+        }
+
+        function previewWidget() {
+            if (!currentWidget) return;
+            
+            // Save current state
+            saveWidget();
+            
+            // Open preview in new window
+            const previewWindow = window.open('', '_blank', 'width=800,height=600');
+            previewWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>${currentWidget.name} - Preview</title>
+                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+                    <style>
+                        body { font-family: 'Inter', sans-serif; margin: 0; padding: 20px; background: #f8f9fa; }
+                        .widget-container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+                        ${document.querySelector('style').textContent}
+                    </style>
+                </head>
+                <body>
+                    <div class="widget-container">
+                        ${currentWidget.content}
+                    </div>
+                </body>
+                </html>
+            `);
+        }
+
+        function publishWidget() {
+            if (!currentWidget) return;
+            
+            currentWidget.published = true;
+            saveWidget();
+            
+            alert('Widget published successfully!');
+        }
+    </script>
+</body>
+</html>

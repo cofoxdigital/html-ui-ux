@@ -814,7 +814,7 @@
                 
                 // Redirect to page editor
                 setTimeout(() => {
-                    window.location.href = `page-editor.html?id=${newPage.id}&template=${selectedTemplate}`;
+                    window.location.href = `page-editor-enhanced.html?id=${newPage.id}&template=${selectedTemplate}`;
                 }, 1000);
             } else {
                 showNotification('Error creating page. Please try again.', 'error');
@@ -822,7 +822,7 @@
         }
 
         function editPage(pageId) {
-            window.location.href = `page-editor.html?id=${pageId}`;
+            window.location.href = `page-editor-enhanced.html?id=${pageId}`;
         }
 
         function viewPage(pageId) {

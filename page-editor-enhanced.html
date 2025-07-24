@@ -1,0 +1,1572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Editor - Phoenix Enterprise</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f8f9fa;
+        }
+
+        .editor-container {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .editor-sidebar {
+            width: 300px;
+            background: white;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editor-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            background: white;
+        }
+
+        .editor-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0 0 5px 0;
+            color: #333;
+        }
+
+        .editor-subtitle {
+            font-size: 14px;
+            color: #666;
+            margin: 0;
+        }
+
+        .editor-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .editor-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editor-toolbar {
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .toolbar-right {
+            display: flex;
+            gap: 10px;
+        }
+
+        .editor-canvas {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .canvas-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            min-height: 800px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .canvas-content {
+            padding: 40px;
+        }
+
+        .sidebar-tabs {
+            display: flex;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .sidebar-tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .sidebar-tab.active {
+            color: #6c5ce7;
+            border-bottom: 2px solid #6c5ce7;
+        }
+
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            height: calc(100vh - 220px);
+            padding-bottom: 20px;
+            scrollbar-width: thin;
+            scrollbar-color: #6c5ce7 #f0f0f0;
+        }
+
+        .sidebar-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .sidebar-content::-webkit-scrollbar-track {
+            background: #f0f0f0;
+            border-radius: 4px;
+        }
+
+        .sidebar-content::-webkit-scrollbar-thumb {
+            background: #6c5ce7;
+            border-radius: 4px;
+        }
+
+        .sidebar-content::-webkit-scrollbar-thumb:hover {
+            background: #5a4fcf;
+        }
+
+        .tab-panel {
+            display: none;
+            padding: 20px;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        /* Grid System Styles */
+        .grid-section {
+            margin-bottom: 20px;
+            border: 2px dashed transparent;
+            border-radius: 8px;
+            position: relative;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .grid-section:hover {
+            border-color: #6c5ce7;
+        }
+
+        .grid-section.drag-over {
+            border-color: #6c5ce7;
+            background: rgba(108, 92, 231, 0.05);
+        }
+
+        .grid-container {
+            display: grid;
+            gap: 15px;
+            padding: 20px;
+            min-height: 100px;
+        }
+
+        .grid-row {
+            display: grid;
+            gap: 15px;
+            grid-template-columns: repeat(12, 1fr);
+        }
+
+        .grid-cell {
+            border: 2px dashed #e0e0e0;
+            border-radius: 6px;
+            min-height: 100px;
+            padding: 15px;
+            position: relative;
+            transition: all 0.2s;
+            background: #fafafa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .grid-cell:hover {
+            border-color: #6c5ce7;
+            background: rgba(108, 92, 231, 0.05);
+        }
+
+        .grid-cell.drag-over {
+            border-color: #6c5ce7;
+            background: rgba(108, 92, 231, 0.1);
+            transform: scale(1.02);
+        }
+
+        .grid-cell.has-content {
+            border-style: solid;
+            background: white;
+        }
+
+        .grid-cell-placeholder {
+            color: #999;
+            font-size: 14px;
+            text-align: center;
+            pointer-events: none;
+        }
+
+        .grid-cell-content {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Grid Configuration Modal */
+        .grid-config-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .grid-config-modal.active {
+            display: flex;
+        }
+
+        .grid-config-content {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .grid-config-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .grid-config-body {
+            padding: 30px;
+        }
+
+        .grid-row-config {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .grid-row-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .column-selector {
+            margin-top: 15px;
+        }
+
+        .column-selector label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .column-options {
+            display: flex;
+            gap: 10px;
+            justify-content: space-between;
+        }
+
+        .column-option {
+            flex: 1;
+            padding: 15px 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .column-option:hover {
+            border-color: #6c5ce7;
+            background: #f8f7ff;
+        }
+
+        .column-option.active {
+            border-color: #6c5ce7;
+            background: #f8f7ff;
+            color: #6c5ce7;
+        }
+
+        .column-preview {
+            display: flex;
+            gap: 2%;
+            margin-bottom: 8px;
+            height: 30px;
+        }
+
+        .preview-col {
+            background: #6c5ce7;
+            border-radius: 4px;
+            opacity: 0.7;
+        }
+
+        .column-option.active .preview-col {
+            opacity: 1;
+        }
+
+        /* Element Library */
+        .element-library {
+            display: grid;
+            gap: 10px;
+        }
+
+        .element-category {
+            margin-bottom: 20px;
+        }
+
+        .element-category h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .element-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .element-item {
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 12px;
+            cursor: grab;
+            transition: all 0.2s;
+            background: white;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .element-item:hover {
+            border-color: #6c5ce7;
+            box-shadow: 0 2px 8px rgba(108, 92, 231, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .element-item:active {
+            cursor: grabbing;
+        }
+
+        .element-item.dragging {
+            opacity: 0.5;
+        }
+
+        .element-item i {
+            font-size: 20px;
+            color: #6c5ce7;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        /* Section Controls */
+        .section-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 5px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .grid-section:hover .section-controls {
+            opacity: 1;
+        }
+
+        .control-btn {
+            width: 30px;
+            height: 30px;
+            border: none;
+            border-radius: 4px;
+            background: #6c5ce7;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .control-btn:hover {
+            background: #5a4fcf;
+        }
+
+        .control-btn.delete {
+            background: #e74c3c;
+        }
+
+        .control-btn.delete:hover {
+            background: #c0392b;
+        }
+
+        /* Responsive Grid Classes */
+        .col-1 { grid-column: span 1; }
+        .col-2 { grid-column: span 2; }
+        .col-3 { grid-column: span 3; }
+        .col-4 { grid-column: span 4; }
+        .col-5 { grid-column: span 5; }
+        .col-6 { grid-column: span 6; }
+        .col-7 { grid-column: span 7; }
+        .col-8 { grid-column: span 8; }
+        .col-9 { grid-column: span 9; }
+        .col-10 { grid-column: span 10; }
+        .col-11 { grid-column: span 11; }
+        .col-12 { grid-column: span 12; }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .grid-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .grid-cell {
+                grid-column: span 12 !important;
+            }
+        }
+
+        /* Tablet Responsive */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .grid-row {
+                grid-template-columns: repeat(6, 1fr);
+            }
+            
+            .col-1, .col-2, .col-3 { grid-column: span 3; }
+            .col-4, .col-5, .col-6 { grid-column: span 6; }
+            .col-7, .col-8, .col-9, .col-10, .col-11, .col-12 { grid-column: span 6; }
+        }
+
+        .device-preview {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .device-btn {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .device-btn.active {
+            background: #6c5ce7;
+            color: white;
+            border-color: #6c5ce7;
+        }
+
+        .canvas-container.mobile {
+            max-width: 375px;
+        }
+
+        .canvas-container.tablet {
+            max-width: 768px;
+        }
+
+        /* Element specific styles */
+        .element-text {
+            padding: 10px;
+        }
+
+        .element-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #6c5ce7;
+            color: white;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .element-button:hover {
+            background: #5a4fcf;
+        }
+
+        .element-image {
+            width: 100%;
+            height: 200px;
+            background: #f0f0f0;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+        }
+
+        .element-video {
+            width: 100%;
+            height: 200px;
+            background: #000;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+        }
+
+        .element-spacer {
+            height: 50px;
+        }
+
+        .drop-zone {
+            min-height: 100px;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 14px;
+            margin: 20px 0;
+            transition: all 0.2s;
+        }
+
+        .drop-zone.drag-over {
+            border-color: #6c5ce7;
+            background: rgba(108, 92, 231, 0.05);
+            color: #6c5ce7;
+        }
+
+        .section-item {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+            margin-bottom: 10px;
+        }
+
+        .section-item:hover {
+            border-color: #6c5ce7;
+            box-shadow: 0 2px 8px rgba(108, 92, 231, 0.1);
+        }
+
+        .section-item h4 {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .section-item p {
+            margin: 0;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .section-item i {
+            font-size: 24px;
+            color: #6c5ce7;
+            margin-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .btn-block {
+            width: 100%;
+            display: block;
+            text-align: center;
+        }
+
+        .element-controls {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            display: flex;
+            gap: 5px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .grid-cell:hover .element-controls {
+            opacity: 1;
+        }
+
+        .element-control-btn {
+            width: 24px;
+            height: 24px;
+            border: none;
+            border-radius: 4px;
+            background: #6c5ce7;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            transition: all 0.2s;
+        }
+
+        .element-control-btn:hover {
+            background: #5a4fcf;
+        }
+
+        .element-control-btn.delete {
+            background: #e74c3c;
+        }
+
+        .element-control-btn.delete:hover {
+            background: #c0392b;
+        }
+
+        .element-widget,
+        .element-form {
+            width: 100%;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .element-widget i,
+        .element-form i {
+            font-size: 32px;
+            color: #6c5ce7;
+            margin-bottom: 10px;
+        }
+
+        .element-widget h4,
+        .element-form h4 {
+            margin: 0 0 5px 0;
+            color: #333;
+        }
+
+        .element-widget p,
+        .element-form p {
+            margin: 0;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .grid-preview {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .grid-preview-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .grid-preview-container {
+            display: grid;
+            gap: 10px;
+        }
+
+        .grid-preview-row {
+            display: grid;
+            gap: 10px;
+            grid-template-columns: repeat(12, 1fr);
+        }
+
+        .grid-preview-cell {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="editor-container">
+        <!-- Sidebar -->
+        <div class="editor-sidebar">
+            <div class="editor-header">
+                <h2 class="editor-title" id="page-title">New Page</h2>
+                <p class="editor-subtitle">Build your page with grid layouts</p>
+                <div class="editor-actions">
+                    <a href="pages.html" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </a>
+                    <button class="btn btn-primary btn-sm" onclick="savePage()">
+                        <i class="fas fa-save"></i> Save
+                    </button>
+                </div>
+            </div>
+
+            <div class="sidebar-tabs">
+                <button class="sidebar-tab active" onclick="switchTab('sections')">Sections</button>
+                <button class="sidebar-tab" onclick="switchTab('elements')">Elements</button>
+                <button class="sidebar-tab" onclick="switchTab('settings')">Settings</button>
+            </div>
+
+            <div class="sidebar-content">
+                <!-- Sections Tab -->
+                <div class="tab-panel active" id="sections-panel">
+                    <button class="btn btn-primary btn-block" onclick="showGridConfig()">
+                        <i class="fas fa-th"></i> Add Grid Section
+                    </button>
+                    
+                    <div style="margin-top: 20px;">
+                        <h4 style="margin-bottom: 15px; color: #333;">Preset Sections</h4>
+                        <div class="section-library">
+                            <div class="section-item" onclick="addPresetSection('header')">
+                                <i class="fas fa-bars"></i>
+                                <h4>Header</h4>
+                                <p>Navigation bar with logo and menu</p>
+                            </div>
+                            <div class="section-item" onclick="addPresetSection('hero')">
+                                <i class="fas fa-star"></i>
+                                <h4>Hero Section</h4>
+                                <p>Large banner with title and CTA</p>
+                            </div>
+                            <div class="section-item" onclick="addPresetSection('features')">
+                                <i class="fas fa-th-large"></i>
+                                <h4>Features Grid</h4>
+                                <p>3-column feature showcase</p>
+                            </div>
+                            <div class="section-item" onclick="addPresetSection('two-column')">
+                                <i class="fas fa-columns"></i>
+                                <h4>Two Column</h4>
+                                <p>50/50 split layout</p>
+                            </div>
+                            <div class="section-item" onclick="addPresetSection('three-column')">
+                                <i class="fas fa-th"></i>
+                                <h4>Three Column</h4>
+                                <p>Equal three column layout</p>
+                            </div>
+                            <div class="section-item" onclick="addPresetSection('footer')">
+                                <i class="fas fa-grip-lines"></i>
+                                <h4>Footer</h4>
+                                <p>Multi-column footer layout</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Elements Tab -->
+                <div class="tab-panel" id="elements-panel">
+                    <div class="element-library">
+                        <div class="element-category">
+                            <h4>Basic Elements</h4>
+                            <div class="element-grid">
+                                <div class="element-item" draggable="true" data-element="text">
+                                    <i class="fas fa-font"></i>
+                                    <div>Text</div>
+                                </div>
+                                <div class="element-item" draggable="true" data-element="heading">
+                                    <i class="fas fa-heading"></i>
+                                    <div>Heading</div>
+                                </div>
+                                <div class="element-item" draggable="true" data-element="button">
+                                    <i class="fas fa-square"></i>
+                                    <div>Button</div>
+                                </div>
+                                <div class="element-item" draggable="true" data-element="image">
+                                    <i class="fas fa-image"></i>
+                                    <div>Image</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="element-category">
+                            <h4>Media</h4>
+                            <div class="element-grid">
+                                <div class="element-item" draggable="true" data-element="video">
+                                    <i class="fas fa-video"></i>
+                                    <div>Video</div>
+                                </div>
+                                <div class="element-item" draggable="true" data-element="gallery">
+                                    <i class="fas fa-images"></i>
+                                    <div>Gallery</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="element-category">
+                            <h4>Layout</h4>
+                            <div class="element-grid">
+                                <div class="element-item" draggable="true" data-element="spacer">
+                                    <i class="fas fa-arrows-alt-v"></i>
+                                    <div>Spacer</div>
+                                </div>
+                                <div class="element-item" draggable="true" data-element="divider">
+                                    <i class="fas fa-minus"></i>
+                                    <div>Divider</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="element-category">
+                            <h4>Components</h4>
+                            <div class="element-grid">
+                                <div class="element-item" draggable="true" data-element="form">
+                                    <i class="fas fa-wpforms"></i>
+                                    <div>Form</div>
+                                </div>
+                                <div class="element-item" draggable="true" data-element="widget">
+                                    <i class="fas fa-chart-line"></i>
+                                    <div>Widget</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Tab -->
+                <div class="tab-panel" id="settings-panel">
+                    <div class="form-group">
+                        <label>Page Title</label>
+                        <input type="text" id="settings-title" placeholder="Enter page title">
+                    </div>
+                    <div class="form-group">
+                        <label>Page Status</label>
+                        <select id="settings-status">
+                            <option value="draft">Draft</option>
+                            <option value="published">Published</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Editor -->
+        <div class="editor-main">
+            <div class="editor-toolbar">
+                <div class="toolbar-left">
+                    <div class="device-preview">
+                        <button class="device-btn active" onclick="setDevice('desktop')">
+                            <i class="fas fa-desktop"></i> Desktop
+                        </button>
+                        <button class="device-btn" onclick="setDevice('tablet')">
+                            <i class="fas fa-tablet-alt"></i> Tablet
+                        </button>
+                        <button class="device-btn" onclick="setDevice('mobile')">
+                            <i class="fas fa-mobile-alt"></i> Mobile
+                        </button>
+                    </div>
+                </div>
+                <div class="toolbar-right">
+                    <button class="btn btn-outline btn-sm" onclick="previewPage()">
+                        <i class="fas fa-eye"></i> Preview
+                    </button>
+                    <button class="btn btn-primary btn-sm" onclick="publishPage()">
+                        <i class="fas fa-globe"></i> Publish
+                    </button>
+                </div>
+            </div>
+
+            <div class="editor-canvas">
+                <div class="canvas-container" id="canvas">
+                    <div class="canvas-content" id="canvas-content">
+                        <div class="drop-zone" id="main-drop-zone">
+                            <i class="fas fa-plus"></i>
+                            Click "Add Grid Section" to start building your page
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grid Configuration Modal -->
+    <div class="grid-config-modal" id="grid-config-modal">
+        <div class="grid-config-content">
+            <div class="grid-config-header">
+                <h2>Configure Grid Section</h2>
+                <button class="control-btn" onclick="hideGridConfig()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="grid-config-body">
+                <div class="form-group">
+                    <label>Number of Rows</label>
+                    <input type="number" id="grid-rows" min="1" max="10" value="1">
+                </div>
+                
+                <div id="rows-config">
+                    <!-- Row configurations will be added dynamically -->
+                </div>
+
+                <div class="grid-preview">
+                    <div class="grid-preview-title">Preview</div>
+                    <div class="grid-preview-container" id="grid-preview">
+                        <!-- Preview will be rendered here -->
+                    </div>
+                </div>
+
+                <div class="form-actions" style="margin-top: 30px;">
+                    <button class="btn btn-secondary" onclick="hideGridConfig()">Cancel</button>
+                    <button class="btn btn-primary" onclick="createGridSection()">Create Section</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = null;
+        let sectionCounter = 0;
+        let currentDevice = 'desktop';
+        let draggedElement = null;
+
+        // Initialize editor
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPageData();
+            setupDragAndDrop();
+            setupGridRowsInput();
+            updateGridPreview();
+        });
+
+        function loadPageData() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const pageId = urlParams.get('id');
+
+            if (pageId) {
+                const savedPage = localStorage.getItem(`page_${pageId}`);
+                
+                if (savedPage) {
+                    try {
+                        const pageData = JSON.parse(savedPage);
+                        currentPage = {
+                            id: pageData.id,
+                            title: pageData.title || 'New Page',
+                            content: pageData.content || '',
+                            status: pageData.status || 'draft',
+                            published: pageData.published || false
+                        };
+
+                        document.getElementById('page-title').textContent = currentPage.title;
+                        document.getElementById('settings-title').value = currentPage.title;
+                        document.getElementById('settings-status').value = currentPage.status;
+
+                        if (currentPage.content && currentPage.content.trim() !== '') {
+                            document.getElementById('canvas-content').innerHTML = currentPage.content;
+                            setupSectionControls();
+                        }
+                    } catch (error) {
+                        console.error('Error loading page data:', error);
+                        createNewPage(pageId);
+                    }
+                } else {
+                    createNewPage(pageId);
+                }
+            }
+        }
+
+        function createNewPage(pageId) {
+            currentPage = {
+                id: pageId,
+                title: 'New Page',
+                content: '',
+                status: 'draft',
+                published: false
+            };
+
+            document.getElementById('page-title').textContent = currentPage.title;
+            document.getElementById('settings-title').value = currentPage.title;
+            document.getElementById('settings-status').value = currentPage.status;
+        }
+
+        function switchTab(tabName) {
+            // Remove active class from all tabs and panels
+            document.querySelectorAll('.sidebar-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+            
+            // Add active class to selected tab and panel
+            event.target.classList.add('active');
+            document.getElementById(`${tabName}-panel`).classList.add('active');
+        }
+
+        function showGridConfig() {
+            document.getElementById('grid-config-modal').classList.add('active');
+            updateRowsConfig();
+        }
+
+        function hideGridConfig() {
+            document.getElementById('grid-config-modal').classList.remove('active');
+        }
+
+        function setupGridRowsInput() {
+            const rowsInput = document.getElementById('grid-rows');
+            rowsInput.addEventListener('input', function() {
+                updateRowsConfig();
+                updateGridPreview();
+            });
+        }
+
+        function updateRowsConfig() {
+            const numRows = parseInt(document.getElementById('grid-rows').value) || 1;
+            const rowsConfigDiv = document.getElementById('rows-config');
+            rowsConfigDiv.innerHTML = '';
+
+            for (let i = 0; i < numRows; i++) {
+                const rowConfig = document.createElement('div');
+                rowConfig.className = 'grid-row-config';
+                rowConfig.innerHTML = `
+                    <div class="grid-row-header">
+                        <h4>Row ${i + 1}</h4>
+                    </div>
+                    <div class="column-selector">
+                        <label>Number of Columns:</label>
+                        <div class="column-options">
+                            <button type="button" class="column-option ${i === 0 ? 'active' : ''}" data-row="${i}" data-cols="1" onclick="selectColumns(${i}, 1)">
+                                <div class="column-preview">
+                                    <div class="preview-col" style="width: 100%"></div>
+                                </div>
+                                <span>1 Column</span>
+                            </button>
+                            <button type="button" class="column-option" data-row="${i}" data-cols="2" onclick="selectColumns(${i}, 2)">
+                                <div class="column-preview">
+                                    <div class="preview-col" style="width: 48%"></div>
+                                    <div class="preview-col" style="width: 48%"></div>
+                                </div>
+                                <span>2 Columns</span>
+                            </button>
+                            <button type="button" class="column-option" data-row="${i}" data-cols="3" onclick="selectColumns(${i}, 3)">
+                                <div class="column-preview">
+                                    <div class="preview-col" style="width: 31%"></div>
+                                    <div class="preview-col" style="width: 31%"></div>
+                                    <div class="preview-col" style="width: 31%"></div>
+                                </div>
+                                <span>3 Columns</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                rowsConfigDiv.appendChild(rowConfig);
+            }
+        }
+
+        // Store row configurations
+        let rowConfigs = {};
+
+        function selectColumns(rowIndex, numCols) {
+            // Update active state
+            const rowElement = document.querySelector(`[data-row="${rowIndex}"]`).parentElement;
+            rowElement.querySelectorAll('.column-option').forEach(btn => btn.classList.remove('active'));
+            event.target.closest('.column-option').classList.add('active');
+            
+            // Store configuration
+            rowConfigs[rowIndex] = numCols;
+            
+            // Update preview
+            updateGridPreview();
+        }
+
+        function updateGridPreview() {
+            const numRows = parseInt(document.getElementById('grid-rows').value) || 1;
+            const previewContainer = document.getElementById('grid-preview');
+            previewContainer.innerHTML = '';
+
+            for (let i = 0; i < numRows; i++) {
+                const numCols = rowConfigs[i] || 1; // Default to 1 column
+                
+                const previewRow = document.createElement('div');
+                previewRow.className = 'grid-preview-row';
+                
+                // Calculate column widths based on number of columns
+                const colWidth = numCols === 1 ? 12 : (numCols === 2 ? 6 : 4);
+                
+                for (let j = 0; j < numCols; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = `grid-preview-cell col-${colWidth}`;
+                    cell.textContent = `Col ${j + 1}`;
+                    previewRow.appendChild(cell);
+                }
+                
+                previewContainer.appendChild(previewRow);
+            }
+        }
+
+        function createGridSection() {
+            const numRows = parseInt(document.getElementById('grid-rows').value) || 1;
+            const section = document.createElement('div');
+            section.className = 'grid-section';
+            section.id = `section-${++sectionCounter}`;
+            
+            // Add section controls
+            section.innerHTML = `
+                <div class="section-controls">
+                    <button class="control-btn" onclick="moveSection('${section.id}', 'up')">
+                        <i class="fas fa-arrow-up"></i>
+                    </button>
+                    <button class="control-btn" onclick="moveSection('${section.id}', 'down')">
+                        <i class="fas fa-arrow-down"></i>
+                    </button>
+                    <button class="control-btn delete" onclick="deleteSection('${section.id}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+                <div class="grid-container">
+                    ${generateGridRows(numRows)}
+                </div>
+            `;
+
+            // Remove drop zone if it exists
+            const dropZone = document.getElementById('main-drop-zone');
+            if (dropZone) {
+                dropZone.remove();
+            }
+
+            document.getElementById('canvas-content').appendChild(section);
+            setupCellDropZones(section);
+            hideGridConfig();
+        }
+
+        function generateGridRows(numRows) {
+            let html = '';
+            for (let i = 0; i < numRows; i++) {
+                const numCols = rowConfigs[i] || 1; // Default to 1 column
+                const colWidth = numCols === 1 ? 12 : (numCols === 2 ? 6 : 4);
+                
+                html += '<div class="grid-row">';
+                for (let j = 0; j < numCols; j++) {
+                    html += `
+                        <div class="grid-cell col-${colWidth}" data-cell="true">
+                            <div class="grid-cell-placeholder">Drop element here</div>
+                        </div>
+                    `;
+                }
+                html += '</div>';
+            }
+            return html;
+        }
+
+        function addPresetSection(type) {
+            const section = document.createElement('div');
+            section.className = 'grid-section';
+            section.id = `section-${++sectionCounter}`;
+            
+            let gridContent = '';
+            
+            switch(type) {
+                case 'header':
+                    gridContent = `
+                        <div class="grid-row">
+                            <div class="grid-cell col-3 has-content" data-cell="true">
+                                <div class="element-text" style="text-align: left;">
+                                    <h2 style="margin: 0; color: #6c5ce7;">
+                                        <i class="fas fa-fire" style="margin-right: 8px;"></i>Your Logo
+                                    </h2>
+                                </div>
+                            </div>
+                            <div class="grid-cell col-6 has-content" data-cell="true">
+                                <div class="element-text" style="text-align: center;">
+                                    <nav style="display: flex; gap: 30px; justify-content: center; align-items: center;">
+                                        <a href="#" style="color: #333; text-decoration: none; font-weight: 500;">Home</a>
+                                        <a href="#" style="color: #333; text-decoration: none; font-weight: 500;">About</a>
+                                        <a href="#" style="color: #333; text-decoration: none; font-weight: 500;">Services</a>
+                                        <a href="#" style="color: #333; text-decoration: none; font-weight: 500;">Contact</a>
+                                    </nav>
+                                </div>
+                            </div>
+                            <div class="grid-cell col-3 has-content" data-cell="true">
+                                <div class="element-text" style="text-align: right;">
+                                    <a href="#" class="element-button">Sign In</a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                case 'hero':
+                    gridContent = `
+                        <div class="grid-row">
+                            <div class="grid-cell col-12 has-content" data-cell="true">
+                                <div class="element-text">
+                                    <h1>Welcome to Our Website</h1>
+                                    <p>This is a hero section with a full-width layout</p>
+                                    <a href="#" class="element-button">Get Started</a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                case 'features':
+                    gridContent = `
+                        <div class="grid-row">
+                            <div class="grid-cell col-4 has-content" data-cell="true">
+                                <div class="element-text">
+                                    <i class="fas fa-rocket" style="font-size: 48px; color: #6c5ce7;"></i>
+                                    <h3>Fast Performance</h3>
+                                    <p>Lightning fast load times</p>
+                                </div>
+                            </div>
+                            <div class="grid-cell col-4 has-content" data-cell="true">
+                                <div class="element-text">
+                                    <i class="fas fa-shield-alt" style="font-size: 48px; color: #6c5ce7;"></i>
+                                    <h3>Secure</h3>
+                                    <p>Enterprise-grade security</p>
+                                </div>
+                            </div>
+                            <div class="grid-cell col-4 has-content" data-cell="true">
+                                <div class="element-text">
+                                    <i class="fas fa-chart-line" style="font-size: 48px; color: #6c5ce7;"></i>
+                                    <h3>Analytics</h3>
+                                    <p>Detailed insights and reports</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                case 'two-column':
+                    gridContent = `
+                        <div class="grid-row">
+                            <div class="grid-cell col-6" data-cell="true">
+                                <div class="grid-cell-placeholder">Drop element here</div>
+                            </div>
+                            <div class="grid-cell col-6" data-cell="true">
+                                <div class="grid-cell-placeholder">Drop element here</div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                case 'three-column':
+                    gridContent = `
+                        <div class="grid-row">
+                            <div class="grid-cell col-4" data-cell="true">
+                                <div class="grid-cell-placeholder">Drop element here</div>
+                            </div>
+                            <div class="grid-cell col-4" data-cell="true">
+                                <div class="grid-cell-placeholder">Drop element here</div>
+                            </div>
+                            <div class="grid-cell col-4" data-cell="true">
+                                <div class="grid-cell-placeholder">Drop element here</div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                case 'footer':
+                    gridContent = `
+                        <div class="grid-row">
+                            <div class="grid-cell col-3 has-content" data-cell="true">
+                                <div class="element-text">
+                                    <h4>Company</h4>
+                                    <p>About Us<br>Contact<br>Careers</p>
+                                </div>
+                            </div>
+                            <div class="grid-cell col-3 has-content" data-cell="true">
+                                <div class="element-text">
+                                    <h4>Products</h4>
+                                    <p>Features<br>Pricing<br>Support</p>
+                                </div>
+                            </div>
+                            <div class="grid-cell col-3 has-content" data-cell="true">
+                                <div class="element-text">
+                                    <h4>Resources</h4>
+                                    <p>Documentation<br>Blog<br>Community</p>
+                                </div>
+                            </div>
+                            <div class="grid-cell col-3 has-content" data-cell="true">
+                                <div class="element-text">
+                                    <h4>Connect</h4>
+                                    <p>Twitter<br>LinkedIn<br>GitHub</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+            }
+            
+            section.innerHTML = `
+                <div class="section-controls">
+                    <button class="control-btn" onclick="moveSection('${section.id}', 'up')">
+                        <i class="fas fa-arrow-up"></i>
+                    </button>
+                    <button class="control-btn" onclick="moveSection('${section.id}', 'down')">
+                        <i class="fas fa-arrow-down"></i>
+                    </button>
+                    <button class="control-btn delete" onclick="deleteSection('${section.id}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+                <div class="grid-container">
+                    ${gridContent}
+                </div>
+            `;
+
+            // Remove drop zone if it exists
+            const dropZone = document.getElementById('main-drop-zone');
+            if (dropZone) {
+                dropZone.remove();
+            }
+
+            document.getElementById('canvas-content').appendChild(section);
+            setupCellDropZones(section);
+        }
+
+        function setupDragAndDrop() {
+            // Setup draggable elements
+            document.querySelectorAll('.element-item').forEach(element => {
+                element.addEventListener('dragstart', handleDragStart);
+                element.addEventListener('dragend', handleDragEnd);
+            });
+        }
+
+        function handleDragStart(e) {
+            draggedElement = e.target;
+            e.target.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'copy';
+            e.dataTransfer.setData('elementType', e.target.dataset.element);
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+        }
+
+        function setupCellDropZones(section) {
+            section.querySelectorAll('.grid-cell').forEach(cell => {
+                cell.addEventListener('dragover', handleDragOver);
+                cell.addEventListener('drop', handleDrop);
+                cell.addEventListener('dragleave', handleDragLeave);
+            });
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+            
+            const elementType = e.dataTransfer.getData('elementType');
+            const cell = e.currentTarget;
+            
+            // Clear placeholder
+            cell.innerHTML = '';
+            cell.classList.add('has-content');
+            
+            // Add element based on type
+            const elementContent = createElementContent(elementType);
+            cell.appendChild(elementContent);
+            
+            // Add element controls
+            const controls = document.createElement('div');
+            controls.className = 'element-controls';
+            controls.innerHTML = `
+                <button class="element-control-btn" onclick="editElement(this)">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="element-control-btn delete" onclick="removeElement(this)">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            cell.appendChild(controls);
+        }
+
+        function createElementContent(type) {
+            const div = document.createElement('div');
+            div.className = `element-${type}`;
+            
+            switch(type) {
+                case 'text':
+                    div.innerHTML = '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>';
+                    break;
+                case 'heading':
+                    div.innerHTML = '<h2>Heading Text</h2>';
+                    break;
+                case 'button':
+                    div.innerHTML = '<a href="#" class="element-button">Click Me</a>';
+                    break;
+                case 'image':
+                    div.innerHTML = '<div class="element-image"><i class="fas fa-image"></i><br>Image Placeholder</div>';
+                    break;
+                case 'video':
+                    div.innerHTML = '<div class="element-video"><i class="fas fa-play-circle"></i><br>Video Placeholder</div>';
+                    break;
+                case 'gallery':
+                    div.innerHTML = '<div class="element-image"><i class="fas fa-images"></i><br>Gallery Placeholder</div>';
+                    break;
+                case 'spacer':
+                    div.innerHTML = '<div class="element-spacer"></div>';
+                    break;
+                case 'divider':
+                    div.innerHTML = '<hr style="border: 1px solid #e0e0e0;">';
+                    break;
+                case 'form':
+                    div.innerHTML = `
+                        <div class="element-form">
+                            <i class="fas fa-wpforms"></i>
+                            <h4>Form Widget</h4>
+                            <p>Select a form from your library</p>
+                        </div>
+                    `;
+                    break;
+                case 'widget':
+                    div.innerHTML = `
+                        <div class="element-widget">
+                            <i class="fas fa-chart-line"></i>
+                            <h4>Data Widget</h4>
+                            <p>Select a widget from your library</p>
+                        </div>
+                    `;
+                    break;
+            }
+            
+            return div;
+        }
+
+        function removeElement(btn) {
+            const cell = btn.closest('.grid-cell');
+            cell.innerHTML = '<div class="grid-cell-placeholder">Drop element here</div>';
+            cell.classList.remove('has-content');
+        }
+
+        function editElement(btn) {
+            // TODO: Implement element editing
+            alert('Element editing coming soon!');
+        }
+
+        function deleteSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.remove();
+                
+                // Add drop zone back if no sections
+                if (document.querySelectorAll('.grid-section').length === 0) {
+                    const dropZone = document.createElement('div');
+                    dropZone.className = 'drop-zone';
+                    dropZone.id = 'main-drop-zone';
+                    dropZone.innerHTML = '<i class="fas fa-plus"></i> Click "Add Grid Section" to start building your page';
+                    document.getElementById('canvas-content').appendChild(dropZone);
+                }
+            }
+        }
+
+        function moveSection(sectionId, direction) {
+            const section = document.getElementById(sectionId);
+            if (!section) return;
+            
+            if (direction === 'up' && section.previousElementSibling) {
+                section.parentNode.insertBefore(section, section.previousElementSibling);
+            } else if (direction === 'down' && section.nextElementSibling) {
+                section.parentNode.insertBefore(section.nextElementSibling, section);
+            }
+        }
+
+        function setDevice(device) {
+            currentDevice = device;
+            const canvas = document.getElementById('canvas');
+            
+            // Update button states
+            document.querySelectorAll('.device-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update canvas size
+            canvas.classList.remove('mobile', 'tablet');
+            if (device !== 'desktop') {
+                canvas.classList.add(device);
+            }
+        }
+
+        function savePage() {
+            if (!currentPage) return;
+            
+            currentPage.title = document.getElementById('settings-title').value || 'New Page';
+            currentPage.status = document.getElementById('settings-status').value;
+            currentPage.content = document.getElementById('canvas-content').innerHTML;
+            
+            // Save to localStorage
+            localStorage.setItem(`page_${currentPage.id}`, JSON.stringify(currentPage));
+            
+            // Update UI
+            document.getElementById('page-title').textContent = currentPage.title;
+            
+            alert('Page saved successfully!');
+        }
+
+        function previewPage() {
+            if (!currentPage) return;
+            
+            // Save current state
+            savePage();
+            
+            // Open preview
+            window.open(`page-viewer.html?id=${currentPage.id}`, '_blank');
+        }
+
+        function publishPage() {
+            if (!currentPage) return;
+            
+            currentPage.published = true;
+            savePage();
+            
+            alert('Page published successfully!');
+        }
+
+        function setupSectionControls() {
+            document.querySelectorAll('.grid-section').forEach(section => {
+                setupCellDropZones(section);
+            });
+        }
+    </script>
+</body>
+</html>

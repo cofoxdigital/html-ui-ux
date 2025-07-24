@@ -7,15 +7,16 @@ class WidgetManager {
     }
 
     init() {
-        this.renderWidgets();
-        this.updateStats();
-        this.setupEventListeners();
-        this.setupFilters();
-        
         // Initialize with sample widgets if none exist
         if (this.widgets.length === 0) {
             this.createSampleWidgets();
         }
+        
+        this.filteredWidgets = [...this.widgets];
+        this.renderWidgets();
+        this.updateStats();
+        this.setupEventListeners();
+        this.setupFilters();
     }
 
     // Local Storage Management
@@ -56,6 +57,7 @@ class WidgetManager {
         };
 
         this.widgets.push(widget);
+        this.filteredWidgets = [...this.widgets];
         this.saveWidgets();
         this.renderWidgets();
         this.updateStats();
@@ -79,6 +81,7 @@ class WidgetManager {
 
     deleteWidget(id) {
         this.widgets = this.widgets.filter(w => w.id !== id);
+        this.filteredWidgets = [...this.widgets];
         this.saveWidgets();
         this.renderWidgets();
         this.updateStats();
@@ -104,6 +107,7 @@ class WidgetManager {
                 usageCount: 0
             };
             this.widgets.push(duplicate);
+            this.filteredWidgets = [...this.widgets];
             this.saveWidgets();
             this.renderWidgets();
             this.updateStats();
@@ -197,25 +201,25 @@ class WidgetManager {
                 name: 'Revenue Dashboard',
                 description: 'Monthly revenue tracking with growth indicators',
                 category: 'analytics',
-                template: 'kpi'
+                template: 'metric'
             },
             {
                 name: 'Client Progress Chart',
                 description: 'Visual representation of client progress over time',
-                category: 'analytics',
+                category: 'charts',
                 template: 'chart'
             },
             {
                 name: 'Quick Actions Panel',
                 description: 'Common actions for daily operations',
-                category: 'actions',
-                template: 'actions'
+                category: 'other',
+                template: 'blank'
             },
             {
                 name: 'Performance Metrics',
                 description: 'Key performance indicators for business health',
                 category: 'analytics',
-                template: 'kpi'
+                template: 'metric'
             }
         ];
 
@@ -226,8 +230,10 @@ class WidgetManager {
                 this.publishWidget(created.id);
             }
             // Add some usage
-            created.usageCount = Math.floor(Math.random() * 10);
+            created.usageCount = Math.floor(Math.random() * 100);
         });
+        
+        this.saveWidgets();
     }
 
     // Utility Functions
@@ -358,22 +364,17 @@ class WidgetManager {
     updateStats() {
         const totalWidgets = this.widgets.length;
         const publishedWidgets = this.widgets.filter(w => w.status === 'published').length;
+        const draftWidgets = this.widgets.filter(w => w.status === 'draft').length;
         const totalUsage = this.widgets.reduce((sum, w) => sum + w.usageCount, 0);
         
-        // Find most popular category
-        const categoryCount = this.widgets.reduce((acc, w) => {
-            acc[w.category] = (acc[w.category] || 0) + 1;
-            return acc;
-        }, {});
-        const popularCategory = Object.keys(categoryCount).reduce((a, b) => 
-            categoryCount[a] > categoryCount[b] ? a : b, 'Analytics'
-        );
-
-        document.getElementById('total-widgets').textContent = totalWidgets;
-        document.getElementById('published-widgets').textContent = publishedWidgets;
-        document.getElementById('widget-usage').textContent = totalUsage;
-        document.getElementById('popular-category').textContent = 
-            popularCategory.charAt(0).toUpperCase() + popularCategory.slice(1);
+        // Update the stat cards
+        const statCards = document.querySelectorAll('.stat-card h3');
+        if (statCards.length >= 4) {
+            statCards[0].textContent = totalWidgets; // Total Widgets
+            statCards[1].textContent = publishedWidgets; // Published
+            statCards[2].textContent = draftWidgets; // Drafts
+            statCards[3].textContent = totalUsage > 1000 ? `${(totalUsage / 1000).toFixed(1)}k` : totalUsage; // Total Usage
+        }
     }
 
     // Event Listeners
@@ -417,8 +418,8 @@ class WidgetManager {
             const widget = this.createWidget(formData);
             document.getElementById('create-widget-modal').style.display = 'none';
             
-            // Redirect to widget builder
-            window.location.href = `widget-builder.html?id=${widget.id}`;
+            // Redirect to enhanced widget builder
+            window.location.href = `widget-builder-enhanced.html?id=${widget.id}`;
         });
 
         // Delete confirmation
@@ -503,7 +504,7 @@ function createNewWidget() {
 }
 
 function editWidget(id) {
-    window.location.href = `widget-builder.html?id=${id}`;
+    window.location.href = `widget-builder-enhanced.html?id=${id}`;
 }
 
 function deleteWidget(id) {
