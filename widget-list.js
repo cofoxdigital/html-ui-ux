@@ -301,7 +301,7 @@ class WidgetManager {
                         <button class="btn-icon" onclick="editWidget('${widget.id}')" title="Edit">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button class="btn-icon dropdown-toggle" onclick="toggleWidgetMenu('${widget.id}')" title="More actions">
+                        <button class="btn-icon dropdown-toggle" onclick="toggleWidgetMenu(event, '${widget.id}')" title="More actions">
                             <i class="fas fa-ellipsis-v"></i>
                         </button>
                         <div class="dropdown-menu" id="menu-${widget.id}">
@@ -431,9 +431,9 @@ class WidgetManager {
 
         // Close dropdowns when clicking outside
         document.addEventListener('click', (e) => {
-            if (!e.target.closest('.dropdown')) {
+            if (!e.target.closest('.widget-actions')) {
                 document.querySelectorAll('.dropdown-menu').forEach(menu => {
-                    menu.style.display = 'none';
+                    menu.classList.remove('show');
                 });
             }
         });
@@ -519,12 +519,12 @@ function deleteWidget(id) {
 
 function duplicateWidget(id) {
     widgetManager.duplicateWidget(id);
-    toggleWidgetMenu(id); // Close the menu
+    toggleWidgetMenu(null, id); // Close the menu
 }
 
 function publishWidget(id) {
     widgetManager.publishWidget(id);
-    toggleWidgetMenu(id); // Close the menu
+    toggleWidgetMenu(null, id); // Close the menu
 }
 
 function previewWidget(id) {
@@ -544,7 +544,7 @@ function exportWidget(id) {
         link.click();
         URL.revokeObjectURL(url);
     }
-    toggleWidgetMenu(id); // Close the menu
+    toggleWidgetMenu(null, id); // Close the menu
 }
 
 function importWidget() {
@@ -572,15 +572,41 @@ function importWidget() {
     input.click();
 }
 
-function toggleWidgetMenu(id) {
+function toggleWidgetMenu(event, id) {
+    if (event) {
+        event.stopPropagation(); // Prevent event bubbling
+    }
+    
     const menu = document.getElementById(`menu-${id}`);
-    const isVisible = menu.style.display === 'block';
+    if (!menu) {
+        console.error(`Menu not found for widget ${id}`);
+        return;
+    }
+    
+    const isVisible = menu.classList.contains('show');
     
     // Close all menus
-    document.querySelectorAll('.dropdown-menu').forEach(m => m.style.display = 'none');
+    document.querySelectorAll('.dropdown-menu').forEach(m => {
+        m.classList.remove('show');
+    });
     
     // Toggle current menu
-    menu.style.display = isVisible ? 'none' : 'block';
+    if (!isVisible) {
+        menu.classList.add('show');
+        
+        // Position the menu properly
+        if (event && event.currentTarget) {
+            const button = event.currentTarget;
+            const rect = button.getBoundingClientRect();
+            
+            // Ensure menu is positioned relative to the button
+            const widgetActions = button.closest('.widget-actions');
+            if (widgetActions) {
+                const actionsRect = widgetActions.getBoundingClientRect();
+                menu.style.top = `${button.offsetHeight + 5}px`;
+            }
+        }
+    }
 }
 
 // AI Chatbot Functionality

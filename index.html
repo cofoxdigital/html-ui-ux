@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="./styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <!-- Header -->
@@ -47,12 +48,12 @@
             <div class="nav-item" data-section="clients">
                 <i class="fas fa-users"></i>
                 <span>Clients</span>
-                <span class="count">247</span>
+                <span class="count" id="clients-count">5</span>
             </div>
             <div class="nav-item" data-section="team">
                 <i class="fas fa-user-friends"></i>
                 <span>Team</span>
-                <span class="count">12</span>
+                <span class="count" id="team-count">4</span>
             </div>
             <div class="nav-item" data-section="apps">
                 <i class="fas fa-mobile-alt"></i>
@@ -406,78 +407,134 @@
 
             <div class="team-grid">
                 <div class="team-card">
-                    <div class="team-member">
-                        <img src="./man_professional.webp" alt="Coach">
-                        <div class="member-info">
-                            <h3>Mike Chen</h3>
-                            <p>Senior Coach</p>
-                            <div class="member-stats">
-                                <span><i class="fas fa-users"></i> 45 clients</span>
-                                <span><i class="fas fa-star"></i> 4.9 rating</span>
-                            </div>
+                    <div class="team-card-header">
+                        <img src="./man_professional.webp" alt="Coach" class="team-avatar">
+                        <div class="team-actions">
+                            <button class="btn-icon"><i class="fas fa-eye"></i></button>
+                            <button class="btn-icon"><i class="fas fa-edit"></i></button>
+                            <button class="btn-icon"><i class="fas fa-message"></i></button>
                         </div>
                     </div>
-                    <div class="member-actions">
-                        <button class="btn-icon"><i class="fas fa-eye"></i></button>
-                        <button class="btn-icon"><i class="fas fa-edit"></i></button>
-                        <button class="btn-icon"><i class="fas fa-message"></i></button>
+                    <div class="team-info">
+                        <h3>Mike Chen</h3>
+                        <p class="role">Senior Coach</p>
+                        <p class="email">mike.chen@fitlife.com</p>
+                    </div>
+                    <div class="team-stats">
+                        <div class="stat">
+                            <i class="fas fa-users"></i>
+                            <span>45 active clients</span>
+                        </div>
+                        <div class="stat">
+                            <i class="fas fa-star"></i>
+                            <span>4.9/5 rating</span>
+                        </div>
+                        <div class="stat">
+                            <i class="fas fa-certificate"></i>
+                            <span>Certified Personal Trainer</span>
+                        </div>
+                    </div>
+                    <div class="team-status">
+                        <span class="status active">Available</span>
                     </div>
                 </div>
 
                 <div class="team-card">
-                    <div class="team-member">
-                        <img src="./woman_professional.jpg" alt="Coach">
-                        <div class="member-info">
-                            <h3>Lisa Rodriguez</h3>
-                            <p>Fitness Coach</p>
-                            <div class="member-stats">
-                                <span><i class="fas fa-users"></i> 38 clients</span>
-                                <span><i class="fas fa-star"></i> 4.8 rating</span>
-                            </div>
+                    <div class="team-card-header">
+                        <img src="./woman_professional.jpg" alt="Coach" class="team-avatar">
+                        <div class="team-actions">
+                            <button class="btn-icon"><i class="fas fa-eye"></i></button>
+                            <button class="btn-icon"><i class="fas fa-edit"></i></button>
+                            <button class="btn-icon"><i class="fas fa-message"></i></button>
                         </div>
                     </div>
-                    <div class="member-actions">
-                        <button class="btn-icon"><i class="fas fa-eye"></i></button>
-                        <button class="btn-icon"><i class="fas fa-edit"></i></button>
-                        <button class="btn-icon"><i class="fas fa-message"></i></button>
+                    <div class="team-info">
+                        <h3>Lisa Rodriguez</h3>
+                        <p class="role">Fitness Coach</p>
+                        <p class="email">lisa.rodriguez@fitlife.com</p>
+                    </div>
+                    <div class="team-stats">
+                        <div class="stat">
+                            <i class="fas fa-users"></i>
+                            <span>38 active clients</span>
+                        </div>
+                        <div class="stat">
+                            <i class="fas fa-star"></i>
+                            <span>4.8/5 rating</span>
+                        </div>
+                        <div class="stat">
+                            <i class="fas fa-dumbbell"></i>
+                            <span>Strength & Conditioning</span>
+                        </div>
+                    </div>
+                    <div class="team-status">
+                        <span class="status active">Available</span>
                     </div>
                 </div>
 
                 <div class="team-card">
-                    <div class="team-member">
-                        <img src="./man_professional.webp" alt="Coach">
-                        <div class="member-info">
-                            <h3>Alex Thompson</h3>
-                            <p>Nutrition Specialist</p>
-                            <div class="member-stats">
-                                <span><i class="fas fa-users"></i> 32 clients</span>
-                                <span><i class="fas fa-star"></i> 4.9 rating</span>
-                            </div>
+                    <div class="team-card-header">
+                        <img src="./man_professional.webp" alt="Coach" class="team-avatar">
+                        <div class="team-actions">
+                            <button class="btn-icon"><i class="fas fa-eye"></i></button>
+                            <button class="btn-icon"><i class="fas fa-edit"></i></button>
+                            <button class="btn-icon"><i class="fas fa-message"></i></button>
                         </div>
                     </div>
-                    <div class="member-actions">
-                        <button class="btn-icon"><i class="fas fa-eye"></i></button>
-                        <button class="btn-icon"><i class="fas fa-edit"></i></button>
-                        <button class="btn-icon"><i class="fas fa-message"></i></button>
+                    <div class="team-info">
+                        <h3>Alex Thompson</h3>
+                        <p class="role">Nutrition Specialist</p>
+                        <p class="email">alex.thompson@fitlife.com</p>
+                    </div>
+                    <div class="team-stats">
+                        <div class="stat">
+                            <i class="fas fa-users"></i>
+                            <span>32 active clients</span>
+                        </div>
+                        <div class="stat">
+                            <i class="fas fa-star"></i>
+                            <span>4.9/5 rating</span>
+                        </div>
+                        <div class="stat">
+                            <i class="fas fa-apple-alt"></i>
+                            <span>Registered Dietitian</span>
+                        </div>
+                    </div>
+                    <div class="team-status">
+                        <span class="status active">Available</span>
                     </div>
                 </div>
 
                 <div class="team-card">
-                    <div class="team-member">
-                        <img src="./woman_professional.jpg" alt="Coach">
-                        <div class="member-info">
-                            <h3>Sarah Kim</h3>
-                            <p>Wellness Coach</p>
-                            <div class="member-stats">
-                                <span><i class="fas fa-users"></i> 28 clients</span>
-                                <span><i class="fas fa-star"></i> 4.7 rating</span>
-                            </div>
+                    <div class="team-card-header">
+                        <img src="./woman_professional.jpg" alt="Coach" class="team-avatar">
+                        <div class="team-actions">
+                            <button class="btn-icon"><i class="fas fa-eye"></i></button>
+                            <button class="btn-icon"><i class="fas fa-edit"></i></button>
+                            <button class="btn-icon"><i class="fas fa-message"></i></button>
                         </div>
                     </div>
-                    <div class="member-actions">
-                        <button class="btn-icon"><i class="fas fa-eye"></i></button>
-                        <button class="btn-icon"><i class="fas fa-edit"></i></button>
-                        <button class="btn-icon"><i class="fas fa-message"></i></button>
+                    <div class="team-info">
+                        <h3>Sarah Kim</h3>
+                        <p class="role">Wellness Coach</p>
+                        <p class="email">sarah.kim@fitlife.com</p>
+                    </div>
+                    <div class="team-stats">
+                        <div class="stat">
+                            <i class="fas fa-users"></i>
+                            <span>28 active clients</span>
+                        </div>
+                        <div class="stat">
+                            <i class="fas fa-star"></i>
+                            <span>4.7/5 rating</span>
+                        </div>
+                        <div class="stat">
+                            <i class="fas fa-spa"></i>
+                            <span>Yoga & Mindfulness</span>
+                        </div>
+                    </div>
+                    <div class="team-status">
+                        <span class="status active">Available</span>
                     </div>
                 </div>
             </div>
@@ -589,14 +646,11 @@
 
                 <div class="builder-card">
                     <div class="builder-icon">
-                        <i class="fas fa-project-diagram"></i>
+                        <i class="fas fa-puzzle-piece"></i>
                     </div>
-                    <h3>Workflow Builder</h3>
-                    <p>Automate processes with visual workflow designer</p>
-                    <button class="btn btn-primary" onclick="window.location.href='workflow-list.html'">Launch Builder</button>
-                    <button class="btn btn-secondary" onclick="window.location.href='workflow-demo.html'" style="margin-top: 10px;">
-                        <i class="fas fa-info-circle"></i> Learn More
-                    </button>
+                    <h3>Widget Builder</h3>
+                    <p>Build reusable UI components and widgets</p>
+                    <button class="btn btn-primary" onclick="window.location.href='widget-list.html'">Launch Builder</button>
                 </div>
 
                 <div class="builder-card">
@@ -610,20 +664,14 @@
 
                 <div class="builder-card">
                     <div class="builder-icon">
-                        <i class="fas fa-puzzle-piece"></i>
+                        <i class="fas fa-project-diagram"></i>
                     </div>
-                    <h3>Widget Builder</h3>
-                    <p>Build reusable UI components and widgets</p>
-                    <button class="btn btn-primary" onclick="window.location.href='widget-list.html'">Launch Builder</button>
-                </div>
-
-                <div class="builder-card">
-                    <div class="builder-icon">
-                        <i class="fas fa-table"></i>
-                    </div>
-                    <h3>Table Builder</h3>
-                    <p>Create data tables and modules with relationships</p>
-                    <button class="btn btn-primary">Launch Builder</button>
+                    <h3>Workflow Builder</h3>
+                    <p>Automate processes with visual workflow designer</p>
+                    <button class="btn btn-primary" onclick="window.location.href='workflow-list.html'">Launch Builder</button>
+                    <button class="btn btn-secondary" onclick="window.location.href='workflow-demo.html'" style="margin-top: 10px;">
+                        <i class="fas fa-info-circle"></i> Learn More
+                    </button>
                 </div>
             </div>
         </div>
@@ -764,9 +812,8 @@
             <div class="analytics-grid">
                 <div class="analytics-card">
                     <h3>Revenue Analytics</h3>
-                    <div class="chart-placeholder">
-                        <i class="fas fa-chart-line"></i>
-                        <p>Revenue Trend Chart</p>
+                    <div class="chart-container">
+                        <canvas id="revenueChart"></canvas>
                     </div>
                     <div class="analytics-stats">
                         <div class="stat">
@@ -782,9 +829,8 @@
 
                 <div class="analytics-card">
                     <h3>Client Engagement</h3>
-                    <div class="chart-placeholder">
-                        <i class="fas fa-chart-pie"></i>
-                        <p>Engagement Distribution</p>
+                    <div class="chart-container">
+                        <canvas id="engagementChart"></canvas>
                     </div>
                     <div class="analytics-stats">
                         <div class="stat">
@@ -800,9 +846,8 @@
 
                 <div class="analytics-card">
                     <h3>App Performance</h3>
-                    <div class="chart-placeholder">
-                        <i class="fas fa-chart-bar"></i>
-                        <p>Performance Metrics</p>
+                    <div class="chart-container">
+                        <canvas id="performanceChart"></canvas>
                     </div>
                     <div class="analytics-stats">
                         <div class="stat">
@@ -818,9 +863,8 @@
 
                 <div class="analytics-card">
                     <h3>Coach Performance</h3>
-                    <div class="chart-placeholder">
-                        <i class="fas fa-chart-area"></i>
-                        <p>Coach Effectiveness</p>
+                    <div class="chart-container">
+                        <canvas id="coachChart"></canvas>
                     </div>
                     <div class="analytics-stats">
                         <div class="stat">

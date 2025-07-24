@@ -220,22 +220,34 @@
             margin-top: 2px;
         }
         
+        .widget-actions {
+            position: relative;
+        }
+        
         .dropdown {
             position: relative;
+            display: inline-block;
         }
         
         .dropdown-menu {
             position: absolute;
-            top: 100%;
+            top: calc(100% + 5px);
             right: 0;
             background: white;
             border: 1px solid #e0e0e0;
             border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             min-width: 160px;
             display: none;
-            z-index: 100;
-            margin-top: 5px;
+            z-index: 1000;
+        }
+        
+        .dropdown-toggle {
+            position: relative;
+        }
+        
+        .dropdown-menu.show {
+            display: block !important;
         }
         
         .dropdown-item {
@@ -584,12 +596,12 @@
             <div class="nav-item" data-section="clients">
                 <i class="fas fa-users"></i>
                 <span>Clients</span>
-                <span class="count">247</span>
+                <span class="count">5</span>
             </div>
             <div class="nav-item" data-section="team">
                 <i class="fas fa-user-friends"></i>
                 <span>Team</span>
-                <span class="count">12</span>
+                <span class="count">4</span>
             </div>
             <div class="nav-item" data-section="apps">
                 <i class="fas fa-mobile-alt"></i>
