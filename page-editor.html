@@ -657,8 +657,8 @@
                     </div>
                 </div>
                 <div class="toolbar-right">
-                    <button class="btn btn-outline btn-sm" onclick="previewPage()">
-                        <i class="fas fa-eye"></i> Preview
+                    <button class="btn btn-outline btn-sm" onclick="showComingSoon()" disabled style="opacity: 0.6; cursor: not-allowed;">
+                        <i class="fas fa-eye"></i> Preview (Coming Soon)
                     </button>
                     <button class="btn btn-primary btn-sm" onclick="publishPage()">
                         <i class="fas fa-globe"></i> Publish
@@ -1734,6 +1734,10 @@
             setTimeout(() => {
                 notification.remove();
             }, 3000);
+        }
+
+        function showComingSoon() {
+            showNotification('Preview functionality coming soon!', 'info');
         }
     </script>
 </body>

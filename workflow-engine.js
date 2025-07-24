@@ -279,7 +279,24 @@ class WorkflowEngine {
 
     // Action implementations
     async actionNavigate(instance, config) {
-        const pageId = this.resolveValue(config.pageId, instance.context);
+        // Get pageId directly from config first, then try to resolve it
+        let pageId = config.pageId;
+        
+        // If pageId looks like a template variable, resolve it
+        if (typeof pageId === 'string' && pageId.includes('{{')) {
+            pageId = this.resolveValue(pageId, instance.context);
+        }
+        
+        // Log for debugging
+        console.log('[WorkflowEngine] Navigate action config:', config);
+        console.log('[WorkflowEngine] Resolved pageId:', pageId);
+        
+        if (!pageId) {
+            this.logExecution(instance, 'error', 'Navigation failed: No page ID provided');
+            console.error('[WorkflowEngine] Navigation failed: pageId is empty or undefined');
+            return;
+        }
+        
         const passData = config.passData;
         
         // Check if we're in test mode
@@ -302,12 +319,17 @@ class WorkflowEngine {
         }
 
         // Navigate to page
-        if (config.delay) {
+        const targetUrl = `page-viewer.html?id=${pageId}`;
+        
+        if (config.delay && config.delay > 0) {
+            this.logExecution(instance, 'info', `Navigating to page ${pageId} after ${config.delay}ms delay`);
             setTimeout(() => {
-                window.location.href = `page-viewer.html?id=${pageId}`;
+                console.log('[WorkflowEngine] Navigating to:', targetUrl);
+                window.location.href = targetUrl;
             }, config.delay);
         } else {
-            window.location.href = `page-viewer.html?id=${pageId}`;
+            console.log('[WorkflowEngine] Navigating to:', targetUrl);
+            window.location.href = targetUrl;
         }
 
         this.logExecution(instance, 'success', `Navigating to page: ${pageId}`);
@@ -565,10 +587,15 @@ class WorkflowEngine {
             data
         };
 
+        // Ensure instance.logs exists
+        if (!instance.logs) {
+            instance.logs = [];
+        }
+        
         instance.logs.push(logEntry);
         this.executionLogs.push(logEntry);
 
-        if (this.debugMode) {
+        if (this.debugMode || level === 'error') {
             console.log(`[Workflow ${instance.workflowId}] ${message}`, data);
         }
 

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnose Page Issue</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+        h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        .code {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            overflow-x: auto;
+        }
+        .success {
+            color: #155724;
+            background: #d4edda;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 5px 0;
+        }
+        .error {
+            color: #721c24;
+            background: #f8d7da;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 5px 0;
+        }
+        .info {
+            color: #0c5460;
+            background: #d1ecf1;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 5px 0;
+        }
+        button {
+            background: #4f46e5;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #4338ca;
+        }
+    </style>
+</head>
+<body>
+    <h1>Diagnose Page Navigation Issue</h1>
+
+    <div class="section">
+        <h2>1. Check Dashboard Page Storage</h2>
+        <button onclick="checkDashboardPage()">Check Dashboard Page</button>
+        <div id="dashboard-check"></div>
+    </div>
+
+    <div class="section">
+        <h2>2. Check Workflow Configuration</h2>
+        <button onclick="checkWorkflowConfig()">Check Workflow Config</button>
+        <div id="workflow-check"></div>
+    </div>
+
+    <div class="section">
+        <h2>3. Test Direct Navigation</h2>
+        <button onclick="testDirectNavigation()">Test Navigation</button>
+        <div id="navigation-test"></div>
+    </div>
+
+    <div class="section">
+        <h2>4. Fix Page Storage Format</h2>
+        <button onclick="fixPageStorage()">Fix Page Storage</button>
+        <div id="fix-result"></div>
+    </div>
+
+    <script>
+        function addResult(containerId, message, type = 'info') {
+            const container = document.getElementById(containerId);
+            const div = document.createElement('div');
+            div.className = type;
+            div.textContent = message;
+            container.appendChild(div);
+        }
+
+        function checkDashboardPage() {
+            const container = document.getElementById('dashboard-check');
+            container.innerHTML = '';
+            
+            const pageId = '1753267684548';
+            
+            // Check different storage formats
+            const checks = [
+                { key: `page_${pageId}`, label: 'page_[ID] format' },
+                { key: pageId, label: 'Direct ID format' },
+                { key: 'pages', label: 'Pages array' }
+            ];
+            
+            checks.forEach(check => {
+                const data = localStorage.getItem(check.key);
+                if (data) {
+                    addResult('dashboard-check', `✓ Found in ${check.label}`, 'success');
+                    try {
+                        const parsed = JSON.parse(data);
+                        if (Array.isArray(parsed)) {
+                            const page = parsed.find(p => p.id == pageId);
+                            if (page) {
+                                addResult('dashboard-check', `Page title: ${page.title}`, 'info');
+                            }
+                        } else if (parsed.id == pageId) {
+                            addResult('dashboard-check', `Page title: ${parsed.title}`, 'info');
+                            addResult('dashboard-check', `Page status: ${parsed.status}`, 'info');
+                        }
+                    } catch (e) {
+                        addResult('dashboard-check', `Parse error: ${e.message}`, 'error');
+                    }
+                } else {
+                    addResult('dashboard-check', `✗ Not found in ${check.label}`, 'error');
+                }
+            });
+        }
+
+        function checkWorkflowConfig() {
+            const container = document.getElementById('workflow-check');
+            container.innerHTML = '';
+            
+            const workflows = JSON.parse(localStorage.getItem('workflows') || '[]');
+            const loginWorkflow = workflows.find(w => w.name === 'Login');
+            
+            if (!loginWorkflow) {
+                addResult('workflow-check', 'Login workflow not found', 'error');
+                return;
+            }
+            
+            addResult('workflow-check', `Workflow status: ${loginWorkflow.status}`, loginWorkflow.status === 'published' ? 'success' : 'info');
+            
+            // Find navigate node
+            const navigateNode = loginWorkflow.nodes.find(n => n.type === 'action' && n.subtype === 'navigate');
+            if (navigateNode) {
+                addResult('workflow-check', `Navigate node found`, 'success');
+                addResult('workflow-check', `Page ID in config: ${navigateNode.config.pageId}`, 'info');
+                addResult('workflow-check', `Page ID type: ${typeof navigateNode.config.pageId}`, 'info');
+                
+                // Show the full config
+                const configDiv = document.createElement('div');
+                configDiv.className = 'code';
+                configDiv.textContent = JSON.stringify(navigateNode.config, null, 2);
+                container.appendChild(configDiv);
+            } else {
+                addResult('workflow-check', 'Navigate node not found', 'error');
+            }
+        }
+
+        function testDirectNavigation() {
+            const container = document.getElementById('navigation-test');
+            container.innerHTML = '';
+            
+            const pageId = '1753267684548';
+            const url = `page-viewer.html?id=${pageId}`;
+            
+            addResult('navigation-test', `URL that will be used: ${url}`, 'info');
+            addResult('navigation-test', 'Opening in new tab...', 'info');
+            
+            window.open(url, '_blank');
+        }
+
+        function fixPageStorage() {
+            const container = document.getElementById('fix-result');
+            container.innerHTML = '';
+            
+            try {
+                // Get all pages from different possible locations
+                const pageId = '1753267684548';
+                let dashboardPage = null;
+                
+                // Try to find the dashboard page
+                const pageKey = `page_${pageId}`;
+                const pageData = localStorage.getItem(pageKey);
+                
+                if (pageData) {
+                    dashboardPage = JSON.parse(pageData);
+                    addResult('fix-result', 'Dashboard page found in correct format', 'success');
+                } else {
+                    // Try to find in pages array
+                    const pages = JSON.parse(localStorage.getItem('pages') || '[]');
+                    dashboardPage = pages.find(p => p.id == pageId);
+                    
+                    if (dashboardPage) {
+                        // Save in correct format
+                        localStorage.setItem(pageKey, JSON.stringify(dashboardPage));
+                        addResult('fix-result', 'Dashboard page moved to correct storage format', 'success');
+                    } else {
+                        addResult('fix-result', 'Dashboard page not found anywhere!', 'error');
+                        return;
+                    }
+                }
+                
+                // Ensure page is published
+                if (dashboardPage.status !== 'published') {
+                    dashboardPage.status = 'published';
+                    dashboardPage.published = true;
+                    localStorage.setItem(pageKey, JSON.stringify(dashboardPage));
+                    addResult('fix-result', 'Dashboard page status updated to published', 'success');
+                }
+                
+                // Also fix the login workflow to ensure it's published
+                const workflows = JSON.parse(localStorage.getItem('workflows') || '[]');
+                const loginWorkflow = workflows.find(w => w.name === 'Login');
+                
+                if (loginWorkflow && loginWorkflow.status !== 'published') {
+                    loginWorkflow.status = 'published';
+                    const index = workflows.findIndex(w => w.id === loginWorkflow.id);
+                    workflows[index] = loginWorkflow;
+                    localStorage.setItem('workflows', JSON.stringify(workflows));
+                    addResult('fix-result', 'Login workflow status updated to published', 'success');
+                }
+                
+                addResult('fix-result', 'All fixes applied! Try the login flow again.', 'success');
+                
+            } catch (error) {
+                addResult('fix-result', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-check on load
+        window.addEventListener('DOMContentLoaded', () => {
+            checkDashboardPage();
+        });
+    </script>
+</body>
+</html>
