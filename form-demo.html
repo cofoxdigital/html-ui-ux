@@ -1,0 +1,949 @@
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Builder Demo - Phoenix Enterprise</title>
+    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="./workflow-styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .demo-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        
+        .demo-header h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .demo-header p {
+            font-size: 1.25rem;
+            color: #6B7280;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .feature-section {
+            margin-bottom: 80px;
+        }
+        
+        .feature-section h2 {
+            font-size: 2rem;
+            margin-bottom: 30px;
+            color: #1F2937;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .feature-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .feature-card i {
+            font-size: 2.5rem;
+            color: #4F46E5;
+            margin-bottom: 20px;
+        }
+        
+        .feature-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 15px;
+            color: #1F2937;
+        }
+        
+        .feature-card p {
+            color: #6B7280;
+            line-height: 1.6;
+        }
+        
+        .demo-preview {
+            background: #F9FAFB;
+            border-radius: 12px;
+            padding: 40px;
+            margin-bottom: 40px;
+        }
+        
+        .form-preview {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-field {
+            margin-bottom: 20px;
+        }
+        
+        .form-field label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .form-field input,
+        .form-field select,
+        .form-field textarea {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-field input:focus,
+        .form-field select:focus,
+        .form-field textarea:focus {
+            outline: none;
+            border-color: #4F46E5;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .code-example {
+            background: #1F2937;
+            color: #E5E7EB;
+            padding: 30px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .cta-section {
+            text-align: center;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            border-radius: 12px;
+            color: white;
+        }
+        
+        .cta-section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+        
+        .cta-section p {
+            font-size: 1.25rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .cta-buttons .btn {
+            padding: 15px 30px;
+            font-size: 1.1rem;
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: #4F46E5;
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 30px;
+            transition: color 0.3s ease;
+        }
+        
+        .back-link:hover {
+            color: #7C3AED;
+        }
+        
+        /* Enhanced How It Works Styles */
+        .how-it-works-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 80px;
+        }
+        
+        .how-it-works-step {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+        
+        .how-it-works-step.reverse {
+            direction: rtl;
+        }
+        
+        .how-it-works-step.reverse > * {
+            direction: ltr;
+        }
+        
+        .step-screenshot {
+            position: relative;
+        }
+        
+        .screenshot-placeholder {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            min-height: 350px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .step-info {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .step-info .step-number {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .step-info h3 {
+            font-size: 1.5rem;
+            color: #1F2937;
+            margin: 0;
+        }
+        
+        .step-info p {
+            color: #6B7280;
+            line-height: 1.6;
+            margin: 0;
+        }
+        
+        /* Field Palette Mockup */
+        .field-palette {
+            background: #F9FAFB;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .palette-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .field-items {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        
+        .field-item {
+            background: white;
+            border: 2px solid #E5E7EB;
+            border-radius: 6px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: move;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            color: #374151;
+        }
+        
+        .field-item:hover {
+            border-color: #4F46E5;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .field-item i {
+            color: #4F46E5;
+        }
+        
+        .drag-indicator {
+            text-align: center;
+            margin-top: 20px;
+            color: #6B7280;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        /* Properties Panel Mockup */
+        .properties-panel {
+            background: #F9FAFB;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .property-fields {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .property-field label {
+            display: block;
+            font-size: 0.85rem;
+            color: #374151;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        .property-field input,
+        .property-field select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #E5E7EB;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            background: white;
+        }
+        
+        .toggle-switch {
+            width: 50px;
+            height: 24px;
+            background: #E5E7EB;
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .toggle-switch.checked {
+            background: #4F46E5;
+        }
+        
+        .toggle-slider {
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .toggle-switch.checked .toggle-slider {
+            transform: translateX(26px);
+        }
+        
+        /* Form Layout Preview Mockup */
+        .form-layout-preview {
+            background: #F9FAFB;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .layout-toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .layout-btn {
+            padding: 8px 16px;
+            border: 1px solid #E5E7EB;
+            background: white;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .layout-btn.active {
+            background: #4F46E5;
+            color: white;
+            border-color: #4F46E5;
+        }
+        
+        .form-preview-mini {
+            background: white;
+            border: 1px solid #E5E7EB;
+            border-radius: 6px;
+            padding: 20px;
+        }
+        
+        .form-row {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .form-row.two-columns {
+            grid-template-columns: 1fr 1fr;
+        }
+        
+        .form-field-preview {
+            background: #F3F4F6;
+            border: 1px dashed #D1D5DB;
+            border-radius: 4px;
+            height: 40px;
+        }
+        
+        .form-field-preview.full {
+            grid-column: 1 / -1;
+        }
+        
+        .field-placeholder {
+            width: 100%;
+            height: 100%;
+            border-radius: 4px;
+        }
+        
+        .form-section-header {
+            margin: 20px 0 10px 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #E5E7EB;
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.9rem;
+        }
+        
+        /* Workflow Connection Mockup */
+        .workflow-connection {
+            background: #F9FAFB;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .connection-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .workflow-items {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .workflow-item {
+            background: white;
+            border: 1px solid #E5E7EB;
+            border-radius: 6px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .workflow-item.connected {
+            border-color: #10B981;
+            background: #F0FDF4;
+        }
+        
+        .workflow-item i {
+            font-size: 1.2rem;
+            color: #4F46E5;
+        }
+        
+        .workflow-item.connected i:last-child {
+            color: #10B981;
+            margin-left: auto;
+        }
+        
+        .workflow-item span {
+            flex: 1;
+            font-size: 0.9rem;
+            color: #374151;
+        }
+        
+        .connect-btn {
+            padding: 6px 12px;
+            border: 1px solid #4F46E5;
+            background: white;
+            color: #4F46E5;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .connect-btn:hover {
+            background: #4F46E5;
+            color: white;
+        }
+        
+        /* Publish Options Mockup */
+        .publish-options {
+            background: #F9FAFB;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .publish-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .publish-methods {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+        
+        .publish-method {
+            background: white;
+            border: 1px solid #E5E7EB;
+            border-radius: 6px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .publish-method:hover {
+            border-color: #4F46E5;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .publish-method i {
+            font-size: 2rem;
+            color: #4F46E5;
+            margin-bottom: 10px;
+        }
+        
+        .publish-method h4 {
+            font-size: 0.9rem;
+            color: #374151;
+            margin: 10px 0 5px 0;
+        }
+        
+        .publish-method p {
+            font-size: 0.8rem;
+            color: #6B7280;
+            margin: 0 0 15px 0;
+        }
+        
+        .copy-btn,
+        .select-btn {
+            padding: 6px 12px;
+            border: 1px solid #4F46E5;
+            background: #4F46E5;
+            color: white;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .copy-btn:hover,
+        .select-btn:hover {
+            background: #4338CA;
+            border-color: #4338CA;
+        }
+        
+        @media (max-width: 768px) {
+            .how-it-works-step {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            
+            .how-it-works-step.reverse {
+                direction: ltr;
+            }
+            
+            .publish-methods {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <a href="index.html" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Back to Dashboard
+        </a>
+        
+        <div class="demo-header">
+            <h1>Form Builder Demo</h1>
+            <p>Create powerful, dynamic forms with our intuitive drag-and-drop builder. Add validation, conditional logic, and seamlessly integrate with workflows.</p>
+        </div>
+        
+        <div class="feature-section">
+            <h2>Key Features</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <i class="fas fa-magic"></i>
+                    <h3>Drag & Drop Interface</h3>
+                    <p>Build forms visually by dragging field types from the palette and dropping them into your form canvas.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-check-circle"></i>
+                    <h3>Smart Validation</h3>
+                    <p>Set up field validation rules including required fields, email formats, number ranges, and custom patterns.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-code-branch"></i>
+                    <h3>Conditional Logic</h3>
+                    <p>Show or hide fields based on user input. Create dynamic forms that adapt to user responses.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-palette"></i>
+                    <h3>Custom Styling</h3>
+                    <p>Customize the look and feel of your forms with themes, custom CSS, and responsive layouts.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-plug"></i>
+                    <h3>Workflow Integration</h3>
+                    <p>Connect forms to workflows to automate actions on submission like sending emails or updating databases.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-robot"></i>
+                    <h3>AI-Powered Creation</h3>
+                    <p>Use our AI assistant to create forms automatically. Just describe what you need!</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="feature-section">
+            <h2>Field Types Available</h2>
+            <div class="demo-preview">
+                <div class="form-preview">
+                    <h3 style="margin-bottom: 30px;">Sample Registration Form</h3>
+                    
+                    <div class="form-field">
+                        <label>Text Input</label>
+                        <input type="text" placeholder="Enter your full name">
+                    </div>
+                    
+                    <div class="form-field">
+                        <label>Email Input</label>
+                        <input type="email" placeholder="your@email.com">
+                    </div>
+                    
+                    <div class="form-field">
+                        <label>Password Input</label>
+                        <input type="password" placeholder="Create a secure password">
+                    </div>
+                    
+                    <div class="form-field">
+                        <label>Dropdown Select</label>
+                        <select>
+                            <option>Choose your country</option>
+                            <option>United States</option>
+                            <option>United Kingdom</option>
+                            <option>Canada</option>
+                            <option>Australia</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-field">
+                        <label>Date Picker</label>
+                        <input type="date">
+                    </div>
+                    
+                    <div class="form-field">
+                        <label>Textarea</label>
+                        <textarea rows="4" placeholder="Tell us about yourself..."></textarea>
+                    </div>
+                    
+                    <div class="form-field">
+                        <label style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" style="width: auto;">
+                            I agree to the terms and conditions
+                        </label>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button class="btn btn-primary">Submit Form</button>
+                        <button class="btn btn-secondary">Save Draft</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="feature-section">
+            <h2>How It Works</h2>
+            <div class="how-it-works-grid">
+                <div class="how-it-works-step">
+                    <div class="step-screenshot">
+                        <div class="screenshot-placeholder">
+                            <div class="field-palette">
+                                <div class="palette-header">
+                                    <i class="fas fa-toolbox"></i>
+                                    <span>Field Types</span>
+                                </div>
+                                <div class="field-items">
+                                    <div class="field-item"><i class="fas fa-font"></i> Text</div>
+                                    <div class="field-item"><i class="fas fa-envelope"></i> Email</div>
+                                    <div class="field-item"><i class="fas fa-calendar"></i> Date</div>
+                                    <div class="field-item"><i class="fas fa-list"></i> Select</div>
+                                    <div class="field-item"><i class="fas fa-check-square"></i> Checkbox</div>
+                                    <div class="field-item"><i class="fas fa-upload"></i> File</div>
+                                </div>
+                            </div>
+                            <div class="drag-indicator">
+                                <i class="fas fa-hand-pointer"></i>
+                                <span>Drag to form</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="step-info">
+                        <div class="step-number">1</div>
+                        <h3>Choose Field Types</h3>
+                        <p>Select from 15+ field types including text, email, dropdowns, checkboxes, file uploads, and more. Simply drag and drop them onto your form canvas.</p>
+                    </div>
+                </div>
+                
+                <div class="how-it-works-step reverse">
+                    <div class="step-screenshot">
+                        <div class="screenshot-placeholder">
+                            <div class="properties-panel">
+                                <div class="panel-header">
+                                    <i class="fas fa-cog"></i>
+                                    <span>Field Properties</span>
+                                </div>
+                                <div class="property-fields">
+                                    <div class="property-field">
+                                        <label>Label</label>
+                                        <input type="text" value="Email Address" readonly>
+                                    </div>
+                                    <div class="property-field">
+                                        <label>Placeholder</label>
+                                        <input type="text" value="Enter your email" readonly>
+                                    </div>
+                                    <div class="property-field">
+                                        <label>Required</label>
+                                        <div class="toggle-switch checked">
+                                            <div class="toggle-slider"></div>
+                                        </div>
+                                    </div>
+                                    <div class="property-field">
+                                        <label>Validation</label>
+                                        <select>
+                                            <option>Email Format</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="step-info">
+                        <div class="step-number">2</div>
+                        <h3>Configure Properties</h3>
+                        <p>Set field labels, placeholders, validation rules, and conditional logic for each field. Make fields required, add custom error messages, and set up dynamic behavior.</p>
+                    </div>
+                </div>
+                
+                <div class="how-it-works-step">
+                    <div class="step-screenshot">
+                        <div class="screenshot-placeholder">
+                            <div class="form-layout-preview">
+                                <div class="layout-toolbar">
+                                    <button class="layout-btn active"><i class="fas fa-columns"></i> 2 Columns</button>
+                                    <button class="layout-btn"><i class="fas fa-th"></i> 3 Columns</button>
+                                    <button class="layout-btn"><i class="fas fa-align-justify"></i> Full Width</button>
+                                </div>
+                                <div class="form-preview-mini">
+                                    <div class="form-row two-columns">
+                                        <div class="form-field-preview">
+                                            <div class="field-placeholder"></div>
+                                        </div>
+                                        <div class="form-field-preview">
+                                            <div class="field-placeholder"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-field-preview full">
+                                            <div class="field-placeholder"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-section-header">
+                                        <span>Contact Information</span>
+                                    </div>
+                                    <div class="form-row two-columns">
+                                        <div class="form-field-preview">
+                                            <div class="field-placeholder"></div>
+                                        </div>
+                                        <div class="form-field-preview">
+                                            <div class="field-placeholder"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="step-info">
+                        <div class="step-number">3</div>
+                        <h3>Design Layout</h3>
+                        <p>Arrange fields in columns, add sections, and customize the visual appearance of your form. Create multi-column layouts and group related fields together.</p>
+                    </div>
+                </div>
+                
+                <div class="how-it-works-step reverse">
+                    <div class="step-screenshot">
+                        <div class="screenshot-placeholder">
+                            <div class="workflow-connection">
+                                <div class="connection-header">
+                                    <i class="fas fa-project-diagram"></i>
+                                    <span>Workflow Actions</span>
+                                </div>
+                                <div class="workflow-items">
+                                    <div class="workflow-item connected">
+                                        <i class="fas fa-envelope"></i>
+                                        <span>Send Email</span>
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                    <div class="workflow-item connected">
+                                        <i class="fas fa-database"></i>
+                                        <span>Save to Database</span>
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                    <div class="workflow-item">
+                                        <i class="fas fa-bell"></i>
+                                        <span>Send Notification</span>
+                                        <button class="connect-btn">Connect</button>
+                                    </div>
+                                    <div class="workflow-item">
+                                        <i class="fas fa-link"></i>
+                                        <span>Webhook</span>
+                                        <button class="connect-btn">Connect</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="step-info">
+                        <div class="step-number">4</div>
+                        <h3>Connect Workflows</h3>
+                        <p>Link your form to workflows to automate what happens when users submit the form. Send emails, save data, trigger notifications, and integrate with external services.</p>
+                    </div>
+                </div>
+                
+                <div class="how-it-works-step">
+                    <div class="step-screenshot">
+                        <div class="screenshot-placeholder">
+                            <div class="publish-options">
+                                <div class="publish-header">
+                                    <i class="fas fa-globe"></i>
+                                    <span>Publish Options</span>
+                                </div>
+                                <div class="publish-methods">
+                                    <div class="publish-method">
+                                        <i class="fas fa-code"></i>
+                                        <h4>Embed Code</h4>
+                                        <p>Add to any website</p>
+                                        <button class="copy-btn"><i class="fas fa-copy"></i> Copy</button>
+                                    </div>
+                                    <div class="publish-method">
+                                        <i class="fas fa-link"></i>
+                                        <h4>Direct Link</h4>
+                                        <p>Share standalone form</p>
+                                        <button class="copy-btn"><i class="fas fa-copy"></i> Copy</button>
+                                    </div>
+                                    <div class="publish-method">
+                                        <i class="fas fa-puzzle-piece"></i>
+                                        <h4>Add to Page</h4>
+                                        <p>Use in Page Builder</p>
+                                        <button class="select-btn">Select</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="step-info">
+                        <div class="step-number">5</div>
+                        <h3>Publish & Embed</h3>
+                        <p>Publish your form and embed it in pages, share via direct link, or integrate with your applications. Track submissions and analyze form performance.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="cta-section">
+            <h2>Ready to Build Your Forms?</h2>
+            <p>Start creating powerful forms in minutes with our intuitive builder.</p>
+            <div class="cta-buttons">
+                <button class="btn btn-white" onclick="window.location.href='form-list.html'">
+                    <i class="fas fa-rocket"></i> Launch Form Builder
+                </button>
+                <button class="btn btn-outline-white" onclick="window.location.href='form-builder.html'">
+                    <i class="fas fa-plus"></i> Create New Form
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="./chatbot.js"></script>
+</body>
+</html>

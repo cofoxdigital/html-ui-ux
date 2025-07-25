@@ -35,6 +35,32 @@
             align-items: center;
             padding: 15px 20px;
             border-bottom: 1px solid #f0f0f0;
+            position: relative;
+        }
+
+        .ai-badge {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            box-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
+        }
+
+        .ai-badge i {
+            font-size: 10px;
+        }
+
+        .form-card-header.has-ai-badge .form-status {
+            margin-left: 70px;
         }
 
         .form-status {

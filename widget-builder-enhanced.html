@@ -14,10 +14,19 @@
             background: #f8f9fa;
         }
 
+        .app-container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
         .builder-container {
             display: flex;
-            height: 100vh;
+            flex: 1;
             overflow: hidden;
+            width: 100%;
         }
 
         .builder-sidebar {
@@ -546,7 +555,8 @@
     </style>
 </head>
 <body>
-    <div class="builder-container">
+    <div class="app-container">
+        <div class="builder-container">
         <!-- Sidebar -->
         <div class="builder-sidebar">
             <div class="builder-header">
@@ -771,6 +781,7 @@
                 </div>
             </div>
         </div>
+        </div>
     </div>
 
     <script>
@@ -789,26 +800,46 @@
             const widgetId = urlParams.get('id');
 
             if (widgetId) {
-                const savedWidget = localStorage.getItem(`widget_${widgetId}`);
+                // First try to load from individual widget key
+                let savedWidget = localStorage.getItem(`widget_${widgetId}`);
+                let widgetData = null;
                 
                 if (savedWidget) {
                     try {
-                        const widgetData = JSON.parse(savedWidget);
-                        currentWidget = widgetData;
-                        
-                        document.getElementById('widget-title').textContent = currentWidget.name || 'New Widget';
-                        document.getElementById('settings-name').value = currentWidget.name || '';
-                        document.getElementById('settings-description').value = currentWidget.description || '';
-                        document.getElementById('settings-frequency').value = currentWidget.updateFrequency || 'realtime';
-                        document.getElementById('settings-datasource').value = currentWidget.dataSource || 'api';
-
-                        if (currentWidget.content) {
-                            document.getElementById('widget-container').innerHTML = currentWidget.content;
-                            setupWidgetControls();
-                        }
+                        widgetData = JSON.parse(savedWidget);
                     } catch (error) {
-                        console.error('Error loading widget data:', error);
-                        createNewWidget(widgetId);
+                        console.error('Error parsing individual widget data:', error);
+                    }
+                }
+                
+                // If not found, try to load from phoenix_widgets collection
+                if (!widgetData) {
+                    try {
+                        const phoenixWidgets = JSON.parse(localStorage.getItem('phoenix_widgets') || '{"widgets":[]}');
+                        widgetData = phoenixWidgets.widgets.find(w => w.id === widgetId);
+                    } catch (error) {
+                        console.error('Error loading from phoenix_widgets:', error);
+                    }
+                }
+                
+                if (widgetData) {
+                    currentWidget = widgetData;
+                    
+                    document.getElementById('widget-title').textContent = currentWidget.name || 'New Widget';
+                    document.getElementById('settings-name').value = currentWidget.name || '';
+                    document.getElementById('settings-description').value = currentWidget.description || '';
+                    document.getElementById('settings-frequency').value = currentWidget.updateFrequency || 'realtime';
+                    document.getElementById('settings-datasource').value = currentWidget.dataSource || 'api';
+
+                    // Check if widget has content or definition
+                    if (currentWidget.content) {
+                        document.getElementById('widget-container').innerHTML = currentWidget.content;
+                        setupWidgetControls();
+                        // Reinitialize any charts in the loaded content
+                        reinitializeCharts();
+                    } else if (currentWidget.definition) {
+                        // Load from definition (AI-created widgets)
+                        loadWidgetFromDefinition(currentWidget.definition);
                     }
                 } else {
                     createNewWidget(widgetId);
@@ -828,6 +859,337 @@
                 dataSource: 'api',
                 published: false
             };
+        }
+
+        function loadWidgetFromDefinition(definition) {
+            const container = document.getElementById('widget-container');
+            container.innerHTML = '';
+            
+            // Apply styling from definition
+            if (definition.styling) {
+                Object.assign(container.style, definition.styling);
+            }
+            
+            // Handle split layout widgets
+            if (definition.type === 'split-layout' && definition.components) {
+                // Apply grid styling to container
+                Object.assign(container.style, {
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: '20px'
+                });
+                
+                // Create split layout structure - each component in its own row
+                const gridHTML = definition.components.map((component, index) => `
+                    <div class="widget-row">
+                        <div class="widget-cell col-12 has-content" id="split-cell-${index}">
+                            <!-- Component will be rendered here -->
+                        </div>
+                    </div>
+                `).join('');
+                
+                container.innerHTML = gridHTML;
+                
+                // Render each component
+                definition.components.forEach((component, index) => {
+                    const cell = document.getElementById(`split-cell-${index}`);
+                    if (cell) {
+                        renderComponentInCell(component, cell);
+                    }
+                });
+            } else if (definition.type === 'grid-layout' && definition.components) {
+                // Apply grid styling to container
+                Object.assign(container.style, {
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gridTemplateRows: '1fr 1fr',
+                    gap: '20px'
+                });
+                
+                // Create grid layout structure (2x2) - each component in its own row
+                const gridHTML = definition.components.map((component, index) => `
+                    <div class="widget-row">
+                        <div class="widget-cell col-12 has-content" id="grid-cell-${index}">
+                            <!-- Component will be rendered here -->
+                        </div>
+                    </div>
+                `).join('');
+                
+                container.innerHTML = gridHTML;
+                
+                // Render each component
+                definition.components.forEach((component, index) => {
+                    const cell = document.getElementById(`grid-cell-${index}`);
+                    if (cell) {
+                        renderComponentInCell(component, cell);
+                    }
+                });
+            } else if (definition.type === 'triple-layout' && definition.components) {
+                // Create triple layout structure (1x3)
+                const gridHTML = `
+                    <div class="widget-grid">
+                        <div class="widget-row">
+                            ${definition.components.slice(0, 3).map((component, index) => `
+                                <div class="widget-cell col-4 has-content" id="triple-cell-${index}">
+                                    <!-- Component will be rendered here -->
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                container.innerHTML = gridHTML;
+                
+                // Render each component
+                definition.components.forEach((component, index) => {
+                    const cell = document.getElementById(`triple-cell-${index}`);
+                    if (cell) {
+                        renderComponentInCell(component, cell);
+                    }
+                });
+            } else if (definition.type === 'chart-widget' && definition.components) {
+                const chartComponent = definition.components[0];
+                if (chartComponent) {
+                    container.innerHTML = `
+                        <div class="widget-grid">
+                            <div class="widget-row">
+                                <div class="widget-cell col-12 has-content">
+                                    <div class="widget-chart" style="position: relative; height: 300px;">
+                                        <canvas id="ai-chart-${Date.now()}"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Render chart after DOM update
+                    setTimeout(() => {
+                        const canvas = container.querySelector('canvas');
+                        if (canvas && chartComponent.props) {
+                            const chartType = chartComponent.type.includes('bar') ? 'bar' : 
+                                            chartComponent.type.includes('pie') ? 'pie' : 
+                                            chartComponent.type.includes('line') ? 'line' : 'line';
+                            
+                            new Chart(canvas, {
+                                type: chartType,
+                                data: {
+                                    labels: chartComponent.props.labels || [],
+                                    datasets: [{
+                                        label: chartComponent.props.title || 'Data',
+                                        data: chartComponent.props.data || [],
+                                        borderColor: '#6c5ce7',
+                                        backgroundColor: chartType === 'pie' ? 
+                                            ['#6c5ce7', '#00b894', '#fdcb6e', '#e17055', '#74b9ff'] :
+                                            'rgba(108, 92, 231, 0.1)',
+                                        tension: 0.4
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: {
+                                        legend: {
+                                            display: true,
+                                            position: 'top'
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                    }, 100);
+                }
+            } else if (definition.type === 'table-widget' && definition.components) {
+                const tableComponent = definition.components[0];
+                if (tableComponent && tableComponent.props) {
+                    const { columns, data } = tableComponent.props;
+                    let tableHTML = '<table class="widget-table"><thead><tr>';
+                    
+                    // Add headers
+                    columns.forEach(col => {
+                        tableHTML += `<th>${col}</th>`;
+                    });
+                    tableHTML += '</tr></thead><tbody>';
+                    
+                    // Add rows
+                    data.forEach(row => {
+                        tableHTML += '<tr>';
+                        row.forEach(cell => {
+                            tableHTML += `<td>${cell}</td>`;
+                        });
+                        tableHTML += '</tr>';
+                    });
+                    tableHTML += '</tbody></table>';
+                    
+                    container.innerHTML = `
+                        <div class="widget-grid">
+                            <div class="widget-row">
+                                <div class="widget-cell col-12 has-content">
+                                    ${tableHTML}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            } else if (definition.type === 'kpi-metric' && definition.components) {
+                const metricComponent = definition.components[0];
+                if (metricComponent && metricComponent.props) {
+                    const { value, label, change, changeType } = metricComponent.props;
+                    container.innerHTML = `
+                        <div class="widget-grid">
+                            <div class="widget-row">
+                                <div class="widget-cell col-12 has-content">
+                                    <div class="widget-metric">
+                                        <p class="metric-value">${value || '0'}</p>
+                                        <p class="metric-label">${label || 'Metric'}</p>
+                                        ${change ? `<p class="metric-change ${changeType === 'positive' ? 'positive' : changeType === 'negative' ? 'negative' : ''}">${changeType === 'positive' ? '↑' : changeType === 'negative' ? '↓' : ''} ${change}</p>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            } else if (definition.type === 'action-group' && definition.components) {
+                let buttonsHTML = '<div style="display: flex; gap: 12px; flex-wrap: wrap;">';
+                definition.components.forEach(component => {
+                    if (component.type === 'button' && component.props) {
+                        const { text, icon, color } = component.props;
+                        buttonsHTML += `
+                            <button class="btn btn-${color || 'primary'}">
+                                ${icon ? `<i class="${icon}"></i> ` : ''}${text || 'Button'}
+                            </button>
+                        `;
+                    }
+                });
+                buttonsHTML += '</div>';
+                
+                container.innerHTML = `
+                    <div class="widget-grid">
+                        <div class="widget-row">
+                            <div class="widget-cell col-12 has-content">
+                                ${buttonsHTML}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Default container
+                container.innerHTML = `
+                    <div class="widget-grid">
+                        <div class="widget-row">
+                            <div class="widget-cell col-12 has-content">
+                                <div style="text-align: center; padding: 40px; color: #666;">
+                                    <i class="fas fa-puzzle-piece" style="font-size: 48px; margin-bottom: 10px;"></i>
+                                    <p>Widget content will appear here</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            setupWidgetControls();
+        }
+        
+        function renderComponentInCell(component, cell) {
+            // Apply component styling if available
+            if (component.styling) {
+                Object.assign(cell.style, component.styling);
+            }
+            
+            // Render based on component type
+            if (component.type === 'chart-container' && component.components) {
+                const chartComponent = component.components[0];
+                if (chartComponent) {
+                    const canvasId = `chart-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+                    cell.innerHTML = `
+                        <div class="widget-chart" style="position: relative; height: 300px;">
+                            <canvas id="${canvasId}"></canvas>
+                        </div>
+                    `;
+                    
+                    setTimeout(() => {
+                        const canvas = document.getElementById(canvasId);
+                        if (canvas && chartComponent.props) {
+                            const chartType = chartComponent.type.includes('bar') ? 'bar' : 
+                                            chartComponent.type.includes('pie') ? 'pie' : 
+                                            chartComponent.type.includes('line') ? 'line' : 'line';
+                            
+                            new Chart(canvas, {
+                                type: chartType,
+                                data: {
+                                    labels: chartComponent.props.labels || [],
+                                    datasets: [{
+                                        label: chartComponent.props.title || 'Data',
+                                        data: chartComponent.props.data || [],
+                                        borderColor: '#6c5ce7',
+                                        backgroundColor: chartType === 'pie' ? 
+                                            ['#6c5ce7', '#00b894', '#fdcb6e', '#e17055', '#74b9ff'] :
+                                            'rgba(108, 92, 231, 0.1)',
+                                        tension: 0.4
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: {
+                                        legend: {
+                                            display: true,
+                                            position: 'top'
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                    }, 100);
+                }
+            } else if (component.type === 'metric-container' && component.components) {
+                const metricComponent = component.components[0];
+                if (metricComponent && metricComponent.props) {
+                    const { value, label, change, changeType } = metricComponent.props;
+                    cell.innerHTML = `
+                        <div class="widget-metric">
+                            <p class="metric-value">${value || '0'}</p>
+                            <p class="metric-label">${label || 'Metric'}</p>
+                            ${change ? `<p class="metric-change ${changeType === 'positive' ? 'positive' : changeType === 'negative' ? 'negative' : ''}">${changeType === 'positive' ? '↑' : changeType === 'negative' ? '↓' : ''} ${change}</p>` : ''}
+                        </div>
+                    `;
+                }
+            } else if (component.type === 'table-container' && component.components) {
+                const tableComponent = component.components[0];
+                if (tableComponent && tableComponent.props) {
+                    const { columns, data } = tableComponent.props;
+                    let tableHTML = '<table class="widget-table"><thead><tr>';
+                    
+                    columns.forEach(col => {
+                        tableHTML += `<th>${col}</th>`;
+                    });
+                    tableHTML += '</tr></thead><tbody>';
+                    
+                    data.forEach(row => {
+                        tableHTML += '<tr>';
+                        row.forEach(cell => {
+                            tableHTML += `<td>${cell}</td>`;
+                        });
+                        tableHTML += '</tr>';
+                    });
+                    tableHTML += '</tbody></table>';
+                    
+                    cell.innerHTML = tableHTML;
+                }
+            } else if (component.type === 'button-container' && component.components) {
+                let buttonsHTML = '<div style="display: flex; gap: 12px; flex-wrap: wrap;">';
+                component.components.forEach(btnComponent => {
+                    if (btnComponent.type === 'button' && btnComponent.props) {
+                        const { text, icon, color } = btnComponent.props;
+                        buttonsHTML += `
+                            <button class="btn btn-${color || 'primary'}">
+                                ${icon ? `<i class="${icon}"></i> ` : ''}${text || 'Button'}
+                            </button>
+                        `;
+                    }
+                });
+                buttonsHTML += '</div>';
+                cell.innerHTML = buttonsHTML;
+            }
         }
 
         function switchTab(tabName) {
@@ -1279,6 +1641,7 @@
                     div.className = 'widget-chart';
                     div.style.position = 'relative';
                     div.style.height = '300px';
+                    div.setAttribute('data-chart-type', 'line');
                     const lineCanvas = document.createElement('canvas');
                     lineCanvas.id = 'chart-' + Date.now();
                     div.appendChild(lineCanvas);
@@ -1315,6 +1678,7 @@
                     div.className = 'widget-chart';
                     div.style.position = 'relative';
                     div.style.height = '300px';
+                    div.setAttribute('data-chart-type', 'bar');
                     const barCanvas = document.createElement('canvas');
                     barCanvas.id = 'chart-' + Date.now();
                     div.appendChild(barCanvas);
@@ -1353,6 +1717,7 @@
                     div.className = 'widget-chart';
                     div.style.position = 'relative';
                     div.style.height = '300px';
+                    div.setAttribute('data-chart-type', 'pie');
                     const pieCanvas = document.createElement('canvas');
                     pieCanvas.id = 'chart-' + Date.now();
                     div.appendChild(pieCanvas);
@@ -1389,6 +1754,7 @@
                     div.className = 'widget-chart';
                     div.style.position = 'relative';
                     div.style.height = '300px';
+                    div.setAttribute('data-chart-type', 'area');
                     const areaCanvas = document.createElement('canvas');
                     areaCanvas.id = 'chart-' + Date.now();
                     div.appendChild(areaCanvas);
@@ -1526,8 +1892,37 @@
             currentWidget.dataSource = document.getElementById('settings-datasource').value;
             currentWidget.content = document.getElementById('widget-container').innerHTML;
             
-            // Save to localStorage
+            // Save to individual localStorage key
             localStorage.setItem(`widget_${currentWidget.id}`, JSON.stringify(currentWidget));
+            
+            // Also update in phoenix_widgets collection
+            try {
+                const phoenixWidgets = JSON.parse(localStorage.getItem('phoenix_widgets') || '{"widgets":[]}');
+                const existingIndex = phoenixWidgets.widgets.findIndex(w => w.id === currentWidget.id);
+                
+                if (existingIndex >= 0) {
+                    // Update existing widget
+                    phoenixWidgets.widgets[existingIndex] = {
+                        ...phoenixWidgets.widgets[existingIndex],
+                        ...currentWidget,
+                        updated: new Date().toISOString()
+                    };
+                } else {
+                    // Add new widget to collection
+                    phoenixWidgets.widgets.push({
+                        ...currentWidget,
+                        created: currentWidget.created || new Date().toISOString(),
+                        updated: new Date().toISOString(),
+                        status: currentWidget.status || 'draft',
+                        usageCount: currentWidget.usageCount || 0
+                    });
+                }
+                
+                phoenixWidgets.lastUpdated = new Date().toISOString();
+                localStorage.setItem('phoenix_widgets', JSON.stringify(phoenixWidgets));
+            } catch (error) {
+                console.error('Error updating phoenix_widgets:', error);
+            }
             
             // Update UI
             document.getElementById('widget-title').textContent = currentWidget.name;
@@ -1571,6 +1966,242 @@
             saveWidget();
             
             alert('Widget published successfully!');
+        }
+
+        function reinitializeCharts() {
+            // Find all canvas elements in the widget container
+            const container = document.getElementById('widget-container');
+            const canvases = container.querySelectorAll('canvas');
+            
+            canvases.forEach(canvas => {
+                // Skip if canvas doesn't have an ID
+                if (!canvas.id) return;
+                
+                // Try to determine chart type from parent classes or canvas ID
+                const parent = canvas.closest('.widget-chart');
+                if (!parent) return;
+                
+                // Check if this is from a template
+                if (canvas.id === 'sales-chart-canvas') {
+                    // Recreate sales chart
+                    new Chart(canvas, {
+                        type: 'line',
+                        data: {
+                            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                            datasets: [{
+                                label: 'Sales Revenue',
+                                data: [65000, 72000, 68000, 85000, 92000, 88000, 95000, 98000, 102000, 110000, 108000, 125000],
+                                borderColor: '#6c5ce7',
+                                backgroundColor: 'rgba(108, 92, 231, 0.1)',
+                                tension: 0.4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'top'
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function(value) {
+                                            return '$' + value.toLocaleString();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                } else if (canvas.id === 'user-stats-canvas') {
+                    // Recreate user stats chart
+                    new Chart(canvas, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                            datasets: [{
+                                label: 'Active Users',
+                                data: [1200, 1900, 1500, 2500, 2200, 3000, 2800],
+                                backgroundColor: '#6c5ce7'
+                            }, {
+                                label: 'New Users',
+                                data: [200, 300, 250, 400, 350, 500, 450],
+                                backgroundColor: '#00b894'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'top'
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+                } else if (canvas.id.startsWith('chart-')) {
+                    // First check for data-chart-type attribute
+                    const chartContainer = parent;
+                    const dataChartType = chartContainer.getAttribute('data-chart-type');
+                    
+                    let chartType = 'line'; // default
+                    let chartData = null;
+                    
+                    // Use data attribute if available
+                    if (dataChartType) {
+                        chartType = dataChartType === 'area' ? 'line' : dataChartType;
+                        
+                        // Set appropriate data based on chart type
+                        switch(dataChartType) {
+                            case 'bar':
+                                chartData = {
+                                    labels: ['Product A', 'Product B', 'Product C', 'Product D', 'Product E'],
+                                    datasets: [{
+                                        label: 'Sales',
+                                        data: [12, 19, 8, 15, 10],
+                                        backgroundColor: [
+                                            '#6c5ce7',
+                                            '#00b894',
+                                            '#fdcb6e',
+                                            '#e17055',
+                                            '#74b9ff'
+                                        ]
+                                    }]
+                                };
+                                break;
+                            case 'pie':
+                                chartData = {
+                                    labels: ['Desktop', 'Mobile', 'Tablet', 'Other'],
+                                    datasets: [{
+                                        data: [45, 35, 15, 5],
+                                        backgroundColor: [
+                                            '#6c5ce7',
+                                            '#00b894',
+                                            '#fdcb6e',
+                                            '#e17055'
+                                        ]
+                                    }]
+                                };
+                                break;
+                            case 'area':
+                                chartData = {
+                                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                                    datasets: [{
+                                        label: 'Visitors',
+                                        data: [1200, 1900, 1500, 2500, 2200, 3000, 2800],
+                                        borderColor: '#6c5ce7',
+                                        backgroundColor: 'rgba(108, 92, 231, 0.3)',
+                                        fill: true,
+                                        tension: 0.4
+                                    }]
+                                };
+                                break;
+                            default:
+                                chartData = {
+                                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                                    datasets: [{
+                                        label: 'Revenue',
+                                        data: [12000, 19000, 15000, 25000, 22000, 30000],
+                                        borderColor: '#6c5ce7',
+                                        backgroundColor: 'rgba(108, 92, 231, 0.1)',
+                                        tension: 0.4
+                                    }]
+                                };
+                        }
+                    } else {
+                        // Fallback to content detection if no data attribute
+                        const widgetCell = canvas.closest('.widget-cell');
+                        const savedHTML = widgetCell ? widgetCell.innerHTML : '';
+                        
+                        if (savedHTML.includes('Bar Chart') || savedHTML.includes('bar-chart')) {
+                            chartType = 'bar';
+                            chartData = {
+                                labels: ['Product A', 'Product B', 'Product C', 'Product D', 'Product E'],
+                                datasets: [{
+                                    label: 'Sales',
+                                    data: [12, 19, 8, 15, 10],
+                                    backgroundColor: [
+                                        '#6c5ce7',
+                                        '#00b894',
+                                        '#fdcb6e',
+                                        '#e17055',
+                                        '#74b9ff'
+                                    ]
+                                }]
+                            };
+                        } else if (savedHTML.includes('Pie Chart') || savedHTML.includes('pie-chart')) {
+                            chartType = 'pie';
+                            chartData = {
+                                labels: ['Desktop', 'Mobile', 'Tablet', 'Other'],
+                                datasets: [{
+                                    data: [45, 35, 15, 5],
+                                    backgroundColor: [
+                                        '#6c5ce7',
+                                        '#00b894',
+                                        '#fdcb6e',
+                                        '#e17055'
+                                    ]
+                                }]
+                            };
+                        } else if (savedHTML.includes('Area Chart') || savedHTML.includes('area-chart') || savedHTML.includes('Visitors')) {
+                            chartType = 'line';
+                            chartData = {
+                                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                                datasets: [{
+                                    label: 'Visitors',
+                                    data: [1200, 1900, 1500, 2500, 2200, 3000, 2800],
+                                    borderColor: '#6c5ce7',
+                                    backgroundColor: 'rgba(108, 92, 231, 0.3)',
+                                    fill: true,
+                                    tension: 0.4
+                                }]
+                            };
+                        } else {
+                            // Default line chart
+                            chartData = {
+                                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                                datasets: [{
+                                    label: 'Revenue',
+                                    data: [12000, 19000, 15000, 25000, 22000, 30000],
+                                    borderColor: '#6c5ce7',
+                                    backgroundColor: 'rgba(108, 92, 231, 0.1)',
+                                    tension: 0.4
+                                }]
+                            };
+                        }
+                    }
+                    
+                    new Chart(canvas, {
+                        type: chartType,
+                        data: chartData,
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: chartType !== 'pie' ? true : true,
+                                    position: chartType === 'pie' ? 'right' : 'top'
+                                }
+                            },
+                            scales: chartType !== 'pie' ? {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            } : undefined
+                        }
+                    });
+                }
+            });
         }
     </script>
 </body>

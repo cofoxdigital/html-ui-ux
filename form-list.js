@@ -113,28 +113,59 @@ class FormListManager {
         // Load saved forms from localStorage
         this.forms = [];
         
-        // Get all localStorage keys that start with 'form_'
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key && key.startsWith('form_') && !key.includes('_autosave')) {
-                try {
-                    const formData = JSON.parse(localStorage.getItem(key));
+        // First, load forms from phoenix_forms structure (used by AI Assistant and form builder)
+        try {
+            const phoenixForms = JSON.parse(localStorage.getItem('phoenix_forms') || '{"forms":[]}');
+            if (phoenixForms.forms && Array.isArray(phoenixForms.forms)) {
+                phoenixForms.forms.forEach(formData => {
                     if (formData && formData.id && formData.name) {
-                        // Convert form data to list format
                         const listForm = {
                             id: formData.id,
                             name: formData.name,
-                            description: `Form with ${formData.fields ? formData.fields.length : (formData.elements ? formData.elements.length : 0)} elements`,
-                            category: this.getCategoryFromElements(formData.fields || formData.elements || []),
-                            status: formData.status || 'draft', // Use the actual status from form data
-                            created: formData.createdAt || formData.updatedAt || new Date().toISOString().split('T')[0],
-                            updated: formData.updatedAt ? formData.updatedAt.split('T')[0] : new Date().toISOString().split('T')[0],
-                            views: 0,
-                            submissions: 0,
-                            conversion: 0,
-                            elements: formData.fields || formData.elements || []
+                            description: formData.description || `Form with ${formData.fields ? formData.fields.length : 0} fields`,
+                            category: this.getCategoryFromElements(formData.fields || []),
+                            status: formData.status || 'draft',
+                            created: formData.createdAt ? formData.createdAt.split('T')[0] : new Date().toISOString().split('T')[0],
+                            updated: formData.updatedAt ? formData.updatedAt.split('T')[0] : (formData.createdAt ? formData.createdAt.split('T')[0] : new Date().toISOString().split('T')[0]),
+                            views: formData.views || 0,
+                            submissions: formData.submissions || 0,
+                            conversion: formData.conversion || 0,
+                            elements: formData.fields || [],
+                            createdBy: formData.createdBy || 'User'
                         };
                         this.forms.push(listForm);
+                    }
+                });
+            }
+        } catch (error) {
+            console.error('Error parsing phoenix_forms data:', error);
+        }
+        
+        // Then, load individual form_ keys (legacy format)
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith('form_') && !key.includes('_autosave') && !key.includes('_created')) {
+                try {
+                    const formData = JSON.parse(localStorage.getItem(key));
+                    if (formData && formData.id && formData.name) {
+                        // Check if this form already exists (avoid duplicates)
+                        if (!this.forms.find(f => f.id === formData.id)) {
+                            const listForm = {
+                                id: formData.id,
+                                name: formData.name,
+                                description: `Form with ${formData.fields ? formData.fields.length : (formData.elements ? formData.elements.length : 0)} elements`,
+                                category: this.getCategoryFromElements(formData.fields || formData.elements || []),
+                                status: formData.status || 'draft',
+                                created: formData.createdAt || formData.updatedAt || new Date().toISOString().split('T')[0],
+                                updated: formData.updatedAt ? formData.updatedAt.split('T')[0] : new Date().toISOString().split('T')[0],
+                                views: 0,
+                                submissions: 0,
+                                conversion: 0,
+                                elements: formData.fields || formData.elements || [],
+                                createdBy: 'User'
+                            };
+                            this.forms.push(listForm);
+                        }
                     }
                 } catch (error) {
                     console.error('Error parsing form data:', error);
@@ -262,14 +293,16 @@ class FormListManager {
                           form.status === 'draft' ? 'fa-edit' : 'fa-archive';
         
         const categoryIcon = this.getCategoryIcon(form.category);
+        const isAICreated = form.createdBy === 'AI Assistant';
 
         return `
             <div class="form-card" data-form-id="${form.id}" data-status="${form.status}" data-category="${form.category}">
-                <div class="form-card-header">
+                <div class="form-card-header ${isAICreated ? 'has-ai-badge' : ''}">
                     <div class="form-status ${statusClass}">
                         <i class="fas ${statusIcon}"></i>
                         ${form.status.charAt(0).toUpperCase() + form.status.slice(1)}
                     </div>
+                    ${isAICreated ? '<div class="ai-badge" title="Created by AI Assistant"><i class="fas fa-robot"></i> AI</div>' : ''}
                     <div class="form-actions">
                         <button class="btn-icon preview-form" title="Preview" data-form-id="${form.id}">
                             <i class="fas fa-eye"></i>
@@ -522,13 +555,28 @@ class FormListManager {
     deleteForm() {
         const formId = document.getElementById('confirm-delete').dataset.formId;
         
-        // Remove from localStorage
+        // Remove from localStorage (individual form key)
         localStorage.removeItem(`form_${formId}`);
+        localStorage.removeItem(`form_${formId}_created`);
+        
+        // Also remove from phoenix_forms structure (used by AI Assistant)
+        try {
+            const phoenixForms = JSON.parse(localStorage.getItem('phoenix_forms') || '{"forms":[]}');
+            if (phoenixForms.forms && Array.isArray(phoenixForms.forms)) {
+                phoenixForms.forms = phoenixForms.forms.filter(f => f.id !== formId);
+                localStorage.setItem('phoenix_forms', JSON.stringify(phoenixForms));
+            }
+        } catch (error) {
+            console.error('Error updating phoenix_forms:', error);
+        }
         
         // Remove from forms array
         this.forms = this.forms.filter(f => f.id != formId);
         this.hideDeleteModal();
         this.applyFilters();
+        
+        // Show success notification
+        this.showNotification('Form deleted successfully', 'success');
     }
 
     previewForm(formId) {
@@ -608,6 +656,32 @@ class FormListManager {
         
         chatbotMessages.appendChild(messageDiv);
         chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+    }
+    
+    showNotification(message, type = 'info') {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.innerHTML = `
+            <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+            <span>${message}</span>
+        `;
+        
+        // Add to body
+        document.body.appendChild(notification);
+        
+        // Trigger animation
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 100);
+        
+        // Remove after 3 seconds
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                document.body.removeChild(notification);
+            }, 300);
+        }, 3000);
     }
     
     // AI Response Generator for Form Builder

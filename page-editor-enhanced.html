@@ -635,11 +635,12 @@
         .element-controls {
             position: absolute;
             top: 5px;
-            right: 5px;
+            left: 5px;
             display: flex;
             gap: 5px;
             opacity: 0;
             transition: opacity 0.2s;
+            z-index: 20;
         }
 
         .grid-cell:hover .element-controls {
@@ -709,6 +710,197 @@
             border-radius: 8px;
         }
 
+        /* Text Editor Styles */
+        .text-editor-toolbar {
+            position: fixed;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 8px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            min-width: 500px;
+        }
+
+        .toolbar-btn {
+            width: 32px;
+            height: 32px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .toolbar-btn:hover {
+            background: #f0f0f0;
+            border-color: #6c5ce7;
+        }
+
+        .toolbar-btn.active {
+            background: #6c5ce7;
+            color: white;
+            border-color: #6c5ce7;
+        }
+
+        .toolbar-separator {
+            width: 1px;
+            height: 24px;
+            background: #ddd;
+            margin: 0 4px;
+        }
+
+        .font-size-input {
+            width: 60px;
+            height: 32px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 0 8px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .color-picker-wrapper {
+            position: relative;
+        }
+
+        .color-picker-btn {
+            width: 32px;
+            height: 32px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .color-preview {
+            position: absolute;
+            bottom: 2px;
+            left: 2px;
+            right: 2px;
+            height: 4px;
+            background: #000;
+            border-radius: 2px;
+        }
+
+        .color-picker-dropdown {
+            position: absolute;
+            top: 36px;
+            left: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: none;
+            z-index: 101;
+        }
+
+        .color-picker-dropdown.active {
+            display: block;
+        }
+
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 24px);
+            gap: 4px;
+            margin-bottom: 8px;
+        }
+
+        .color-option {
+            width: 24px;
+            height: 24px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .color-option:hover {
+            transform: scale(1.1);
+            border-color: #333;
+        }
+
+        .custom-color-input {
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        /* Special Characters Modal */
+        .special-chars-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            padding: 20px;
+            max-width: 500px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 1001;
+            display: none;
+        }
+
+        .special-chars-modal.active {
+            display: block;
+        }
+
+        .special-chars-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .special-chars-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 4px;
+        }
+
+        .char-btn {
+            width: 40px;
+            height: 40px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.2s;
+        }
+
+        .char-btn:hover {
+            background: #f0f0f0;
+            border-color: #6c5ce7;
+            transform: scale(1.1);
+        }
+
+        .editable-element {
+            outline: none;
+            position: relative;
+            min-height: 20px;
+        }
+
+        .editable-element:focus {
+            outline: 2px solid #6c5ce7;
+            outline-offset: 2px;
+        }
+
+        .editing-active {
+            position: relative;
+        }
+
         .grid-preview-title {
             font-size: 14px;
             font-weight: 600;
@@ -737,6 +929,548 @@
             justify-content: center;
             font-size: 11px;
             color: #666;
+        }
+
+        /* Button Configuration Modal */
+        .button-config-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .button-config-modal.active {
+            display: flex;
+        }
+
+        .button-config-content {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .button-config-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .button-config-body {
+            padding: 30px;
+        }
+
+        .link-type-selector {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .link-type-option {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .link-type-option:hover {
+            border-color: #6c5ce7;
+            background: #f8f7ff;
+        }
+
+        .link-type-option.active {
+            border-color: #6c5ce7;
+            background: #f8f7ff;
+            color: #6c5ce7;
+        }
+
+        .link-type-option i {
+            font-size: 24px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .link-config-section {
+            display: none;
+        }
+
+        .link-config-section.active {
+            display: block;
+        }
+
+        .page-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .page-item {
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .page-item:hover {
+            background: #f8f9fa;
+        }
+
+        .page-item.selected {
+            background: #f8f7ff;
+            border: 1px solid #6c5ce7;
+        }
+
+        .page-status {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: #e0e0e0;
+            color: #666;
+        }
+
+        .page-status.published {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            margin-top: 15px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        .checkbox-group label {
+            margin: 0;
+            cursor: pointer;
+            font-size: 14px;
+            color: #333;
+            user-select: none;
+        }
+
+        .page-dropdown {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+        }
+
+        .page-dropdown:focus {
+            outline: none;
+            border-color: #6c5ce7;
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+        }
+
+        /* Image Configuration Modal */
+        .image-config-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .image-config-modal.active {
+            display: flex;
+        }
+
+        .image-config-content {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .image-config-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .image-config-body {
+            padding: 30px;
+        }
+
+        .image-type-selector {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .image-type-option {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .image-type-option:hover {
+            border-color: #6c5ce7;
+            background: #f8f7ff;
+        }
+
+        .image-type-option.active {
+            border-color: #6c5ce7;
+            background: #f8f7ff;
+            color: #6c5ce7;
+        }
+
+        .image-type-option i {
+            font-size: 24px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .image-config-section {
+            display: none;
+        }
+
+        .image-config-section.active {
+            display: block;
+        }
+
+        .file-upload-area {
+            border: 2px dashed #e0e0e0;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #fafafa;
+        }
+
+        .file-upload-area:hover {
+            border-color: #6c5ce7;
+            background: #f8f7ff;
+        }
+
+        .file-upload-area.drag-over {
+            border-color: #6c5ce7;
+            background: #f8f7ff;
+        }
+
+        .file-upload-area i {
+            font-size: 48px;
+            color: #6c5ce7;
+            margin-bottom: 15px;
+        }
+
+        .file-upload-area p {
+            margin: 0 0 10px 0;
+            color: #666;
+        }
+
+        .file-upload-area small {
+            color: #999;
+            font-size: 12px;
+        }
+
+        .image-preview {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .image-preview img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .image-preview-info {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .element-image {
+            width: 100%;
+            height: 300px;
+            overflow: hidden;
+            border-radius: 6px;
+            position: relative;
+        }
+
+        .element-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 6px;
+            display: block;
+        }
+
+        .element-image.placeholder {
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+        }
+
+        .dimension-info {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .dimension-info i {
+            color: #6c5ce7;
+            margin-right: 8px;
+        }
+
+        .dimension-info strong {
+            color: #333;
+        }
+
+        .image-fit-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .fit-option {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .fit-option:hover {
+            border-color: #6c5ce7;
+            background: #f8f7ff;
+        }
+
+        .fit-option.active {
+            border-color: #6c5ce7;
+            background: #f8f7ff;
+            color: #6c5ce7;
+        }
+
+        .fit-option i {
+            display: block;
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        /* Gallery Configuration Styles */
+        .gallery-images-container {
+            margin: 20px 0;
+        }
+
+        .gallery-images-list {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .gallery-image-item {
+            position: relative;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            overflow: hidden;
+            aspect-ratio: 1;
+            background: #f8f9fa;
+        }
+
+        .gallery-image-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .gallery-image-item .remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 24px;
+            height: 24px;
+            background: rgba(231, 76, 60, 0.9);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .gallery-image-item:hover .remove-btn {
+            opacity: 1;
+        }
+
+        .gallery-image-item .caption-input {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            padding: 5px;
+            font-size: 11px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .gallery-image-item:hover .caption-input {
+            opacity: 1;
+        }
+
+        .add-gallery-image-btn {
+            border: 2px dashed #6c5ce7;
+            border-radius: 6px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #f8f7ff;
+            color: #6c5ce7;
+            font-weight: 500;
+        }
+
+        .add-gallery-image-btn:hover {
+            background: #6c5ce7;
+            color: white;
+        }
+
+        .add-gallery-image-btn i {
+            font-size: 24px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .element-gallery {
+            width: 100%;
+            padding: 20px;
+        }
+
+        .gallery-grid {
+            display: grid;
+            gap: 10px;
+        }
+
+        .gallery-grid.grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .gallery-grid.two-column {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .gallery-grid.four-column {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .gallery-grid.masonry {
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            grid-auto-rows: 10px;
+        }
+
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.05);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .gallery-item .caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px;
+            font-size: 12px;
+            transform: translateY(100%);
+            transition: transform 0.2s;
+        }
+
+        .gallery-item:hover .caption {
+            transform: translateY(0);
+        }
+
+        .element-gallery.placeholder {
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            min-height: 200px;
+            border-radius: 6px;
         }
     </style>
 </head>
@@ -835,10 +1569,6 @@
                         <div class="element-category">
                             <h4>Media</h4>
                             <div class="element-grid">
-                                <div class="element-item" draggable="true" data-element="video">
-                                    <i class="fas fa-video"></i>
-                                    <div>Video</div>
-                                </div>
                                 <div class="element-item" draggable="true" data-element="gallery">
                                     <i class="fas fa-images"></i>
                                     <div>Gallery</div>
@@ -927,6 +1657,277 @@
                             Click "Add Grid Section" to start building your page
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Button Configuration Modal -->
+    <div class="button-config-modal" id="button-config-modal">
+        <div class="button-config-content">
+            <div class="button-config-header">
+                <h2>Configure Button Link</h2>
+                <button class="control-btn" onclick="hideButtonConfig()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="button-config-body">
+                <!-- Button Text -->
+                <div class="form-group">
+                    <label>Button Text</label>
+                    <input type="text" id="button-text-input" placeholder="Enter button text">
+                </div>
+
+                <div class="link-type-selector">
+                    <div class="link-type-option active" onclick="selectLinkType('page')">
+                        <i class="fas fa-file"></i>
+                        <div>Page Link</div>
+                    </div>
+                    <div class="link-type-option" onclick="selectLinkType('custom')">
+                        <i class="fas fa-link"></i>
+                        <div>Custom URL</div>
+                    </div>
+                </div>
+
+                <!-- Page Link Section -->
+                <div class="link-config-section active" id="page-link-section">
+                    <div class="form-group">
+                        <label>Select a Published Page</label>
+                        <select class="page-dropdown" id="page-select">
+                            <option value="">Choose a page...</option>
+                        </select>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="page-new-tab">
+                        <label for="page-new-tab">Open in new tab</label>
+                    </div>
+                </div>
+
+                <!-- Custom Link Section -->
+                <div class="link-config-section" id="custom-link-section">
+                    <div class="form-group">
+                        <label>Custom URL</label>
+                        <input type="url" id="custom-url-input" placeholder="https://example.com">
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="custom-new-tab">
+                        <label for="custom-new-tab">Open in new tab</label>
+                    </div>
+                </div>
+
+                <div class="form-actions" style="margin-top: 30px;">
+                    <button class="btn btn-secondary" onclick="hideButtonConfig()">Cancel</button>
+                    <button class="btn btn-primary" onclick="applyButtonConfig()">Apply</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Configuration Modal -->
+    <div class="image-config-modal" id="image-config-modal">
+        <div class="image-config-content">
+            <div class="image-config-header">
+                <h2>Configure Image</h2>
+                <button class="control-btn" onclick="hideImageConfig()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="image-config-body">
+                <!-- Dimension Info -->
+                <div class="dimension-info">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Recommended:</strong> Images will be displayed at 300px height. Use 16:9 or 4:3 aspect ratio. <strong>File size limit: 500KB</strong> for local storage. For larger images, use external URLs.
+                </div>
+
+                <div class="image-type-selector">
+                    <div class="image-type-option active" onclick="selectImageType('upload')">
+                        <i class="fas fa-upload"></i>
+                        <div>Upload Image</div>
+                    </div>
+                    <div class="image-type-option" onclick="selectImageType('link')">
+                        <i class="fas fa-link"></i>
+                        <div>Image URL</div>
+                    </div>
+                </div>
+
+                <!-- Upload Image Section -->
+                <div class="image-config-section active" id="upload-image-section">
+                    <div class="file-upload-area" onclick="document.getElementById('image-file-input').click()" ondrop="handleImageDrop(event)" ondragover="handleImageDragOver(event)" ondragleave="handleImageDragLeave(event)">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Click to upload or drag and drop</p>
+                        <small>PNG, JPG, GIF up to 10MB</small>
+                        <input type="file" id="image-file-input" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+                    </div>
+                    <div class="image-preview" id="upload-preview" style="display: none;">
+                        <img id="upload-preview-img" src="" alt="Preview">
+                        <div class="image-preview-info">
+                            <span id="upload-file-name"></span>
+                            <button class="btn btn-sm btn-secondary" onclick="clearImageUpload()">Remove</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Link Image Section -->
+                <div class="image-config-section" id="link-image-section">
+                    <div class="form-group">
+                        <label>Image URL</label>
+                        <input type="url" id="image-url-input" placeholder="https://example.com/image.jpg" oninput="previewImageUrl()">
+                    </div>
+                    <div class="image-preview" id="url-preview" style="display: none;">
+                        <img id="url-preview-img" src="" alt="Preview">
+                        <div class="image-preview-info">
+                            <span>Image preview</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Alt Text (for accessibility)</label>
+                    <input type="text" id="image-alt-input" placeholder="Describe the image">
+                </div>
+
+                <div class="form-actions" style="margin-top: 30px;">
+                    <button class="btn btn-secondary" onclick="hideImageConfig()">Cancel</button>
+                    <button class="btn btn-primary" onclick="applyImageConfig()">Apply</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Configuration Modal -->
+    <div class="image-config-modal" id="video-config-modal">
+        <div class="image-config-content">
+            <div class="image-config-header">
+                <h2>Configure Video</h2>
+                <button class="control-btn" onclick="hideVideoConfig()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="image-config-body">
+                <!-- Dimension Info -->
+                <div class="dimension-info">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Supported formats:</strong> MP4, WebM, OGG. For best compatibility, use MP4 format. Maximum file size: 50MB.
+                </div>
+
+                <div class="image-type-selector">
+                    <div class="image-type-option active" onclick="selectVideoType('upload')">
+                        <i class="fas fa-upload"></i>
+                        <div>Upload Video</div>
+                    </div>
+                    <div class="image-type-option" onclick="selectVideoType('link')">
+                        <i class="fas fa-link"></i>
+                        <div>Video URL</div>
+                    </div>
+                </div>
+
+                <!-- Upload Video Section -->
+                <div class="image-config-section active" id="upload-video-section">
+                    <div class="file-upload-area" onclick="document.getElementById('video-file-input').click()" ondrop="handleVideoDrop(event)" ondragover="handleVideoDragOver(event)" ondragleave="handleVideoDragLeave(event)">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Click to upload or drag and drop</p>
+                        <small>MP4, WebM, OGG up to 50MB</small>
+                        <input type="file" id="video-file-input" accept="video/*" style="display: none;" onchange="handleVideoUpload(event)">
+                    </div>
+                    <div class="image-preview" id="video-upload-preview" style="display: none;">
+                        <video id="upload-preview-video" controls style="max-width: 100%; max-height: 200px;"></video>
+                        <div class="image-preview-info">
+                            <span id="upload-video-name"></span>
+                            <button class="btn btn-sm btn-secondary" onclick="clearVideoUpload()">Remove</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Link Video Section -->
+                <div class="image-config-section" id="link-video-section">
+                    <div class="form-group">
+                        <label>Video URL</label>
+                        <input type="url" id="video-url-input" placeholder="https://example.com/video.mp4" oninput="previewVideoUrl()">
+                        <small style="color: #666; display: block; margin-top: 5px;">
+                            Supports direct video URLs (MP4, WebM, OGG) or YouTube/Vimeo embed URLs
+                        </small>
+                    </div>
+                    <div class="image-preview" id="video-url-preview" style="display: none;">
+                        <video id="url-preview-video" controls style="max-width: 100%; max-height: 200px;"></video>
+                        <div class="image-preview-info">
+                            <span>Video preview</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="video-autoplay" />
+                    <label for="video-autoplay">Autoplay (muted)</label>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="video-loop" />
+                    <label for="video-loop">Loop video</label>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="video-controls" checked />
+                    <label for="video-controls">Show controls</label>
+                </div>
+
+                <div class="form-actions" style="margin-top: 30px;">
+                    <button class="btn btn-secondary" onclick="hideVideoConfig()">Cancel</button>
+                    <button class="btn btn-primary" onclick="applyVideoConfig()">Apply</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gallery Configuration Modal -->
+    <div class="image-config-modal" id="gallery-config-modal">
+        <div class="image-config-content">
+            <div class="image-config-header">
+                <h2>Configure Gallery</h2>
+                <button class="control-btn" onclick="hideGalleryConfig()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="image-config-body">
+                <!-- Dimension Info -->
+                <div class="dimension-info">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Gallery Layout:</strong> Create a responsive image gallery. You can upload multiple images or add image URLs. Images will be displayed in a grid layout.
+                </div>
+
+                <div class="gallery-images-container" id="gallery-images-container">
+                    <div class="gallery-images-list" id="gallery-images-list">
+                        <!-- Gallery images will be added here -->
+                    </div>
+                    <div class="add-gallery-image-btn" onclick="addGalleryImage()">
+                        <i class="fas fa-plus"></i>
+                        <span>Add Image</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Gallery Layout</label>
+                    <select id="gallery-layout-select">
+                        <option value="grid">Grid (3 columns)</option>
+                        <option value="masonry">Masonry</option>
+                        <option value="carousel">Carousel</option>
+                        <option value="two-column">2 Columns</option>
+                        <option value="four-column">4 Columns</option>
+                    </select>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="gallery-lightbox" checked />
+                    <label for="gallery-lightbox">Enable lightbox on click</label>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="gallery-captions" />
+                    <label for="gallery-captions">Show image captions</label>
+                </div>
+
+                <div class="form-actions" style="margin-top: 30px;">
+                    <button class="btn btn-secondary" onclick="hideGalleryConfig()">Cancel</button>
+                    <button class="btn btn-primary" onclick="applyGalleryConfig()">Apply</button>
                 </div>
             </div>
         </div>
@@ -1437,13 +2438,12 @@
                     div.innerHTML = '<a href="#" class="element-button">Click Me</a>';
                     break;
                 case 'image':
-                    div.innerHTML = '<div class="element-image"><i class="fas fa-image"></i><br>Image Placeholder</div>';
-                    break;
-                case 'video':
-                    div.innerHTML = '<div class="element-video"><i class="fas fa-play-circle"></i><br>Video Placeholder</div>';
+                    div.className = 'element-image placeholder';
+                    div.innerHTML = '<i class="fas fa-image"></i><br>Image Placeholder';
                     break;
                 case 'gallery':
-                    div.innerHTML = '<div class="element-image"><i class="fas fa-images"></i><br>Gallery Placeholder</div>';
+                    div.className = 'element-gallery placeholder';
+                    div.innerHTML = '<i class="fas fa-images"></i><br>Gallery Placeholder';
                     break;
                 case 'spacer':
                     div.innerHTML = '<div class="element-spacer"></div>';
@@ -1480,10 +2480,1041 @@
             cell.classList.remove('has-content');
         }
 
+        let currentEditingElement = null;
+        let currentSelection = null;
+        let currentButtonElement = null;
+        let selectedPageId = null;
+        let selectedLinkType = 'page';
+        let currentImageElement = null;
+        let selectedImageType = 'upload';
+        let uploadedImageData = null;
+        let currentVideoElement = null;
+        let selectedVideoType = 'upload';
+        let uploadedVideoData = null;
+        let currentGalleryElement = null;
+        let galleryImages = [];
+
         function editElement(btn) {
-            // TODO: Implement element editing
-            alert('Element editing coming soon!');
+            const cell = btn.closest('.grid-cell');
+            const element = cell.querySelector('[class^="element-"]');
+            
+            if (element.classList.contains('element-text') || element.classList.contains('element-heading')) {
+                enableTextEditing(element);
+            } else if (element.classList.contains('element-button')) {
+                // Show button configuration modal
+                const buttonEl = element.querySelector('.element-button');
+                if (buttonEl) {
+                    currentButtonElement = buttonEl;
+                    showButtonConfig();
+                }
+            } else if (element.classList.contains('element-image')) {
+                // Show image configuration modal
+                currentImageElement = element;
+                showImageConfig();
+            } else if (element.classList.contains('element-video')) {
+                // Show video configuration modal
+                currentVideoElement = element;
+                showVideoConfig();
+            } else if (element.classList.contains('element-gallery')) {
+                // Show gallery configuration modal
+                currentGalleryElement = element;
+                showGalleryConfig();
+            } else {
+                alert('Advanced editing for this element type coming soon!');
+            }
         }
+
+        // Image Configuration Functions
+        function showImageConfig() {
+            document.getElementById('image-config-modal').classList.add('active');
+            
+            // Reset form
+            selectedImageType = 'upload';
+            uploadedImageData = null;
+            document.getElementById('image-url-input').value = '';
+            document.getElementById('image-alt-input').value = '';
+            document.getElementById('upload-preview').style.display = 'none';
+            document.getElementById('url-preview').style.display = 'none';
+            
+            // Check if image already has a source
+            if (currentImageElement) {
+                const img = currentImageElement.querySelector('img');
+                if (img) {
+                    const src = img.src;
+                    const alt = img.alt || '';
+                    document.getElementById('image-alt-input').value = alt;
+                    
+                    if (src.startsWith('data:')) {
+                        // It's an uploaded image
+                        uploadedImageData = src;
+                        document.getElementById('upload-preview-img').src = src;
+                        document.getElementById('upload-preview').style.display = 'block';
+                        selectImageType('upload');
+                    } else if (src) {
+                        // It's a URL image
+                        document.getElementById('image-url-input').value = src;
+                        document.getElementById('url-preview-img').src = src;
+                        document.getElementById('url-preview').style.display = 'block';
+                        selectImageType('link');
+                    }
+                }
+            }
+        }
+
+        function hideImageConfig() {
+            document.getElementById('image-config-modal').classList.remove('active');
+            currentImageElement = null;
+            uploadedImageData = null;
+        }
+
+        function selectImageType(type) {
+            selectedImageType = type;
+            
+            // Update UI
+            document.querySelectorAll('.image-type-option').forEach(option => {
+                option.classList.remove('active');
+            });
+            event.target.closest('.image-type-option').classList.add('active');
+            
+            // Show/hide sections
+            document.querySelectorAll('.image-config-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            if (type === 'upload') {
+                document.getElementById('upload-image-section').classList.add('active');
+            } else {
+                document.getElementById('link-image-section').classList.add('active');
+            }
+        }
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                // Check file size (limit to 500KB for localStorage)
+                const maxSize = 500 * 1024; // 500KB
+                if (file.size > maxSize) {
+                    alert('Image file is too large for local storage. Please use an image URL instead or compress the image to under 500KB.');
+                    event.target.value = '';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedImageData = e.target.result;
+                    document.getElementById('upload-preview-img').src = uploadedImageData;
+                    document.getElementById('upload-file-name').textContent = file.name + ' (' + Math.round(file.size / 1024) + 'KB)';
+                    document.getElementById('upload-preview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function handleImageDrop(event) {
+            event.preventDefault();
+            event.currentTarget.classList.remove('drag-over');
+            
+            const files = event.dataTransfer.files;
+            if (files.length > 0 && files[0].type.startsWith('image/')) {
+                const file = files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedImageData = e.target.result;
+                    document.getElementById('upload-preview-img').src = uploadedImageData;
+                    document.getElementById('upload-file-name').textContent = file.name;
+                    document.getElementById('upload-preview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function handleImageDragOver(event) {
+            event.preventDefault();
+            event.currentTarget.classList.add('drag-over');
+        }
+
+        function handleImageDragLeave(event) {
+            event.currentTarget.classList.remove('drag-over');
+        }
+
+        function clearImageUpload() {
+            uploadedImageData = null;
+            document.getElementById('upload-preview').style.display = 'none';
+            document.getElementById('image-file-input').value = '';
+        }
+
+        function previewImageUrl() {
+            const url = document.getElementById('image-url-input').value.trim();
+            if (url) {
+                const previewImg = document.getElementById('url-preview-img');
+                previewImg.src = url;
+                document.getElementById('url-preview').style.display = 'block';
+                
+                // Add error handler
+                previewImg.onerror = function() {
+                    handleImageError();
+                };
+            } else {
+                document.getElementById('url-preview').style.display = 'none';
+            }
+        }
+
+        function handleImageError() {
+            document.getElementById('url-preview').style.display = 'none';
+            alert('Failed to load image. Please check the URL and ensure it points to a valid image.');
+        }
+
+        function applyImageConfig() {
+            if (!currentImageElement) return;
+            
+            const altText = document.getElementById('image-alt-input').value.trim();
+            let imageSrc = '';
+            
+            if (selectedImageType === 'upload') {
+                if (!uploadedImageData) {
+                    alert('Please upload an image');
+                    return;
+                }
+                imageSrc = uploadedImageData;
+            } else {
+                const imageUrl = document.getElementById('image-url-input').value.trim();
+                if (!imageUrl) {
+                    alert('Please enter an image URL');
+                    return;
+                }
+                imageSrc = imageUrl;
+            }
+            
+            // Update the image element - CSS will handle sizing with object-fit: cover
+            currentImageElement.innerHTML = `<img src="${imageSrc}" alt="${altText}">`;
+            currentImageElement.classList.remove('placeholder');
+            
+            hideImageConfig();
+        }
+
+        // Video Configuration Functions
+        function showVideoConfig() {
+            document.getElementById('video-config-modal').classList.add('active');
+            
+            // Reset form
+            selectedVideoType = 'upload';
+            uploadedVideoData = null;
+            document.getElementById('video-url-input').value = '';
+            document.getElementById('video-upload-preview').style.display = 'none';
+            document.getElementById('video-url-preview').style.display = 'none';
+            document.getElementById('video-autoplay').checked = false;
+            document.getElementById('video-loop').checked = false;
+            document.getElementById('video-controls').checked = true;
+            
+            // Check if video already has a source
+            if (currentVideoElement) {
+                const video = currentVideoElement.querySelector('video');
+                if (video) {
+                    const src = video.src;
+                    document.getElementById('video-autoplay').checked = video.autoplay;
+                    document.getElementById('video-loop').checked = video.loop;
+                    document.getElementById('video-controls').checked = video.controls;
+                    
+                    if (src.startsWith('data:')) {
+                        // It's an uploaded video
+                        uploadedVideoData = src;
+                        document.getElementById('upload-preview-video').src = src;
+                        document.getElementById('video-upload-preview').style.display = 'block';
+                        selectVideoType('upload');
+                    } else if (src) {
+                        // It's a URL video
+                        document.getElementById('video-url-input').value = src;
+                        document.getElementById('url-preview-video').src = src;
+                        document.getElementById('video-url-preview').style.display = 'block';
+                        selectVideoType('link');
+                    }
+                }
+            }
+        }
+
+        function hideVideoConfig() {
+            document.getElementById('video-config-modal').classList.remove('active');
+            currentVideoElement = null;
+            uploadedVideoData = null;
+        }
+
+        function selectVideoType(type) {
+            selectedVideoType = type;
+            
+            // Update UI
+            document.querySelectorAll('#video-config-modal .image-type-option').forEach(option => {
+                option.classList.remove('active');
+            });
+            event.target.closest('.image-type-option').classList.add('active');
+            
+            // Show/hide sections
+            document.querySelectorAll('#video-config-modal .image-config-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            if (type === 'upload') {
+                document.getElementById('upload-video-section').classList.add('active');
+            } else {
+                document.getElementById('link-video-section').classList.add('active');
+            }
+        }
+
+        function handleVideoUpload(event) {
+            const file = event.target.files[0];
+            if (file && file.type.startsWith('video/')) {
+                // Check file size (limit to 2MB for localStorage)
+                const maxSize = 2 * 1024 * 1024; // 2MB
+                if (file.size > maxSize) {
+                    alert('Video file is too large for local storage. Please use a video URL instead or use a video under 2MB. For larger videos, consider hosting them externally.');
+                    event.target.value = '';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedVideoData = e.target.result;
+                    document.getElementById('upload-preview-video').src = uploadedVideoData;
+                    document.getElementById('upload-video-name').textContent = file.name + ' (' + Math.round(file.size / 1024 / 1024 * 10) / 10 + 'MB)';
+                    document.getElementById('video-upload-preview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function handleVideoDrop(event) {
+            event.preventDefault();
+            event.currentTarget.classList.remove('drag-over');
+            
+            const files = event.dataTransfer.files;
+            if (files.length > 0 && files[0].type.startsWith('video/')) {
+                const file = files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedVideoData = e.target.result;
+                    document.getElementById('upload-preview-video').src = uploadedVideoData;
+                    document.getElementById('upload-video-name').textContent = file.name;
+                    document.getElementById('video-upload-preview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function handleVideoDragOver(event) {
+            event.preventDefault();
+            event.currentTarget.classList.add('drag-over');
+        }
+
+        function handleVideoDragLeave(event) {
+            event.currentTarget.classList.remove('drag-over');
+        }
+
+        function clearVideoUpload() {
+            uploadedVideoData = null;
+            document.getElementById('video-upload-preview').style.display = 'none';
+            document.getElementById('video-file-input').value = '';
+        }
+
+        function previewVideoUrl() {
+            const url = document.getElementById('video-url-input').value.trim();
+            if (url) {
+                const previewVideo = document.getElementById('url-preview-video');
+                
+                // Check if it's a YouTube or Vimeo URL
+                if (url.includes('youtube.com') || url.includes('youtu.be')) {
+                    alert('For YouTube videos, please use the embed URL format: https://www.youtube.com/embed/VIDEO_ID');
+                    return;
+                } else if (url.includes('vimeo.com')) {
+                    alert('For Vimeo videos, please use the embed URL format: https://player.vimeo.com/video/VIDEO_ID');
+                    return;
+                }
+                
+                previewVideo.src = url;
+                document.getElementById('video-url-preview').style.display = 'block';
+                
+                // Add error handler
+                previewVideo.onerror = function() {
+                    handleVideoError();
+                };
+            } else {
+                document.getElementById('video-url-preview').style.display = 'none';
+            }
+        }
+
+        function handleVideoError() {
+            document.getElementById('video-url-preview').style.display = 'none';
+            alert('Failed to load video. Please check the URL and ensure it points to a valid video file.');
+        }
+
+        function applyVideoConfig() {
+            if (!currentVideoElement) return;
+            
+            let videoSrc = '';
+            
+            if (selectedVideoType === 'upload') {
+                if (!uploadedVideoData) {
+                    alert('Please upload a video');
+                    return;
+                }
+                videoSrc = uploadedVideoData;
+            } else {
+                const videoUrl = document.getElementById('video-url-input').value.trim();
+                if (!videoUrl) {
+                    alert('Please enter a video URL');
+                    return;
+                }
+                videoSrc = videoUrl;
+            }
+            
+            const autoplay = document.getElementById('video-autoplay').checked;
+            const loop = document.getElementById('video-loop').checked;
+            const controls = document.getElementById('video-controls').checked;
+            
+            // Update the video element
+            currentVideoElement.innerHTML = `
+                <video 
+                    src="${videoSrc}" 
+                    ${autoplay ? 'autoplay muted' : ''} 
+                    ${loop ? 'loop' : ''} 
+                    ${controls ? 'controls' : ''}
+                    style="width: 100%; height: 100%; object-fit: cover;">
+                </video>
+            `;
+            currentVideoElement.classList.remove('placeholder');
+            
+            hideVideoConfig();
+        }
+
+        // Gallery Configuration Functions
+        function showGalleryConfig() {
+            document.getElementById('gallery-config-modal').classList.add('active');
+            
+            // Reset form
+            galleryImages = [];
+            document.getElementById('gallery-images-list').innerHTML = '';
+            document.getElementById('gallery-layout-select').value = 'grid';
+            document.getElementById('gallery-lightbox').checked = true;
+            document.getElementById('gallery-captions').checked = false;
+            
+            // Check if gallery already has images
+            if (currentGalleryElement && !currentGalleryElement.classList.contains('placeholder')) {
+                const existingGallery = currentGalleryElement.querySelector('.gallery-grid');
+                if (existingGallery) {
+                    // Get layout
+                    const layoutClasses = ['grid', 'two-column', 'four-column', 'masonry', 'carousel'];
+                    for (let layoutClass of layoutClasses) {
+                        if (existingGallery.classList.contains(layoutClass)) {
+                            document.getElementById('gallery-layout-select').value = layoutClass;
+                            break;
+                        }
+                    }
+                    
+                    // Get images
+                    const galleryItems = existingGallery.querySelectorAll('.gallery-item');
+                    galleryItems.forEach(item => {
+                        const img = item.querySelector('img');
+                        const caption = item.querySelector('.caption');
+                        if (img) {
+                            galleryImages.push({
+                                src: img.src,
+                                caption: caption ? caption.textContent : ''
+                            });
+                        }
+                    });
+                    
+                    // Update UI
+                    updateGalleryImagesList();
+                    
+                    // Check if captions are shown
+                    if (galleryItems.length > 0 && galleryItems[0].querySelector('.caption')) {
+                        document.getElementById('gallery-captions').checked = true;
+                    }
+                }
+            }
+        }
+
+        function hideGalleryConfig() {
+            document.getElementById('gallery-config-modal').classList.remove('active');
+            currentGalleryElement = null;
+            galleryImages = [];
+        }
+
+        function addGalleryImage() {
+            // Create a temporary file input
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.multiple = true;
+            
+            input.onchange = function(e) {
+                const files = Array.from(e.target.files);
+                const maxSize = 300 * 1024; // 300KB per image for galleries
+                let validFiles = [];
+                let oversizedFiles = [];
+                
+                files.forEach(file => {
+                    if (file.type.startsWith('image/')) {
+                        if (file.size > maxSize) {
+                            oversizedFiles.push(file.name);
+                        } else {
+                            validFiles.push(file);
+                        }
+                    }
+                });
+                
+                if (oversizedFiles.length > 0) {
+                    alert(`The following images are too large (max 300KB per image for galleries):\n${oversizedFiles.join('\n')}\n\nPlease use smaller images or host them externally and use URLs instead.`);
+                }
+                
+                validFiles.forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        galleryImages.push({
+                            src: e.target.result,
+                            caption: ''
+                        });
+                        updateGalleryImagesList();
+                    };
+                    reader.readAsDataURL(file);
+                });
+            };
+            
+            input.click();
+        }
+
+        function updateGalleryImagesList() {
+            const container = document.getElementById('gallery-images-list');
+            container.innerHTML = '';
+            
+            galleryImages.forEach((image, index) => {
+                const item = document.createElement('div');
+                item.className = 'gallery-image-item';
+                item.innerHTML = `
+                    <img src="${image.src}" alt="Gallery image ${index + 1}">
+                    <button class="remove-btn" onclick="removeGalleryImage(${index})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <input type="text" class="caption-input" placeholder="Caption (optional)" 
+                           value="${image.caption || ''}" 
+                           onchange="updateGalleryCaption(${index}, this.value)">
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function removeGalleryImage(index) {
+            galleryImages.splice(index, 1);
+            updateGalleryImagesList();
+        }
+
+        function updateGalleryCaption(index, caption) {
+            if (galleryImages[index]) {
+                galleryImages[index].caption = caption;
+            }
+        }
+
+        function applyGalleryConfig() {
+            if (!currentGalleryElement) return;
+            
+            if (galleryImages.length === 0) {
+                alert('Please add at least one image to the gallery');
+                return;
+            }
+            
+            const layout = document.getElementById('gallery-layout-select').value;
+            const enableLightbox = document.getElementById('gallery-lightbox').checked;
+            const showCaptions = document.getElementById('gallery-captions').checked;
+            
+            // Create gallery HTML
+            let galleryHTML = `<div class="gallery-grid ${layout}">`;
+            
+            galleryImages.forEach((image, index) => {
+                galleryHTML += `
+                    <div class="gallery-item" ${enableLightbox ? 'onclick="openLightbox(this)"' : ''}>
+                        <img src="${image.src}" alt="Gallery image ${index + 1}">
+                        ${showCaptions && image.caption ? `<div class="caption">${image.caption}</div>` : ''}
+                    </div>
+                `;
+            });
+            
+            galleryHTML += '</div>';
+            
+            // Update the gallery element
+            currentGalleryElement.innerHTML = galleryHTML;
+            currentGalleryElement.classList.remove('placeholder');
+            
+            hideGalleryConfig();
+        }
+
+        // Simple lightbox function (can be enhanced later)
+        function openLightbox(item) {
+            const img = item.querySelector('img');
+            if (img) {
+                // For now, just open the image in a new tab
+                window.open(img.src, '_blank');
+            }
+        }
+
+        // Button Configuration Functions
+        function showButtonConfig() {
+            document.getElementById('button-config-modal').classList.add('active');
+            loadPublishedPages();
+            
+            // Set button text
+            if (currentButtonElement) {
+                document.getElementById('button-text-input').value = currentButtonElement.textContent || 'Click Me';
+            }
+            
+            // Reset form
+            selectedPageId = null;
+            selectedLinkType = 'page';
+            document.getElementById('custom-url-input').value = '';
+            document.getElementById('page-new-tab').checked = false;
+            document.getElementById('custom-new-tab').checked = false;
+            
+            // Check if button already has a link
+            if (currentButtonElement && currentButtonElement.href) {
+                const href = currentButtonElement.getAttribute('href');
+                const hasTarget = currentButtonElement.target === '_blank';
+                
+                if (href && href.startsWith('page-viewer.html?id=')) {
+                    // It's a page link
+                    selectedPageId = href.split('id=')[1];
+                    document.getElementById('page-new-tab').checked = hasTarget;
+                    selectLinkType('page');
+                } else if (href && href !== '#') {
+                    // It's a custom link
+                    document.getElementById('custom-url-input').value = href;
+                    document.getElementById('custom-new-tab').checked = hasTarget;
+                    selectLinkType('custom');
+                }
+            }
+        }
+
+        function hideButtonConfig() {
+            document.getElementById('button-config-modal').classList.remove('active');
+            currentButtonElement = null;
+        }
+
+        function selectLinkType(type) {
+            selectedLinkType = type;
+            
+            // Update UI
+            document.querySelectorAll('.link-type-option').forEach(option => {
+                option.classList.remove('active');
+            });
+            event.target.closest('.link-type-option').classList.add('active');
+            
+            // Show/hide sections
+            document.querySelectorAll('.link-config-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            if (type === 'page') {
+                document.getElementById('page-link-section').classList.add('active');
+            } else {
+                document.getElementById('custom-link-section').classList.add('active');
+            }
+        }
+
+        function loadPublishedPages() {
+            const pageSelect = document.getElementById('page-select');
+            pageSelect.innerHTML = '<option value="">Choose a page...</option>';
+            
+            // Get all pages from localStorage
+            const pages = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('page_')) {
+                    try {
+                        const pageData = JSON.parse(localStorage.getItem(key));
+                        if (pageData.published || pageData.status === 'published') {
+                            pages.push(pageData);
+                        }
+                    } catch (e) {
+                        console.error('Error parsing page data:', e);
+                    }
+                }
+            }
+            
+            if (pages.length === 0) {
+                pageSelect.innerHTML = '<option value="">No published pages available</option>';
+                pageSelect.disabled = true;
+                return;
+            }
+            
+            // Enable dropdown
+            pageSelect.disabled = false;
+            
+            // Add pages to dropdown
+            pages.forEach(page => {
+                const option = document.createElement('option');
+                option.value = page.id;
+                option.textContent = page.title || 'Untitled Page';
+                
+                if (page.id === selectedPageId) {
+                    option.selected = true;
+                }
+                
+                pageSelect.appendChild(option);
+            });
+            
+            // Update selectedPageId when dropdown changes
+            pageSelect.onchange = function() {
+                selectedPageId = this.value;
+            };
+        }
+
+        function applyButtonConfig() {
+            if (!currentButtonElement) return;
+            
+            // Update button text
+            const buttonText = document.getElementById('button-text-input').value.trim();
+            if (buttonText) {
+                currentButtonElement.textContent = buttonText;
+            }
+            
+            if (selectedLinkType === 'page') {
+                // Get selected page from dropdown
+                const pageSelect = document.getElementById('page-select');
+                const selectedPageId = pageSelect.value;
+                
+                if (!selectedPageId) {
+                    alert('Please select a page');
+                    return;
+                }
+                
+                currentButtonElement.href = `page-viewer.html?id=${selectedPageId}`;
+                
+                // Handle new tab for page links
+                if (document.getElementById('page-new-tab').checked) {
+                    currentButtonElement.target = '_blank';
+                } else {
+                    currentButtonElement.removeAttribute('target');
+                }
+            } else {
+                const customUrl = document.getElementById('custom-url-input').value.trim();
+                if (!customUrl) {
+                    alert('Please enter a URL');
+                    return;
+                }
+                
+                // Ensure URL has protocol
+                let url = customUrl;
+                if (!url.match(/^https?:\/\//)) {
+                    url = 'https://' + url;
+                }
+                
+                currentButtonElement.href = url;
+                
+                // Handle new tab for custom links
+                if (document.getElementById('custom-new-tab').checked) {
+                    currentButtonElement.target = '_blank';
+                } else {
+                    currentButtonElement.removeAttribute('target');
+                }
+            }
+            
+            hideButtonConfig();
+        }
+
+        function enableTextEditing(element) {
+            // Make element editable
+            element.contentEditable = true;
+            element.classList.add('editable-element', 'editing-active');
+            element.focus();
+            
+            currentEditingElement = element;
+            
+            // Create and show toolbar
+            showTextToolbar(element);
+            
+            // Save on blur
+            element.addEventListener('blur', function(e) {
+                // Don't blur if clicking toolbar
+                if (e.relatedTarget && e.relatedTarget.closest('.text-editor-toolbar')) {
+                    element.focus();
+                    return;
+                }
+                
+                setTimeout(() => {
+                    if (!document.activeElement.closest('.text-editor-toolbar')) {
+                        hideTextToolbar();
+                        element.contentEditable = false;
+                        element.classList.remove('editing-active');
+                    }
+                }, 100);
+            });
+        }
+
+        function showTextToolbar(element) {
+            // Remove existing toolbar if any
+            const existingToolbar = document.querySelector('.text-editor-toolbar');
+            if (existingToolbar) {
+                existingToolbar.remove();
+            }
+            
+            // Create toolbar
+            const toolbar = document.createElement('div');
+            toolbar.className = 'text-editor-toolbar';
+            toolbar.innerHTML = `
+                <button class="toolbar-btn" onclick="formatText('bold')" title="Bold">
+                    <i class="fas fa-bold"></i>
+                </button>
+                <button class="toolbar-btn" onclick="formatText('italic')" title="Italic">
+                    <i class="fas fa-italic"></i>
+                </button>
+                <div class="toolbar-separator"></div>
+                <select class="font-size-input" onchange="setFontSize(this.value)" title="Font Size">
+                    <option value="">Size</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                    <option value="11">11</option>
+                    <option value="12">12</option>
+                    <option value="14">14</option>
+                    <option value="16">16</option>
+                    <option value="18">18</option>
+                    <option value="20">20</option>
+                    <option value="24">24</option>
+                    <option value="28">28</option>
+                    <option value="32">32</option>
+                    <option value="36">36</option>
+                    <option value="48">48</option>
+                    <option value="72">72</option>
+                </select>
+                <div class="toolbar-separator"></div>
+                <div class="color-picker-wrapper">
+                    <button class="color-picker-btn" onclick="toggleColorPicker()" title="Text Color">
+                        <i class="fas fa-palette"></i>
+                        <div class="color-preview"></div>
+                    </button>
+                    <div class="color-picker-dropdown" id="color-picker">
+                        <div class="color-grid">
+                            <div class="color-option" style="background: #000000" onclick="event.stopPropagation(); setTextColor('#000000')"></div>
+                            <div class="color-option" style="background: #333333" onclick="event.stopPropagation(); setTextColor('#333333')"></div>
+                            <div class="color-option" style="background: #666666" onclick="event.stopPropagation(); setTextColor('#666666')"></div>
+                            <div class="color-option" style="background: #999999" onclick="event.stopPropagation(); setTextColor('#999999')"></div>
+                            <div class="color-option" style="background: #CCCCCC" onclick="event.stopPropagation(); setTextColor('#CCCCCC')"></div>
+                            <div class="color-option" style="background: #FFFFFF; border: 1px solid #ddd;" onclick="event.stopPropagation(); setTextColor('#FFFFFF')"></div>
+                            <div class="color-option" style="background: #FF0000" onclick="event.stopPropagation(); setTextColor('#FF0000')"></div>
+                            <div class="color-option" style="background: #00FF00" onclick="event.stopPropagation(); setTextColor('#00FF00')"></div>
+                            <div class="color-option" style="background: #0000FF" onclick="event.stopPropagation(); setTextColor('#0000FF')"></div>
+                            <div class="color-option" style="background: #FFFF00" onclick="event.stopPropagation(); setTextColor('#FFFF00')"></div>
+                            <div class="color-option" style="background: #FF00FF" onclick="event.stopPropagation(); setTextColor('#FF00FF')"></div>
+                            <div class="color-option" style="background: #00FFFF" onclick="event.stopPropagation(); setTextColor('#00FFFF')"></div>
+                            <div class="color-option" style="background: #6c5ce7" onclick="event.stopPropagation(); setTextColor('#6c5ce7')"></div>
+                            <div class="color-option" style="background: #e74c3c" onclick="event.stopPropagation(); setTextColor('#e74c3c')"></div>
+                            <div class="color-option" style="background: #3498db" onclick="event.stopPropagation(); setTextColor('#3498db')"></div>
+                            <div class="color-option" style="background: #2ecc71" onclick="event.stopPropagation(); setTextColor('#2ecc71')"></div>
+                        </div>
+                        <input type="color" class="custom-color-input" onchange="setTextColor(this.value)" title="Custom Color">
+                    </div>
+                </div>
+                <div class="toolbar-separator"></div>
+                <button class="toolbar-btn" onclick="formatText('insertUnorderedList')" title="Bullet List">
+                    <i class="fas fa-list-ul"></i>
+                </button>
+                <button class="toolbar-btn" onclick="formatText('insertOrderedList')" title="Numbered List">
+                    <i class="fas fa-list-ol"></i>
+                </button>
+                <div class="toolbar-separator"></div>
+                <button class="toolbar-btn" onclick="showSpecialChars()" title="Special Characters">
+                    <i class="fas fa-omega"></i>
+                </button>
+            `;
+            
+            // Append toolbar to body
+            document.body.appendChild(toolbar);
+            
+            // Position toolbar above element
+            const rect = element.getBoundingClientRect();
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+            
+            toolbar.style.top = (rect.top + scrollTop - 50) + 'px';
+            toolbar.style.left = (rect.left + scrollLeft) + 'px';
+            
+            // Update toolbar state
+            updateToolbarState();
+        }
+
+        function hideTextToolbar() {
+            const toolbar = document.querySelector('.text-editor-toolbar');
+            if (toolbar) {
+                toolbar.remove();
+            }
+        }
+
+        function formatText(command) {
+            if (currentEditingElement) {
+                const selection = window.getSelection();
+                
+                // If no text is selected, select all content
+                if (selection.isCollapsed || selection.toString().trim() === '') {
+                    const range = document.createRange();
+                    range.selectNodeContents(currentEditingElement);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                }
+                
+                document.execCommand(command, false, null);
+                updateToolbarState();
+                currentEditingElement.focus();
+            }
+        }
+
+        function setFontSize(size) {
+            if (!size || !currentEditingElement) return;
+            
+            const selection = window.getSelection();
+            
+            // If no text is selected, select all content
+            if (selection.isCollapsed || selection.toString().trim() === '') {
+                const range = document.createRange();
+                range.selectNodeContents(currentEditingElement);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
+            
+            // Remove any existing font size spans to prevent nesting
+            document.execCommand('fontSize', false, '7');
+            
+            // Get all font elements created by execCommand
+            const fontElements = currentEditingElement.getElementsByTagName('font');
+            
+            // Convert font elements to spans with proper size
+            Array.from(fontElements).forEach(font => {
+                if (font.size === '7') {
+                    const span = document.createElement('span');
+                    span.style.fontSize = size + 'px';
+                    span.innerHTML = font.innerHTML;
+                    font.parentNode.replaceChild(span, font);
+                }
+            });
+            
+            currentEditingElement.focus();
+        }
+
+        function setTextColor(color) {
+            if (currentEditingElement) {
+                const selection = window.getSelection();
+                
+                // If no text is selected, select all content
+                if (selection.isCollapsed || selection.toString().trim() === '') {
+                    const range = document.createRange();
+                    range.selectNodeContents(currentEditingElement);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                }
+                
+                // Apply color
+                document.execCommand('foreColor', false, color);
+                
+                // Update color preview
+                const preview = document.querySelector('.color-preview');
+                if (preview) {
+                    preview.style.background = color;
+                }
+                
+                // Hide color picker
+                setTimeout(() => {
+                    document.getElementById('color-picker').classList.remove('active');
+                }, 100);
+                
+                currentEditingElement.focus();
+            }
+        }
+
+        function toggleColorPicker() {
+            const picker = document.getElementById('color-picker');
+            picker.classList.toggle('active');
+        }
+
+        function showSpecialChars() {
+            // Create modal if it doesn't exist
+            let modal = document.getElementById('special-chars-modal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'special-chars-modal';
+                modal.className = 'special-chars-modal';
+                modal.innerHTML = `
+                    <div class="special-chars-header">
+                        <h3>Special Characters</h3>
+                        <button class="toolbar-btn" onclick="hideSpecialChars()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="special-chars-grid">
+                        ${generateSpecialChars()}
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+            
+            modal.classList.add('active');
+        }
+
+        function hideSpecialChars() {
+            const modal = document.getElementById('special-chars-modal');
+            if (modal) {
+                modal.classList.remove('active');
+            }
+        }
+
+        function generateSpecialChars() {
+            const chars = [
+                '©', '®', '™', '€', '£', '¥', '¢', '§', '¶', '•',
+                '†', '‡', '°', '¹', '²', '³', '½', '¼', '¾', '‰',
+                '←', '→', '↑', '↓', '↔', '⇐', '⇒', '⇑', '⇓', '⇔',
+                '±', '×', '÷', '≠', '≈', '≤', '≥', '∞', '∑', '√',
+                'α', 'β', 'γ', 'δ', 'ε', 'θ', 'λ', 'μ', 'π', 'σ',
+                '♠', '♣', '♥', '♦', '♪', '♫', '☀', '☁', '☂', '★'
+            ];
+            
+            return chars.map(char => 
+                `<button class="char-btn" onclick="insertSpecialChar('${char}')">${char}</button>`
+            ).join('');
+        }
+
+        function insertSpecialChar(char) {
+            if (currentEditingElement) {
+                currentEditingElement.focus();
+                document.execCommand('insertText', false, char);
+                hideSpecialChars();
+            }
+        }
+
+        function updateToolbarState() {
+            // Update bold button
+            const boldBtn = document.querySelector('.toolbar-btn[title="Bold"]');
+            if (boldBtn) {
+                if (document.queryCommandState('bold')) {
+                    boldBtn.classList.add('active');
+                } else {
+                    boldBtn.classList.remove('active');
+                }
+            }
+            
+            // Update italic button
+            const italicBtn = document.querySelector('.toolbar-btn[title="Italic"]');
+            if (italicBtn) {
+                if (document.queryCommandState('italic')) {
+                    italicBtn.classList.add('active');
+                } else {
+                    italicBtn.classList.remove('active');
+                }
+            }
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.color-picker-wrapper')) {
+                const picker = document.getElementById('color-picker');
+                if (picker) {
+                    picker.classList.remove('active');
+                }
+            }
+        });
 
         function deleteSection(sectionId) {
             const section = document.getElementById(sectionId);
@@ -1530,12 +3561,38 @@
         function savePage() {
             if (!currentPage) return;
             
+            // Hide any active toolbars before saving
+            hideTextToolbar();
+            
+            // Remove editing states
+            document.querySelectorAll('.editable-element').forEach(el => {
+                el.contentEditable = false;
+                el.classList.remove('editing-active', 'editable-element');
+            });
+            
             currentPage.title = document.getElementById('settings-title').value || 'New Page';
             currentPage.status = document.getElementById('settings-status').value;
-            currentPage.content = document.getElementById('canvas-content').innerHTML;
             
-            // Save to localStorage
-            localStorage.setItem(`page_${currentPage.id}`, JSON.stringify(currentPage));
+            // Get the content with all formatting preserved
+            const content = document.getElementById('canvas-content').cloneNode(true);
+            
+            // Remove any temporary editing artifacts
+            content.querySelectorAll('.text-editor-toolbar').forEach(toolbar => toolbar.remove());
+            
+            currentPage.content = content.innerHTML;
+            
+            // Save to localStorage with all formatting and published status
+            const pageData = {
+                id: currentPage.id,
+                title: currentPage.title,
+                content: currentPage.content,
+                status: currentPage.status,
+                published: currentPage.published || false,
+                createdAt: currentPage.createdAt || new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+            
+            localStorage.setItem(`page_${currentPage.id}`, JSON.stringify(pageData));
             
             // Update UI
             document.getElementById('page-title').textContent = currentPage.title;
@@ -1556,7 +3613,13 @@
         function publishPage() {
             if (!currentPage) return;
             
+            // Set both published flag and status
             currentPage.published = true;
+            currentPage.status = 'published';
+            
+            // Update the status dropdown to reflect the change
+            document.getElementById('settings-status').value = 'published';
+            
             savePage();
             
             alert('Page published successfully!');

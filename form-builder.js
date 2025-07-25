@@ -1151,6 +1151,15 @@ class FormBuilder {
                 const formData = JSON.parse(savedForm);
                 // Support both 'fields' (new) and 'elements' (old) for backward compatibility
                 this.formElements = formData.fields || formData.elements || [];
+                
+                // Update form name from saved data
+                if (formData.name) {
+                    this.formName = formData.name;
+                    document.getElementById('form-title').value = this.formName;
+                    document.getElementById('form-name-breadcrumb').textContent = this.formName;
+                    document.querySelector('.form-preview-title').textContent = this.formName;
+                }
+                
                 this.renderForm();
             }
         }

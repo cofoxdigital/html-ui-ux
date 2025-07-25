@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Widget Builder Demo - Phoenix Enterprise</title>
+    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="./workflow-styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .demo-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        
+        .demo-header h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .demo-header p {
+            font-size: 1.25rem;
+            color: #6B7280;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .feature-section {
+            margin-bottom: 80px;
+        }
+        
+        .feature-section h2 {
+            font-size: 2rem;
+            margin-bottom: 30px;
+            color: #1F2937;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .feature-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .feature-card i {
+            font-size: 2.5rem;
+            color: #4F46E5;
+            margin-bottom: 20px;
+        }
+        
+        .feature-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 15px;
+            color: #1F2937;
+        }
+        
+        .feature-card p {
+            color: #6B7280;
+            line-height: 1.6;
+        }
+        
+        .widget-showcase {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .widget-example {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .widget-example h3 {
+            margin-bottom: 20px;
+            color: #1F2937;
+        }
+        
+        .metric-widget {
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .metric-widget .metric-value {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .metric-widget .metric-label {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .metric-widget .metric-change {
+            margin-top: 15px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        
+        .table-widget {
+            overflow-x: auto;
+        }
+        
+        .table-widget table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .table-widget th,
+        .table-widget td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #E5E7EB;
+        }
+        
+        .table-widget th {
+            background: #F9FAFB;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .code-example {
+            background: #1F2937;
+            color: #E5E7EB;
+            padding: 30px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .cta-section {
+            text-align: center;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            border-radius: 12px;
+            color: white;
+        }
+        
+        .cta-section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+        
+        .cta-section p {
+            font-size: 1.25rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .cta-buttons .btn {
+            padding: 15px 30px;
+            font-size: 1.1rem;
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: #4F46E5;
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 30px;
+            transition: color 0.3s ease;
+        }
+        
+        .back-link:hover {
+            color: #7C3AED;
+        }
+        
+        .layout-examples {
+            display: grid;
+            gap: 30px;
+        }
+        
+        .layout-example {
+            background: #F9FAFB;
+            border-radius: 12px;
+            padding: 30px;
+        }
+        
+        .layout-grid {
+            display: grid;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .layout-grid.split {
+            grid-template-columns: 1fr 1fr;
+        }
+        
+        .layout-grid.triple {
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+        
+        .layout-grid.quad {
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+        }
+        
+        .layout-item {
+            background: white;
+            border: 2px dashed #D1D5DB;
+            border-radius: 8px;
+            padding: 40px 20px;
+            text-align: center;
+            color: #6B7280;
+        }
+        
+        /* Enhanced How It Works Styles */
+        .how-it-works-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 80px;
+        }
+        
+        .how-it-works-step {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+        
+        .how-it-works-step.reverse {
+            direction: rtl;
+        }
+        
+        .how-it-works-step.reverse > * {
+            direction: ltr;
+        }
+        
+        .step-screenshot {
+            position: relative;
+        }
+        
+        .screenshot-placeholder {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            min-height: 350px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .step-info {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .step-info .step-number {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .step-info h3 {
+            font-size: 1.5rem;
+            color: #1F2937;
+            margin: 0;
+        }
+        
+        .step-info p {
+            color: #6B7280;
+            line-height: 1.6;
+            margin: 0;
+        }
+        
+        /* Widget Type Selector Mockup */
+        .widget-type-selector {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .widget-type-card {
+            background: #F9FAFB;
+            border: 2px solid #E5E7EB;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .widget-type-card.selected {
+            border-color: #4F46E5;
+            background: #EEF2FF;
+        }
+        
+        .widget-type-card i {
+            font-size: 2rem;
+            color: #4F46E5;
+            margin-bottom: 10px;
+        }
+        
+        .widget-type-card h4 {
+            font-size: 0.9rem;
+            color: #374151;
+            margin: 0;
+        }
+        
+        /* Data Configuration Mockup */
+        .data-config-panel {
+            background: #F9FAFB;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .config-section {
+            margin-bottom: 20px;
+        }
+        
+        .config-section h4 {
+            font-size: 0.9rem;
+            color: #374151;
+            margin-bottom: 10px;
+        }
+        
+        .config-field {
+            background: white;
+            border: 1px solid #E5E7EB;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 10px;
+            font-size: 0.85rem;
+            color: #6B7280;
+        }
+        
+        .data-source-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .toggle-btn {
+            padding: 8px 16px;
+            border: 1px solid #E5E7EB;
+            background: white;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+        
+        .toggle-btn.active {
+            background: #4F46E5;
+            color: white;
+            border-color: #4F46E5;
+        }
+        
+        /* Style Editor Mockup */
+        .style-editor {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .color-palette {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .color-swatch {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .color-swatch.selected {
+            border-color: #4F46E5;
+            transform: scale(1.1);
+        }
+        
+        .style-preview {
+            background: white;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        /* Interaction Builder Mockup */
+        .interaction-builder {
+            background: #F9FAFB;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .interaction-item {
+            background: white;
+            border: 1px solid #E5E7EB;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .interaction-item i {
+            color: #4F46E5;
+            font-size: 1.2rem;
+        }
+        
+        .interaction-details {
+            flex: 1;
+        }
+        
+        .interaction-details h5 {
+            font-size: 0.9rem;
+            color: #374151;
+            margin: 0 0 5px 0;
+        }
+        
+        .interaction-details p {
+            font-size: 0.8rem;
+            color: #6B7280;
+            margin: 0;
+        }
+        
+        /* Widget Library Mockup */
+        .widget-library {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .library-widget {
+            background: white;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .library-widget:hover {
+            border-color: #4F46E5;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .library-widget i {
+            font-size: 1.5rem;
+            color: #4F46E5;
+            margin-bottom: 10px;
+        }
+        
+        .library-widget h5 {
+            font-size: 0.85rem;
+            color: #374151;
+            margin: 0 0 5px 0;
+        }
+        
+        .library-widget p {
+            font-size: 0.75rem;
+            color: #6B7280;
+            margin: 0;
+        }
+        
+        .save-button {
+            background: #4F46E5;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            margin-top: 15px;
+            width: 100%;
+        }
+        
+        @media (max-width: 768px) {
+            .how-it-works-step {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            
+            .how-it-works-step.reverse {
+                direction: ltr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <a href="index.html" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Back to Dashboard
+        </a>
+        
+        <div class="demo-header">
+            <h1>Widget Builder Demo</h1>
+            <p>Create reusable UI components and data visualizations. Build charts, metrics, tables, and custom widgets that can be embedded anywhere in your platform.</p>
+        </div>
+        
+        <div class="feature-section">
+            <h2>Key Features</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Data Visualizations</h3>
+                    <p>Create line charts, bar charts, pie charts, and more with real-time data connections.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <h3>Metric Cards</h3>
+                    <p>Display KPIs and important metrics with customizable styles and trend indicators.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-table"></i>
+                    <h3>Data Tables</h3>
+                    <p>Build interactive tables with sorting, filtering, and pagination capabilities.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-th"></i>
+                    <h3>Layout Options</h3>
+                    <p>Create compound widgets with split, triple, or grid layouts for dashboards.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-plug"></i>
+                    <h3>Data Integration</h3>
+                    <p>Connect widgets to forms, workflows, and external data sources.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-robot"></i>
+                    <h3>AI-Powered Creation</h3>
+                    <p>Use our AI assistant to create widgets automatically based on your requirements.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="feature-section">
+            <h2>Widget Types</h2>
+            <div class="widget-showcase">
+                <div class="widget-example">
+                    <h3>Metric Widget</h3>
+                    <div class="metric-widget">
+                        <div class="metric-value">$124,580</div>
+                        <div class="metric-label">Total Revenue</div>
+                        <div class="metric-change">
+                            <i class="fas fa-arrow-up"></i>
+                            +12.5% from last month
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="widget-example">
+                    <h3>Chart Widget</h3>
+                    <div style="height: 250px; position: relative;">
+                        <canvas id="demoChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="widget-example">
+                    <h3>Table Widget</h3>
+                    <div class="table-widget">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Sales</th>
+                                    <th>Growth</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Premium Plan</td>
+                                    <td>$45,230</td>
+                                    <td style="color: #10B981;">+15%</td>
+                                </tr>
+                                <tr>
+                                    <td>Basic Plan</td>
+                                    <td>$32,150</td>
+                                    <td style="color: #10B981;">+8%</td>
+                                </tr>
+                                <tr>
+                                    <td>Enterprise</td>
+                                    <td>$47,200</td>
+                                    <td style="color: #10B981;">+22%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="widget-example">
+                    <h3>Action Widget</h3>
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                        <button class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Create New
+                        </button>
+                        <button class="btn btn-secondary">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                        <button class="btn btn-outline">
+                            <i class="fas fa-sync"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="feature-section">
+            <h2>Layout Options</h2>
+            <div class="layout-examples">
+                <div class="layout-example">
+                    <h3>Split Layout (2 Components)</h3>
+                    <div class="layout-grid split">
+                        <div class="layout-item">
+                            <i class="fas fa-chart-line" style="font-size: 2rem;"></i>
+                            <p>Chart Component</p>
+                        </div>
+                        <div class="layout-item">
+                            <i class="fas fa-tachometer-alt" style="font-size: 2rem;"></i>
+                            <p>Metric Component</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="layout-example">
+                    <h3>Triple Layout (3 Components)</h3>
+                    <div class="layout-grid triple">
+                        <div class="layout-item">
+                            <i class="fas fa-chart-pie" style="font-size: 2rem;"></i>
+                            <p>Metric 1</p>
+                        </div>
+                        <div class="layout-item">
+                            <i class="fas fa-chart-bar" style="font-size: 2rem;"></i>
+                            <p>Metric 2</p>
+                        </div>
+                        <div class="layout-item">
+                            <i class="fas fa-chart-area" style="font-size: 2rem;"></i>
+                            <p>Metric 3</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="layout-example">
+                    <h3>Grid Layout (4 Components)</h3>
+                    <div class="layout-grid quad">
+                        <div class="layout-item">
+                            <i class="fas fa-users" style="font-size: 2rem;"></i>
+                            <p>Users Metric</p>
+                        </div>
+                        <div class="layout-item">
+                            <i class="fas fa-dollar-sign" style="font-size: 2rem;"></i>
+                            <p>Revenue Metric</p>
+                        </div>
+                        <div class="layout-item">
+                            <i class="fas fa-chart-line" style="font-size: 2rem;"></i>
+                            <p>Growth Chart</p>
+                        </div>
+                        <div class="layout-item">
+                            <i class="fas fa-percentage" style="font-size: 2rem;"></i>
+                            <p>Conversion Rate</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="feature-section">
+            <h2>How It Works</h2>
+            <div class="how-it-works-grid">
+                <div class="how-it-works-step">
+                    <div class="step-screenshot">
+                        <div class="screenshot-placeholder">
+                            <h4 style="margin-bottom: 20px; color: #374151;">Select Widget Type</h4>
+                            <div class="widget-type-selector">
+                                <div class="widget-type-card selected">
+                                    <i class="fas fa-chart-line"></i>
+                                    <h4>Chart</h4>
+                                </div>
+                                <div class="widget-type-card">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                    <h4>Metric</h4>
+                                </div>
+                                <div class="widget-type-card">
+                                    <i class="fas fa-table"></i>
+                                    <h4>Table</h4>
+                                </div>
+                                <div class="widget-type-card">
+                                    <i class="fas fa-code"></i>
+                                    <h4>Custom</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="step-info">
+                        <div class="step-number">1</div>
+                        <h3>Choose Widget Type</h3>
+                        <p>Select from charts, metrics, tables, or create custom widget types. Each type comes with pre-configured templates and settings to get you started quickly.</p>
+                    </div>
+                </div>
+                
+                <div class="how-it-works-step reverse">
+                    <div class="step-screenshot">
+                        <div class="screenshot-placeholder">
+                            <div class="data-config-panel">
+                                <h4 style="margin-bottom: 15px; color: #374151;">Data Configuration</h4>
+                                <div class="data-source-toggle">
+                                    <button class="toggle-btn active">Static Data</button>
+                                    <button class="toggle-btn">API</button>
+                                    <button class="toggle-btn">Form Data</button>
+                                </div>
+                                <div class="config-section">
+                                    <h4>Data Source</h4>
+                                    <div class="config-field">Monthly Revenue Data</div>
+                                    <div class="config-field">Update Interval: 60 seconds</div>
+                                </div>
+                                <div class="config-section">
+                                    <h4>Data Mapping</h4>
+                                    <div class="config-field">X-Axis: Month</div>
+                                    <div class="config-field">Y-Axis: Revenue ($)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="step-info">
+                        <div class="step-number">2</div>
+                        <h3>Configure Data</h3>
+                        <p>Connect to data sources, set up real-time updates, and define data mappings. Pull data from APIs, forms, or use static data for testing.</p>
+                    </div>
+                </div>
+                
+                <div class="how-it-works-step">
+                    <div class="step-screenshot">
+                        <div class="screenshot-placeholder">
+                            <div class="style-editor">
+                                <h4 style="margin-bottom: 15px; color: #374151;">Style Editor</h4>
+                                <div>
+                                    <h5 style="font-size: 0.9rem; color: #374151; margin-bottom: 10px;">Theme Colors</h5>
+                                    <div class="color-palette">
+                                        <div class="color-swatch selected" style="background: #4F46E5;"></div>
+                                        <div class="color-swatch" style="background: #10B981;"></div>
+                                        <div class="color-swatch" style="background: #F59E0B;"></div>
+                                        <div class="color-swatch" style="background: #EF4444;"></div>
+                                        <div class="color-swatch" style="background: #8B5CF6;"></div>
+                                    </div>
+                                </div>
+                                <div class="style-preview">
+                                    <div style="width: 100%; height: 100px; background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white;">
+                                        <div>
+                                            <div style="font-size: 2rem; font-weight: 700;">$45,230</div>
+                                            <div style="font-size: 0.9rem; opacity: 0.9;">Revenue Preview</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="step-info">
+                        <div class="step-number">3</div>
+                        <h3>Customize Appearance</h3>
+                        <p>Style your widget with colors, fonts, sizes, and responsive layouts. Preview changes in real-time and ensure your widget matches your brand.</p>
+                    </div>
+                </div>
+                
+                <div class="how-it-works-step reverse">
+                    <div class="step-screenshot">
+                        <div class="screenshot-placeholder">
+                            <div class="interaction-builder">
+                                <h4 style="margin-bottom: 15px; color: #374151;">Widget Interactions</h4>
+                                <div class="interaction-item">
+                                    <i class="fas fa-mouse-pointer"></i>
+                                    <div class="interaction-details">
+                                        <h5>On Click</h5>
+                                        <p>Navigate to detailed analytics</p>
+                                    </div>
+                                </div>
+                                <div class="interaction-item">
+                                    <i class="fas fa-hand-pointer"></i>
+                                    <div class="interaction-details">
+                                        <h5>On Hover</h5>
+                                        <p>Show tooltip with details</p>
+                                    </div>
+                                </div>
+                                <div class="interaction-item">
+                                    <i class="fas fa-sync"></i>
+                                    <div class="interaction-details">
+                                        <h5>Auto Refresh</h5>
+                                        <p>Update data every 60 seconds</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="step-info">
+                        <div class="step-number">4</div>
+                        <h3>Add Interactions</h3>
+                        <p>Set up click actions, hover effects, and connections to workflows. Make your widgets interactive and responsive to user actions.</p>
+                    </div>
+                </div>
+                
+                <div class="how-it-works-step">
+                    <div class="step-screenshot">
+                        <div class="screenshot-placeholder">
+                            <h4 style="margin-bottom: 20px; color: #374151;">Widget Library</h4>
+                            <div class="widget-library">
+                                <div class="library-widget">
+                                    <i class="fas fa-chart-line"></i>
+                                    <h5>Revenue Chart</h5>
+                                    <p>Monthly trends</p>
+                                </div>
+                                <div class="library-widget">
+                                    <i class="fas fa-users"></i>
+                                    <h5>User Metrics</h5>
+                                    <p>Active users</p>
+                                </div>
+                                <div class="library-widget">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    <h5>Sales Table</h5>
+                                    <p>Product sales</p>
+                                </div>
+                                <div class="library-widget">
+                                    <i class="fas fa-percentage"></i>
+                                    <h5>Conversion Rate</h5>
+                                    <p>KPI metric</p>
+                                </div>
+                            </div>
+                            <button class="save-button">
+                                <i class="fas fa-save"></i> Save to Library
+                            </button>
+                        </div>
+                    </div>
+                    <div class="step-info">
+                        <div class="step-number">5</div>
+                        <h3>Save & Reuse</h3>
+                        <p>Save widgets to your library and reuse them across pages and applications. Share widgets with your team and maintain consistency across your platform.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="cta-section">
+            <h2>Ready to Build Your Widgets?</h2>
+            <p>Create powerful, reusable components for your dashboards and applications.</p>
+            <div class="cta-buttons">
+                <button class="btn btn-white" onclick="window.location.href='widget-list.html'">
+                    <i class="fas fa-rocket"></i> Launch Widget Builder
+                </button>
+                <button class="btn btn-outline-white" onclick="window.location.href='widget-builder-enhanced.html'">
+                    <i class="fas fa-plus"></i> Create New Widget
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Demo Chart
+        const ctx = document.getElementById('demoChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Revenue',
+                    data: [30000, 35000, 32000, 40000, 45000, 52000],
+                    borderColor: '#4F46E5',
+                    backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value.toLocaleString();
+                            }
+                        }
+                    }
+                },
+                layout: {
+                    padding: 10
+                }
+            }
+        });
+    </script>
+    <script src="./chatbot.js"></script>
+</body>
+</html>

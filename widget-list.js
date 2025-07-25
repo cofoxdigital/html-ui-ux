@@ -290,13 +290,17 @@ class WidgetManager {
             return;
         }
 
-        grid.innerHTML = this.filteredWidgets.map(widget => `
+        grid.innerHTML = this.filteredWidgets.map(widget => {
+            const isAICreated = widget.createdBy === 'AI Assistant';
+            
+            return `
             <div class="widget-card" data-widget-id="${widget.id}">
-                <div class="widget-card-header">
+                <div class="widget-card-header ${isAICreated ? 'has-ai-badge' : ''}">
                     <div class="widget-status ${widget.status}">
                         <i class="fas fa-${widget.status === 'published' ? 'rocket' : 'edit'}"></i>
                         ${widget.status.charAt(0).toUpperCase() + widget.status.slice(1)}
                     </div>
+                    ${isAICreated ? '<div class="ai-badge" title="Created by AI Assistant"><i class="fas fa-robot"></i> AI</div>' : ''}
                     <div class="widget-actions">
                         <button class="btn-icon" onclick="editWidget('${widget.id}')" title="Edit">
                             <i class="fas fa-edit"></i>
@@ -358,7 +362,7 @@ class WidgetManager {
                     </button>
                 </div>
             </div>
-        `).join('');
+        `}).join('');
     }
 
     updateStats() {

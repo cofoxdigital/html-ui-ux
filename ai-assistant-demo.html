@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phoenix AI Assistant - Intelligent Features Demo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="./styles.css">
+    <style>
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .demo-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .demo-header h1 {
+            color: #1a1a1a;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .demo-header p {
+            color: #666;
+            font-size: 1.2rem;
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .demo-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .demo-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        }
+        
+        .demo-card h3 {
+            color: #6366f1;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .demo-card h3 i {
+            font-size: 1.2rem;
+        }
+        
+        .example-commands {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .example-commands h4 {
+            color: #333;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .command-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .command-list li {
+            padding: 0.5rem 0;
+            color: #555;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .command-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .command-list li:before {
+            content: "→ ";
+            color: #6366f1;
+            font-weight: bold;
+        }
+        
+        .features-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .features-section h2 {
+            color: #1a1a1a;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: start;
+            gap: 1rem;
+        }
+        
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            background: #6366f1;
+            color: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .feature-content h4 {
+            color: #333;
+            margin-bottom: 0.25rem;
+        }
+        
+        .feature-content p {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+        
+        .try-it-section {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 3rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .try-it-section h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .try-it-section p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        
+        .highlight-box {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem auto;
+            max-width: 600px;
+        }
+        
+        .highlight-box h3 {
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+        
+        .highlight-box p {
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        
+        .created-items {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .created-items h2 {
+            color: #1a1a1a;
+            margin-bottom: 1.5rem;
+        }
+        
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .item-card {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .item-card:hover {
+            background: #6366f1;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .item-card i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: #6366f1;
+        }
+        
+        .item-card:hover i {
+            color: white;
+        }
+        
+        .item-card h4 {
+            margin: 0.5rem 0;
+            font-size: 1rem;
+        }
+        
+        .item-card p {
+            margin: 0;
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="demo-header">
+            <h1><i class="fas fa-robot"></i> Phoenix AI Assistant</h1>
+            <p>Intelligent Component Creation with Natural Language Processing</p>
+        </div>
+        
+        <div class="try-it-section">
+            <h2>Try It Now!</h2>
+            <p>Click the chat icon in the bottom right corner and try these commands:</p>
+            <div class="highlight-box">
+                <h3>Quick Start Examples:</h3>
+                <p>
+                    • "Create a login form called Client Login"<br>
+                    • "Build a landing page with hero and features"<br>
+                    • "Make a dashboard widget for revenue"<br>
+                    • "Create a workflow for form submission"
+                </p>
+            </div>
+        </div>
+        
+        <div class="features-section">
+            <h2>Intelligent Features</h2>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h4>Natural Language Understanding</h4>
+                        <p>Understands your intent from natural language commands</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-magic"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h4>Automatic Creation</h4>
+                        <p>Creates components programmatically based on your request</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h4>Contextual Clarification</h4>
+                        <p>Asks for details when needed to complete your request</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-link"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h4>Action Buttons</h4>
+                        <p>Provides quick actions to edit or preview created components</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h4>Persistent Storage</h4>
+                        <p>Saves all created components for later use</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-puzzle-piece"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h4>Template Library</h4>
+                        <p>Uses smart templates for common component types</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="demo-grid">
+            <div class="demo-card">
+                <h3><i class="fas fa-file-alt"></i> Form Creation</h3>
+                <p>Create forms instantly with natural language. The AI understands form types and automatically adds appropriate fields.</p>
+                <div class="example-commands">
+                    <h4>Example Commands:</h4>
+                    <ul class="command-list">
+                        <li>Create a login form</li>
+                        <li>Make a registration form called User Signup</li>
+                        <li>Build a contact form with name, email, and message</li>
+                        <li>I need a survey form</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="demo-card">
+                <h3><i class="fas fa-desktop"></i> Page Building</h3>
+                <p>Design complete pages by describing what sections you need. The AI creates responsive layouts automatically.</p>
+                <div class="example-commands">
+                    <h4>Example Commands:</h4>
+                    <ul class="command-list">
+                        <li>Create a landing page with header, hero, and footer</li>
+                        <li>Build an about page</li>
+                        <li>Make a page with features and testimonials</li>
+                        <li>Design a portfolio page</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="demo-card">
+                <h3><i class="fas fa-chart-bar"></i> Widget Creation</h3>
+                <p>Generate data visualization widgets and UI components. Perfect for dashboards and analytics.</p>
+                <div class="example-commands">
+                    <h4>Example Commands:</h4>
+                    <ul class="command-list">
+                        <li>Create a revenue chart widget</li>
+                        <li>Make a table widget for user data</li>
+                        <li>Build a metric card for sales</li>
+                        <li>Generate a line chart for trends</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="demo-card">
+                <h3><i class="fas fa-project-diagram"></i> Workflow Automation</h3>
+                <p>Set up automated workflows with triggers and actions. Connect forms, pages, and widgets seamlessly.</p>
+                <div class="example-commands">
+                    <h4>Example Commands:</h4>
+                    <ul class="command-list">
+                        <li>Create a workflow for form submission</li>
+                        <li>Automate user registration process</li>
+                        <li>Build a workflow that triggers on page load</li>
+                        <li>Set up email notification workflow</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="created-items" id="created-items" style="display: none;">
+            <h2>Recently Created by AI</h2>
+            <div class="items-grid" id="items-grid">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+        
+        <div class="features-section">
+            <h2>How It Works</h2>
+            <div class="demo-grid">
+                <div class="demo-card">
+                    <h3>1. Natural Language Input</h3>
+                    <p>Simply type what you want to create in plain English. No need to learn complex commands or syntax.</p>
+                </div>
+                <div class="demo-card">
+                    <h3>2. Intent Recognition</h3>
+                    <p>The AI analyzes your request to understand what type of component you want and extracts key details.</p>
+                </div>
+                <div class="demo-card">
+                    <h3>3. Intelligent Creation</h3>
+                    <p>Components are created programmatically with appropriate templates and configurations.</p>
+                </div>
+                <div class="demo-card">
+                    <h3>4. Quick Actions</h3>
+                    <p>Get instant access to edit or preview your created components with action buttons.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Include the chatbot -->
+    <script src="./chatbot.js"></script>
+    
+    <script>
+        // Monitor localStorage for newly created items
+        function updateCreatedItems() {
+            const container = document.getElementById('created-items');
+            const grid = document.getElementById('items-grid');
+            
+            // Check for forms
+            const forms = JSON.parse(localStorage.getItem('phoenix_forms') || '{"forms":[]}');
+            const aiCreatedForms = forms.forms.filter(f => f.createdBy === 'AI Assistant');
+            
+            // Check for pages
+            const pages = JSON.parse(localStorage.getItem('pages') || '[]');
+            const aiCreatedPages = pages.filter(p => {
+                const pageData = localStorage.getItem(`page_${p.id}`);
+                if (pageData) {
+                    const parsed = JSON.parse(pageData);
+                    return parsed.createdBy === 'AI Assistant';
+                }
+                return false;
+            });
+            
+            // Check for widgets
+            const widgets = JSON.parse(localStorage.getItem('phoenix_widgets') || '{"widgets":[]}');
+            const aiCreatedWidgets = widgets.widgets.filter(w => w.createdBy === 'AI Assistant');
+            
+            // Check for workflows
+            const workflows = JSON.parse(localStorage.getItem('workflows') || '[]');
+            const aiCreatedWorkflows = workflows.filter(w => w.createdBy === 'AI Assistant');
+            
+            if (aiCreatedForms.length || aiCreatedPages.length || aiCreatedWidgets.length || aiCreatedWorkflows.length) {
+                container.style.display = 'block';
+                grid.innerHTML = '';
+                
+                // Add forms
+                aiCreatedForms.forEach(form => {
+                    grid.innerHTML += `
+                        <div class="item-card" onclick="window.location.href='form-builder.html?id=${form.id}'">
+                            <i class="fas fa-file-alt"></i>
+                            <h4>${form.name}</h4>
+                            <p>Form</p>
+                        </div>
+                    `;
+                });
+                
+                // Add pages
+                aiCreatedPages.forEach(page => {
+                    grid.innerHTML += `
+                        <div class="item-card" onclick="window.location.href='page-editor.html?id=${page.id}'">
+                            <i class="fas fa-desktop"></i>
+                            <h4>${page.name}</h4>
+                            <p>Page</p>
+                        </div>
+                    `;
+                });
+                
+                // Add widgets
+                aiCreatedWidgets.forEach(widget => {
+                    grid.innerHTML += `
+                        <div class="item-card" onclick="window.location.href='widget-builder.html?id=${widget.id}'">
+                            <i class="fas fa-chart-bar"></i>
+                            <h4>${widget.name}</h4>
+                            <p>Widget</p>
+                        </div>
+                    `;
+                });
+                
+                // Add workflows
+                aiCreatedWorkflows.forEach(workflow => {
+                    grid.innerHTML += `
+                        <div class="item-card" onclick="window.location.href='workflow-builder.html?id=${workflow.id}'">
+                            <i class="fas fa-project-diagram"></i>
+                            <h4>${workflow.name}</h4>
+                            <p>Workflow</p>
+                        </div>
+                    `;
+                });
+            }
+        }
+        
+        // Update on load and periodically
+        updateCreatedItems();
+        setInterval(updateCreatedItems, 2000);
+    </script>
+</body>
+</html>
